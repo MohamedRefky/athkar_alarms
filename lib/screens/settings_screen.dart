@@ -601,7 +601,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }) {
     return Container(
       width: double.infinity,
-      padding: padding ?? EdgeInsets.all(16.r),
       decoration: BoxDecoration(
         color: isDark ? AppColors.darkSurface : AppColors.surface,
         borderRadius: BorderRadius.circular(16.r),
@@ -618,7 +617,15 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ),
         ],
       ),
-      child: child,
+      child: Material(
+        color: Colors.transparent,
+        borderRadius: BorderRadius.circular(16.r),
+        clipBehavior: Clip.antiAlias,
+        child: Padding(
+          padding: padding ?? EdgeInsets.all(16.r),
+          child: child,
+        ),
+      ),
     );
   }
 

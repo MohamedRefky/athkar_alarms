@@ -195,7 +195,10 @@ class AudioAzkarScreen extends StatelessWidget {
                                 ),
                               ],
                             ),
-                            child: ListTile(
+                            child: Material(
+                              color: Colors.transparent,
+                              borderRadius: BorderRadius.circular(16.r),
+                              child: ListTile(
                               contentPadding: EdgeInsets.symmetric(
                                 horizontal: 16.w,
                                 vertical: 6.h,
@@ -317,6 +320,7 @@ class AudioAzkarScreen extends StatelessWidget {
                                 ],
                               ),
                             ),
+                          ),
                           );
                         },
                       ),
