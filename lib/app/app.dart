@@ -6,7 +6,6 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../cubits/settings_cubit.dart';
 import '../cubits/dua_cubit.dart';
 import '../services/service_locator.dart';
-import '../screens/shell_screen.dart';
 import '../screens/splash_screen.dart';
 import 'app_theme.dart';
 
