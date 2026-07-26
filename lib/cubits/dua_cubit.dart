@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:math';
+import 'package:azkar/services/notification_service.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:audioplayers/audioplayers.dart';
@@ -9,6 +10,7 @@ import '../models/dua_model.dart';
 import '../models/audio_azkar_model.dart';
 import '../services/audio_service.dart';
 import '../services/preferences_service.dart';
+import '../services/service_locator.dart';
 import 'dua_state.dart';
 
 class DuaCubit extends Cubit<DuaState> {
@@ -73,6 +75,16 @@ class DuaCubit extends Cubit<DuaState> {
         currentAudioAzkar: audioAzkar.isNotEmpty ? audioAzkar.first : null,
         isLoading: false,
       ));
+
+      try {
+        final notificationService = sl<NotificationService>();
+        final settings = _prefsService.getSettings();
+        await notificationService.scheduleNotifications(
+          settings: settings,
+          duas: duas,
+          audioAzkar: audioAzkar,
+        );
+      } catch (_) {}
     } catch (e) {
       emit(state.copyWith(
         isLoading: false,

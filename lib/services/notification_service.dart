@@ -75,7 +75,7 @@ class NotificationService {
     );
     await androidImplementation.createNotificationChannel(textChannel);
 
-    // 2. Audio Azkar Channel (Default Sound: azkar_sound)
+    // 2. Main Audio Azkar Channel (Default Sound)
     const audioChannel = AndroidNotificationChannel(
       _audioChannelId,
       _audioChannelName,
@@ -85,6 +85,20 @@ class NotificationService {
       sound: RawResourceAndroidNotificationSound('azkar_sound'),
     );
     await androidImplementation.createNotificationChannel(audioChannel);
+
+    // 3. Audio Channels for all 16 recorded audio clips (audio1 .. audio16)
+    for (int i = 1; i <= 16; i++) {
+      final soundResource = 'audio$i';
+      final channel = AndroidNotificationChannel(
+        'azkar_audio_channel_$soundResource',
+        'إشعار صوتي - صوت $i',
+        description: 'قناة الإشعار الصوتي للمقطع $i',
+        importance: Importance.high,
+        playSound: true,
+        sound: RawResourceAndroidNotificationSound(soundResource),
+      );
+      await androidImplementation.createNotificationChannel(channel);
+    }
   }
 
   Future<bool> requestPermissions() async {
@@ -326,7 +340,7 @@ class NotificationService {
     final soundFileWithExt = '${audioItem.soundName}.mp3';
 
     final androidDetails = AndroidNotificationDetails(
-      'azkar_instant_audio_channel_$soundResource',
+      'azkar_audio_channel_$soundResource',
       'إشعار تجربة الصوت',
       channelDescription: 'قناة تجربة أصوات الإشعارات الصوتية',
       importance: Importance.high,
