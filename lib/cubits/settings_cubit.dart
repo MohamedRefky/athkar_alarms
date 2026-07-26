@@ -13,7 +13,7 @@ class SettingsCubit extends Cubit<SettingsState> {
       : super(SettingsState(settings: _prefsService.getSettings()));
 
   void updateMotherName(String name) async {
-    final updated = state.settings.copyWith(motherName: name.trim());
+    final updated = state.settings.copyWith(motherName: name);
     await _saveAndReschedule(updated);
   }
 
