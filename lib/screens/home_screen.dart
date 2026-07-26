@@ -11,6 +11,7 @@ import '../cubits/settings_state.dart';
 import '../widgets/dua_card.dart';
 import '../widgets/custom_button.dart';
 import '../widgets/audio_player_bar.dart';
+import 'onboarding_screen.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -20,15 +21,42 @@ class HomeScreen extends StatelessWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
+      backgroundColor: isDark ? AppColors.darkBackground : AppColors.background,
       appBar: AppBar(
+        centerTitle: true,
         title: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(LucideIcons.heart, color: AppColors.primary, size: 22.sp),
+            Icon(LucideIcons.heart, color: AppColors.primary, size: 22.r),
             SizedBox(width: 8.w),
-            const Text('اللهم ارحم أمي'),
+            Text(
+              'اللهم ارحم أمي',
+              style: TextStyle(
+                fontSize: 22.sp,
+                fontWeight: FontWeight.bold,
+                color: isDark ? AppColors.darkTextPrimary : AppColors.primaryDark,
+              ),
+            ),
           ],
         ),
+        actions: [
+          IconButton(
+            tooltip: 'عرض الفاتحة والإهداء',
+            icon: Icon(
+              LucideIcons.bookOpen,
+              color: AppColors.primary,
+              size: 22.r,
+            ),
+            onPressed: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (_) => const OnboardingScreen(),
+                ),
+              );
+            },
+          ),
+          SizedBox(width: 8.w),
+        ],
       ),
       body: SafeArea(
         child: BlocBuilder<SettingsCubit, SettingsState>(
@@ -51,17 +79,25 @@ class HomeScreen extends StatelessWidget {
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Icon(LucideIcons.alertCircle, size: 48.sp, color: AppColors.error),
+                          Icon(
+                            LucideIcons.alertCircle,
+                            size: 48.r,
+                            color: AppColors.error,
+                          ),
                           SizedBox(height: 16.h),
                           Text(
                             duaState.errorMessage!,
                             textAlign: TextAlign.center,
-                            style: TextStyle(fontSize: 18.sp, color: AppColors.error),
+                            style: TextStyle(
+                              fontSize: 18.sp,
+                              color: AppColors.error,
+                            ),
                           ),
                           SizedBox(height: 16.h),
                           CustomButton(
                             text: 'إعادة المحاولة',
-                            onPressed: () => context.read<DuaCubit>().loadDuas(),
+                            onPressed: () =>
+                                context.read<DuaCubit>().loadDuas(),
                           ),
                         ],
                       ),
@@ -77,25 +113,52 @@ class HomeScreen extends StatelessWidget {
                 final formattedText = currentDua.getFormattedText(motherName);
 
                 return SingleChildScrollView(
+                  physics: const BouncingScrollPhysics(),
                   padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 16.h),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      // Subheader Header Notice
+                      // Subheader Header Banner
                       Container(
-                        padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
+                        padding: EdgeInsets.symmetric(
+                            horizontal: 18.w, vertical: 14.h),
                         decoration: BoxDecoration(
-                          color: isDark ? AppColors.darkSurface : AppColors.surfaceVariant,
-                          borderRadius: BorderRadius.circular(16.r),
+                          gradient: LinearGradient(
+                            colors: isDark
+                                ? [AppColors.darkSurface, const Color(0xFF1F332A)]
+                                : [AppColors.surfaceVariant, Colors.white],
+                            begin: Alignment.topRight,
+                            end: Alignment.bottomLeft,
+                          ),
+                          borderRadius: BorderRadius.circular(18.r),
+                          border: Border.all(
+                            color: AppColors.accentGold.withValues(alpha: 0.3),
+                          ),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black
+                                  .withValues(alpha: isDark ? 0.2 : 0.04),
+                              blurRadius: 10.r,
+                              offset: const Offset(0, 3),
+                            ),
+                          ],
                         ),
                         child: Row(
                           children: [
-                            Icon(
-                              LucideIcons.sparkles,
-                              color: AppColors.accentGold,
-                              size: 22.sp,
+                            Container(
+                              padding: EdgeInsets.all(8.r),
+                              decoration: BoxDecoration(
+                                color: AppColors.accentGold
+                                    .withValues(alpha: 0.15),
+                                shape: BoxShape.circle,
+                              ),
+                              child: Icon(
+                                LucideIcons.sparkles,
+                                color: AppColors.accentGold,
+                                size: 20.r,
+                              ),
                             ),
-                            SizedBox(width: 10.w),
+                            SizedBox(width: 12.w),
                             Expanded(
                               child: Text(
                                 motherName.trim().isNotEmpty
@@ -104,7 +167,9 @@ class HomeScreen extends StatelessWidget {
                                 style: TextStyle(
                                   fontSize: 15.sp,
                                   fontWeight: FontWeight.bold,
-                                  color: isDark ? AppColors.darkTextSecondary : AppColors.textSecondary,
+                                  color: isDark
+                                      ? AppColors.darkTextPrimary
+                                      : AppColors.textPrimary,
                                 ),
                               ),
                             ),
@@ -132,7 +197,8 @@ class HomeScreen extends StatelessWidget {
                       SizedBox(height: 20.h),
 
                       // Audio Player Bar if active or duration loaded
-                      if (duaState.isPlayingAudio || duaState.audioDuration > Duration.zero) ...[
+                      if (duaState.isPlayingAudio ||
+                          duaState.audioDuration > Duration.zero) ...[
                         AudioPlayerBar(
                           isPlaying: duaState.isPlayingAudio,
                           position: duaState.audioPosition,
@@ -164,7 +230,9 @@ class HomeScreen extends StatelessWidget {
                         text: duaState.isPlayingAudio
                             ? 'إيقاف التلاوة والصوت ⏹️'
                             : 'تشغيل الصوت المصاحب للدعاء 🔊',
-                        icon: duaState.isPlayingAudio ? LucideIcons.square : LucideIcons.volume2,
+                        icon: duaState.isPlayingAudio
+                            ? LucideIcons.square
+                            : LucideIcons.volume2,
                         isSecondary: true,
                         onPressed: () {
                           context.read<DuaCubit>().toggleAudio(
