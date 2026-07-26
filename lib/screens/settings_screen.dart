@@ -55,43 +55,167 @@ class _SettingsScreenState extends State<SettingsScreen> {
     }
   }
 
-  Future<void> _showCustomIntervalDialog(
+  Future<void> _showCustomIntervalSheet(
     BuildContext context,
     bool isAudio,
     int initialValue,
   ) async {
-    final controller = TextEditingController(text: initialValue.toString());
-    final result = await showDialog<int>(
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final controller = TextEditingController(
+      text: initialValue > 0 ? initialValue.toString() : '30',
+    );
+
+    final result = await showModalBottomSheet<int>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: Text(
-          isAudio
-              ? 'تحديد مدة تكرار الصوت بالدقائق'
-              : 'تحديد مدة تكرار النص بالدقائق',
-          style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.bold),
-        ),
-        content: TextField(
-          controller: controller,
-          keyboardType: TextInputType.number,
-          decoration: const InputDecoration(
-            hintText: 'أدخل عدد الدقائق (مثلاً: 45)',
-            suffixText: 'دقيقة',
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('إلغاء'),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              final val = int.tryParse(controller.text);
-              Navigator.pop(context, val);
-            },
-            child: const Text('حفظ'),
-          ),
-        ],
+      isScrollControlled: true,
+      backgroundColor: isDark ? AppColors.darkSurface : AppColors.surface,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24.r)),
       ),
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setSheetState) {
+            void addMinutes(int mins) {
+              final current = int.tryParse(controller.text) ?? 0;
+              controller.text = (current + mins).toString();
+              setSheetState(() {});
+            }
+
+            return Padding(
+              padding: EdgeInsets.only(
+                left: 20.w,
+                right: 20.w,
+                top: 20.h,
+                bottom: MediaQuery.of(context).viewInsets.bottom + 24.h,
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Center(
+                    child: Container(
+                      width: 40.w,
+                      height: 4.h,
+                      decoration: BoxDecoration(
+                        color: AppColors.textHint.withValues(alpha: 0.3),
+                        borderRadius: BorderRadius.circular(2.r),
+                      ),
+                    ),
+                  ),
+                  SizedBox(height: 16.h),
+                  Row(
+                    children: [
+                      Icon(
+                        LucideIcons.timer,
+                        color: AppColors.primary,
+                        size: 24.r,
+                      ),
+                      SizedBox(width: 10.w),
+                      Text(
+                        isAudio
+                            ? 'تخصيص وقت تكرار الصوت بالدقائق'
+                            : 'تخصيص وقت تكرار النص بالدقائق',
+                        style: TextStyle(
+                          fontSize: 16.sp,
+                          fontWeight: FontWeight.bold,
+                          color: isDark
+                              ? AppColors.darkTextPrimary
+                              : AppColors.textPrimary,
+                        ),
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: 16.h),
+
+                  // Preset Addition Chips
+                  Text(
+                    'إضافة سريعة للوقت:',
+                    style: TextStyle(
+                      fontSize: 13.sp,
+                      color: AppColors.textHint,
+                    ),
+                  ),
+                  SizedBox(height: 8.h),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    children: [
+                      _buildPresetChip('+15 دقيقة', () => addMinutes(15)),
+                      _buildPresetChip('+30 دقيقة', () => addMinutes(30)),
+                      _buildPresetChip('+1 ساعة', () => addMinutes(60)),
+                      _buildPresetChip('+2 ساعة', () => addMinutes(120)),
+                    ],
+                  ),
+
+                  SizedBox(height: 16.h),
+
+                  // Input Box
+                  TextField(
+                    controller: controller,
+                    keyboardType: TextInputType.number,
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 22.sp,
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.primary,
+                    ),
+                    decoration: InputDecoration(
+                      suffixText: 'دقيقة',
+                      suffixStyle: TextStyle(
+                        fontSize: 14.sp,
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.textHint,
+                      ),
+                      filled: true,
+                      fillColor: isDark
+                          ? AppColors.darkBackground
+                          : AppColors.surfaceVariant,
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(16.r),
+                        borderSide: BorderSide.none,
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(16.r),
+                        borderSide: const BorderSide(
+                          color: AppColors.primary,
+                          width: 2,
+                        ),
+                      ),
+                    ),
+                  ),
+
+                  SizedBox(height: 20.h),
+
+                  // Confirm Action Button
+                  SizedBox(
+                    width: double.infinity,
+                    height: 50.h,
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.primary,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(14.r),
+                        ),
+                      ),
+                      onPressed: () {
+                        final val = int.tryParse(controller.text);
+                        Navigator.pop(context, val);
+                      },
+                      child: Text(
+                        'حفظ الوقت وتفعيله ⚡',
+                        style: TextStyle(
+                          fontSize: 16.sp,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            );
+          },
+        );
+      },
     );
 
     if (result != null && result > 0 && mounted) {
@@ -102,6 +226,54 @@ class _SettingsScreenState extends State<SettingsScreen> {
         context.read<SettingsCubit>().updateTextCustomInterval(result);
         context.read<SettingsCubit>().updateTextFrequency(NotificationFrequency.custom);
       }
+    }
+  }
+
+  Widget _buildPresetChip(String label, VoidCallback onTap) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(12.r),
+      child: Container(
+        padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
+        decoration: BoxDecoration(
+          color: AppColors.primary.withValues(alpha: 0.1),
+          borderRadius: BorderRadius.circular(12.r),
+          border: Border.all(
+            color: AppColors.primary.withValues(alpha: 0.2),
+          ),
+        ),
+        child: Text(
+          label,
+          style: TextStyle(
+            fontSize: 13.sp,
+            fontWeight: FontWeight.bold,
+            color: AppColors.primary,
+          ),
+        ),
+      ),
+    );
+  }
+
+  IconData _getFrequencyIcon(NotificationFrequency freq) {
+    switch (freq) {
+      case NotificationFrequency.every15Minutes:
+        return LucideIcons.zap;
+      case NotificationFrequency.every30Minutes:
+        return LucideIcons.timer;
+      case NotificationFrequency.every1Hour:
+        return LucideIcons.clock;
+      case NotificationFrequency.every2Hours:
+        return LucideIcons.clock3;
+      case NotificationFrequency.every3Hours:
+        return LucideIcons.clock8;
+      case NotificationFrequency.every6Hours:
+        return LucideIcons.sun;
+      case NotificationFrequency.every12Hours:
+        return LucideIcons.moon;
+      case NotificationFrequency.onceDaily:
+        return LucideIcons.calendar;
+      case NotificationFrequency.custom:
+        return LucideIcons.sliders;
     }
   }
 
@@ -243,12 +415,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                 : Colors.black.withValues(alpha: 0.05),
                           ),
                           Padding(
-                            padding: EdgeInsets.all(12.r),
+                            padding: EdgeInsets.all(16.r),
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  'معدل تكرار إشعارات الصوت (الفارق الزمني):',
+                                  'اختر معدل تكرار إشعارات الصوت:',
                                   style: TextStyle(
                                     fontSize: 14.sp,
                                     fontWeight: FontWeight.bold,
@@ -257,47 +429,18 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                         : AppColors.textSecondary,
                                   ),
                                 ),
-                                SizedBox(height: 8.h),
-                                Wrap(
-                                  spacing: 8.w,
-                                  runSpacing: 8.h,
-                                  children: NotificationFrequency.values
-                                      .map((freq) {
-                                    final isSelected =
-                                        settings.audioFrequency == freq;
-                                    return ChoiceChip(
-                                      label: Text(freq.label),
-                                      selected: isSelected,
-                                      selectedColor: AppColors.primary,
-                                      labelStyle: TextStyle(
-                                        color: isSelected
-                                            ? Colors.white
-                                            : (isDark
-                                                ? AppColors.darkTextPrimary
-                                                : AppColors.textPrimary),
-                                        fontWeight: isSelected
-                                            ? FontWeight.bold
-                                            : FontWeight.normal,
-                                      ),
-                                      onSelected: (selected) {
-                                        if (selected) {
-                                          if (freq == NotificationFrequency.custom) {
-                                            _showCustomIntervalDialog(
-                                              context,
-                                              true,
-                                              settings.audioCustomIntervalMinutes,
-                                            );
-                                          } else {
-                                            context
-                                                .read<SettingsCubit>()
-                                                .updateAudioFrequency(freq);
-                                          }
-                                        }
-                                      },
-                                    );
-                                  }).toList(),
-                                ),
                                 SizedBox(height: 12.h),
+
+                                // Premium Frequency Selector Grid
+                                _buildPremiumFrequencyGrid(
+                                  context: context,
+                                  currentFreq: settings.audioFrequency,
+                                  isAudio: true,
+                                  customMins: settings.audioCustomIntervalMinutes,
+                                  isDark: isDark,
+                                ),
+
+                                SizedBox(height: 16.h),
                                 Divider(
                                   height: 1,
                                   color: isDark
@@ -319,11 +462,15 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                 RadioListTile<int>(
                                   value: 0,
                                   groupValue: settings.selectedAudioIndex,
-                                  title: const Text('تتابع متسلسل بين الـ 16 صوت (صوت جديد كل فترة) 🔁'),
-                                  subtitle: const Text('الساعة الأولى صوت 1، الساعة الثانية صوت 2... وهكذا'),
+                                  title: const Text(
+                                      'تتابع متسلسل بين الـ 16 صوت (صوت جديد كل فترة) 🔁'),
+                                  subtitle: const Text(
+                                      'الفترة الأولى صوت 1، الفترة التالية صوت 2... وهكذا'),
                                   onChanged: (val) {
                                     if (val != null) {
-                                      context.read<SettingsCubit>().updateSelectedAudioIndex(val);
+                                      context
+                                          .read<SettingsCubit>()
+                                          .updateSelectedAudioIndex(val);
                                     }
                                   },
                                 ),
@@ -397,12 +544,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                 : Colors.black.withValues(alpha: 0.05),
                           ),
                           Padding(
-                            padding: EdgeInsets.all(12.r),
+                            padding: EdgeInsets.all(16.r),
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  'تكرار الإشعارات النصية:',
+                                  'اختر معدل تكرار الإشعارات النصية:',
                                   style: TextStyle(
                                     fontSize: 14.sp,
                                     fontWeight: FontWeight.bold,
@@ -411,45 +558,15 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                         : AppColors.textSecondary,
                                   ),
                                 ),
-                                SizedBox(height: 8.h),
-                                Wrap(
-                                  spacing: 8.w,
-                                  runSpacing: 8.h,
-                                  children: NotificationFrequency.values
-                                      .map((freq) {
-                                    final isSelected =
-                                        settings.textFrequency == freq;
-                                    return ChoiceChip(
-                                      label: Text(freq.label),
-                                      selected: isSelected,
-                                      selectedColor: AppColors.primary,
-                                      labelStyle: TextStyle(
-                                        color: isSelected
-                                            ? Colors.white
-                                            : (isDark
-                                                ? AppColors.darkTextPrimary
-                                                : AppColors.textPrimary),
-                                        fontWeight: isSelected
-                                            ? FontWeight.bold
-                                            : FontWeight.normal,
-                                      ),
-                                      onSelected: (selected) {
-                                        if (selected) {
-                                          if (freq == NotificationFrequency.custom) {
-                                            _showCustomIntervalDialog(
-                                              context,
-                                              false,
-                                              settings.textCustomIntervalMinutes,
-                                            );
-                                          } else {
-                                            context
-                                                .read<SettingsCubit>()
-                                                .updateTextFrequency(freq);
-                                          }
-                                        }
-                                      },
-                                    );
-                                  }).toList(),
+                                SizedBox(height: 12.h),
+
+                                // Premium Frequency Selector Grid
+                                _buildPremiumFrequencyGrid(
+                                  context: context,
+                                  currentFreq: settings.textFrequency,
+                                  isAudio: false,
+                                  customMins: settings.textCustomIntervalMinutes,
+                                  isDark: isDark,
                                 ),
                               ],
                             ),
@@ -516,6 +633,168 @@ class _SettingsScreenState extends State<SettingsScreen> {
           },
         ),
       ),
+    );
+  }
+
+  Widget _buildPremiumFrequencyGrid({
+    required BuildContext context,
+    required NotificationFrequency currentFreq,
+    required bool isAudio,
+    required int customMins,
+    required bool isDark,
+  }) {
+    return Column(
+      children: [
+        GridView.builder(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: 3,
+            crossAxisSpacing: 10.w,
+            mainAxisSpacing: 10.h,
+            childAspectRatio: 2.1,
+          ),
+          itemCount: NotificationFrequency.values.length,
+          itemBuilder: (context, index) {
+            final freq = NotificationFrequency.values[index];
+            final isSelected = currentFreq == freq;
+            final icon = _getFrequencyIcon(freq);
+            final labelText = freq == NotificationFrequency.custom && customMins > 0
+                ? '$customMins دقيقة'
+                : freq.label;
+
+            return AnimatedContainer(
+              duration: const Duration(milliseconds: 200),
+              curve: Curves.easeInOut,
+              decoration: BoxDecoration(
+                gradient: isSelected
+                    ? const LinearGradient(
+                        colors: [AppColors.primary, AppColors.primaryDark],
+                        begin: Alignment.topRight,
+                        end: Alignment.bottomLeft,
+                      )
+                    : null,
+                color: isSelected
+                    ? null
+                    : (isDark
+                        ? AppColors.darkBackground
+                        : AppColors.surfaceVariant),
+                borderRadius: BorderRadius.circular(14.r),
+                border: Border.all(
+                  color: isSelected
+                      ? AppColors.accentGold
+                      : (isDark
+                          ? Colors.white.withValues(alpha: 0.08)
+                          : Colors.black.withValues(alpha: 0.05)),
+                  width: isSelected ? 2 : 1,
+                ),
+                boxShadow: isSelected
+                    ? [
+                        BoxShadow(
+                          color: AppColors.primary.withValues(alpha: 0.3),
+                          blurRadius: 8.r,
+                          offset: const Offset(0, 3),
+                        ),
+                      ]
+                    : null,
+              ),
+              child: Material(
+                color: Colors.transparent,
+                child: InkWell(
+                  borderRadius: BorderRadius.circular(14.r),
+                  onTap: () {
+                    if (freq == NotificationFrequency.custom) {
+                      _showCustomIntervalSheet(context, isAudio, customMins);
+                    } else {
+                      if (isAudio) {
+                        context
+                            .read<SettingsCubit>()
+                            .updateAudioFrequency(freq);
+                      } else {
+                        context
+                            .read<SettingsCubit>()
+                            .updateTextFrequency(freq);
+                      }
+                    }
+                  },
+                  child: Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 4.h),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          icon,
+                          size: 16.r,
+                          color: isSelected
+                              ? AppColors.accentGold
+                              : (isDark
+                                  ? AppColors.darkTextSecondary
+                                  : AppColors.textSecondary),
+                        ),
+                        SizedBox(width: 4.w),
+                        Flexible(
+                          child: Text(
+                            labelText,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              fontSize: 12.sp,
+                              fontWeight: isSelected
+                                  ? FontWeight.bold
+                                  : FontWeight.w600,
+                              color: isSelected
+                                  ? Colors.white
+                                  : (isDark
+                                      ? AppColors.darkTextPrimary
+                                      : AppColors.textPrimary),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            );
+          },
+        ),
+
+        SizedBox(height: 12.h),
+
+        // Active Status Summary Card Banner
+        Container(
+          padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 10.h),
+          decoration: BoxDecoration(
+            color: AppColors.primary.withValues(alpha: 0.08),
+            borderRadius: BorderRadius.circular(12.r),
+            border: Border.all(
+              color: AppColors.primary.withValues(alpha: 0.2),
+            ),
+          ),
+          child: Row(
+            children: [
+              Icon(
+                LucideIcons.sparkles,
+                color: AppColors.primary,
+                size: 18.r,
+              ),
+              SizedBox(width: 8.w),
+              Expanded(
+                child: Text(
+                  isAudio
+                      ? 'سيتم إرسال إشعار صوتي جديد ينطق بالمقطع التالي كل (${currentFreq == NotificationFrequency.custom ? "$customMins دقيقة" : currentFreq.label}) ⚡'
+                      : 'سيتم إرسال دعاء مكتوب جديد كل (${currentFreq == NotificationFrequency.custom ? "$customMins دقيقة" : currentFreq.label}) 📖',
+                  style: TextStyle(
+                    fontSize: 12.sp,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.primary,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
     );
   }
 
