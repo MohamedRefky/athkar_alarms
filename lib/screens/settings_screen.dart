@@ -453,21 +453,25 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                       color: AppColors.primary.withValues(alpha: 0.2),
                                     ),
                                   ),
-                                  child: RadioListTile<int>(
-                                    value: 0,
-                                    activeColor: AppColors.primary,
-                                    groupValue: settings.selectedAudioIndex,
-                                    title: const Text(
-                                        'تتابع متسلسل بين الـ 16 صوت (صوت جديد كل فترة) 🔁'),
-                                    subtitle: const Text(
-                                        'الفترة الأولى صوت 1، الفترة التالية صوت 2... وهكذا'),
-                                    onChanged: (val) {
-                                      if (val != null) {
-                                        context
-                                            .read<SettingsCubit>()
-                                            .updateSelectedAudioIndex(val);
-                                      }
-                                    },
+                                  child: Material(
+                                    color: Colors.transparent,
+                                    borderRadius: BorderRadius.circular(14.r),
+                                    child: RadioListTile<int>(
+                                      value: 0,
+                                      activeColor: AppColors.primary,
+                                      groupValue: settings.selectedAudioIndex,
+                                      title: const Text(
+                                          'تتابع متسلسل بين الـ 16 صوت (صوت جديد كل فترة) 🔁'),
+                                      subtitle: const Text(
+                                          'الفترة الأولى صوت 1، الفترة التالية صوت 2... وهكذا'),
+                                      onChanged: (val) {
+                                        if (val != null) {
+                                          context
+                                              .read<SettingsCubit>()
+                                              .updateSelectedAudioIndex(val);
+                                        }
+                                      },
+                                    ),
                                   ),
                                 ),
                               ],
@@ -704,111 +708,34 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
           SizedBox(height: 18.h),
 
-          // Stepper +/- Controls & Direct Action Button
-          Row(
-            children: [
-              // Decrement Button (-15 mins)
-              _buildStepperButton(
-                icon: LucideIcons.minus,
-                label: '-15د',
-                onTap: () {
-                  final newMins = (intervalMins - 15).clamp(1, 1440);
-                  if (isAudio) {
-                    context.read<SettingsCubit>().updateAudioCustomInterval(newMins);
-                    context.read<SettingsCubit>().updateAudioFrequency(NotificationFrequency.custom);
-                  } else {
-                    context.read<SettingsCubit>().updateTextCustomInterval(newMins);
-                    context.read<SettingsCubit>().updateTextFrequency(NotificationFrequency.custom);
-                  }
-                },
+          // Single Primary Action Button
+          SizedBox(
+            width: double.infinity,
+            height: 50.h,
+            child: ElevatedButton.icon(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.primary,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16.r),
+                ),
+                elevation: 3,
+                shadowColor: AppColors.primary.withValues(alpha: 0.3),
               ),
-
-              SizedBox(width: 8.w),
-
-              // Main Custom Time Action Button
-              Expanded(
-                child: SizedBox(
-                  height: 48.h,
-                  child: ElevatedButton.icon(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.primary,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(16.r),
-                      ),
-                      elevation: 3,
-                      shadowColor: AppColors.primary.withValues(alpha: 0.3),
-                    ),
-                    icon: Icon(LucideIcons.sliders, color: Colors.white, size: 18.r),
-                    label: Text(
-                      'تخصيص وقت مخصص ⚙️',
-                      style: TextStyle(
-                        fontSize: 14.sp,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
-                      ),
-                    ),
-                    onPressed: () {
-                      _showCustomIntervalSheet(context, isAudio, intervalMins);
-                    },
-                  ),
+              icon: Icon(LucideIcons.sliders, color: Colors.white, size: 20.r),
+              label: Text(
+                'تخصيص وتحديد الوقت بالدقائق ⏱️',
+                style: TextStyle(
+                  fontSize: 15.sp,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
                 ),
               ),
-
-              SizedBox(width: 8.w),
-
-              // Increment Button (+15 mins)
-              _buildStepperButton(
-                icon: LucideIcons.plus,
-                label: '+15د',
-                onTap: () {
-                  final newMins = (intervalMins + 15).clamp(1, 1440);
-                  if (isAudio) {
-                    context.read<SettingsCubit>().updateAudioCustomInterval(newMins);
-                    context.read<SettingsCubit>().updateAudioFrequency(NotificationFrequency.custom);
-                  } else {
-                    context.read<SettingsCubit>().updateTextCustomInterval(newMins);
-                    context.read<SettingsCubit>().updateTextFrequency(NotificationFrequency.custom);
-                  }
-                },
-              ),
-            ],
+              onPressed: () {
+                _showCustomIntervalSheet(context, isAudio, intervalMins);
+              },
+            ),
           ),
         ],
-      ),
-    );
-  }
-
-  Widget _buildStepperButton({
-    required IconData icon,
-    required String label,
-    required VoidCallback onTap,
-  }) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(14.r),
-      child: Container(
-        padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 10.h),
-        decoration: BoxDecoration(
-          color: AppColors.primary.withValues(alpha: 0.12),
-          borderRadius: BorderRadius.circular(14.r),
-          border: Border.all(
-            color: AppColors.primary.withValues(alpha: 0.25),
-          ),
-        ),
-        child: Row(
-          children: [
-            Icon(icon, size: 16.r, color: AppColors.primary),
-            SizedBox(width: 2.w),
-            Text(
-              label,
-              style: TextStyle(
-                fontSize: 12.sp,
-                fontWeight: FontWeight.bold,
-                color: AppColors.primary,
-              ),
-            ),
-          ],
-        ),
       ),
     );
   }

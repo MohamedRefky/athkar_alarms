@@ -84,12 +84,12 @@ class SettingsModel extends Equatable {
   const SettingsModel({
     this.motherName = 'صباح عجمي أحمد محمد ريان',
     this.isTextNotificationsEnabled = true,
-    this.textFrequency = NotificationFrequency.every3Hours,
+    this.textFrequency = NotificationFrequency.custom,
     this.textCustomIntervalMinutes = 180,
     this.textDailyHour = 9,
     this.textDailyMinute = 0,
     this.isAudioNotificationsEnabled = true,
-    this.audioFrequency = NotificationFrequency.every1Hour,
+    this.audioFrequency = NotificationFrequency.custom,
     this.audioCustomIntervalMinutes = 60,
     this.audioDailyHour = 17,
     this.audioDailyMinute = 0,
@@ -141,14 +141,14 @@ class SettingsModel extends Equatable {
   }
 
   int getEffectiveTextIntervalMinutes() {
-    if (textFrequency == NotificationFrequency.custom) {
+    if (audioFrequency == NotificationFrequency.custom || textCustomIntervalMinutes > 0) {
       return textCustomIntervalMinutes > 0 ? textCustomIntervalMinutes : 60;
     }
     return textFrequency.intervalMinutes;
   }
 
   int getEffectiveAudioIntervalMinutes() {
-    if (audioFrequency == NotificationFrequency.custom) {
+    if (audioFrequency == NotificationFrequency.custom || audioCustomIntervalMinutes > 0) {
       return audioCustomIntervalMinutes > 0 ? audioCustomIntervalMinutes : 60;
     }
     return audioFrequency.intervalMinutes;

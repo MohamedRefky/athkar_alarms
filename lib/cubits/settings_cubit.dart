@@ -30,7 +30,10 @@ class SettingsCubit extends Cubit<SettingsState> {
   }
 
   void updateTextCustomInterval(int minutes) async {
-    final updated = state.settings.copyWith(textCustomIntervalMinutes: minutes);
+    final updated = state.settings.copyWith(
+      textCustomIntervalMinutes: minutes,
+      textFrequency: NotificationFrequency.custom,
+    );
     await _saveAndReschedule(updated);
   }
 
@@ -54,7 +57,10 @@ class SettingsCubit extends Cubit<SettingsState> {
   }
 
   void updateAudioCustomInterval(int minutes) async {
-    final updated = state.settings.copyWith(audioCustomIntervalMinutes: minutes);
+    final updated = state.settings.copyWith(
+      audioCustomIntervalMinutes: minutes,
+      audioFrequency: NotificationFrequency.custom,
+    );
     await _saveAndReschedule(updated);
   }
 

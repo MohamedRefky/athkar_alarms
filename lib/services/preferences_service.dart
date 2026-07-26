@@ -34,7 +34,7 @@ class PreferencesService {
     // Text settings
     final isTextEnabled = _prefs.getBool(keyIsTextEnabled) ?? true;
     final textFreqIdx =
-        _prefs.getInt(keyTextFrequencyIndex) ?? NotificationFrequency.every3Hours.index;
+        _prefs.getInt(keyTextFrequencyIndex) ?? NotificationFrequency.custom.index;
     final textCustomInterval = _prefs.getInt(keyTextCustomInterval) ?? 180;
     final textDailyHour = _prefs.getInt(keyTextDailyHour) ?? 9;
     final textDailyMinute = _prefs.getInt(keyTextDailyMinute) ?? 0;
@@ -42,8 +42,8 @@ class PreferencesService {
     // Audio settings
     final isAudioEnabled = _prefs.getBool(keyIsAudioEnabled) ?? true;
     final audioFreqIdx =
-        _prefs.getInt(keyAudioFrequencyIndex) ?? NotificationFrequency.every6Hours.index;
-    final audioCustomInterval = _prefs.getInt(keyAudioCustomInterval) ?? 360;
+        _prefs.getInt(keyAudioFrequencyIndex) ?? NotificationFrequency.custom.index;
+    final audioCustomInterval = _prefs.getInt(keyAudioCustomInterval) ?? 60;
     final audioDailyHour = _prefs.getInt(keyAudioDailyHour) ?? 17;
     final audioDailyMinute = _prefs.getInt(keyAudioDailyMinute) ?? 0;
     final selectedAudioIndex = _prefs.getInt(keySelectedAudioIndex) ?? 0;
@@ -61,12 +61,12 @@ class PreferencesService {
     final safeTextFreqIdx =
         (textFreqIdx >= 0 && textFreqIdx < NotificationFrequency.values.length)
             ? textFreqIdx
-            : NotificationFrequency.every3Hours.index;
+            : NotificationFrequency.custom.index;
 
     final safeAudioFreqIdx =
         (audioFreqIdx >= 0 && audioFreqIdx < NotificationFrequency.values.length)
             ? audioFreqIdx
-            : NotificationFrequency.every6Hours.index;
+            : NotificationFrequency.custom.index;
 
     return SettingsModel(
       motherName: motherName,
