@@ -17,18 +17,26 @@ subprojects {
 }
 
 subprojects {
-    project.evaluationDependsOn(":app")
-}
-
-subprojects {
-    afterEvaluate {
-        if (project.plugins.hasPlugin("com.android.application") ||
-            project.plugins.hasPlugin("com.android.library")) {
-            project.extensions.configure<com.android.build.gradle.BaseExtension>("android") {
+    fun configureProject(p: Project) {
+        if (p.plugins.hasPlugin("com.android.application") ||
+            p.plugins.hasPlugin("com.android.library")) {
+            p.extensions.configure<com.android.build.gradle.BaseExtension>("android") {
                 compileSdkVersion(36)
             }
         }
     }
+
+    if (state.executed) {
+        configureProject(this)
+    } else {
+        afterEvaluate {
+            configureProject(this)
+        }
+    }
+}
+
+subprojects {
+    project.evaluationDependsOn(":app")
 }
 
 tasks.register<Delete>("clean") {
