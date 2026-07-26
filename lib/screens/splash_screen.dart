@@ -88,31 +88,32 @@ class _SplashScreenState extends State<SplashScreen>
               child: ScaleTransition(
                 scale: _scaleAnimation,
                 child: Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 24.w),
+                  padding: EdgeInsets.symmetric(horizontal: 16.w),
                   child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      const Spacer(),
-                      // Image Container with smooth shadow and rounded frame
-                      Container(
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(24.r),
-                          boxShadow: [
-                            BoxShadow(
-                              color: AppColors.primary.withValues(alpha: 0.2),
-                              blurRadius: 20.r,
-                              spreadRadius: 2.r,
-                              offset: const Offset(0, 8),
-                            ),
-                          ],
-                        ),
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(24.r),
-                          child: AspectRatio(
-                            aspectRatio: 1.0, // Square aesthetic presentation
+                      SizedBox(height: 16.h),
+                      // Large Prominent Image Frame
+                      Expanded(
+                        child: Container(
+                          width: double.infinity,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(28.r),
+                            boxShadow: [
+                              BoxShadow(
+                                color: AppColors.primary.withValues(alpha: 0.25),
+                                blurRadius: 24.r,
+                                spreadRadius: 2.r,
+                                offset: const Offset(0, 10),
+                              ),
+                            ],
+                          ),
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(28.r),
                             child: Image.asset(
                               'assets/image/image.jpeg',
                               fit: BoxFit.cover,
+                              filterQuality: FilterQuality.high,
+                              isAntiAlias: true,
                               errorBuilder: (context, error, stackTrace) {
                                 return Container(
                                   color: isDark
@@ -129,37 +130,37 @@ class _SplashScreenState extends State<SplashScreen>
                           ),
                         ),
                       ),
-                      SizedBox(height: 32.h),
+                      SizedBox(height: 20.h),
                       Text(
                         'اللهم ارحم أمي',
                         style: TextStyle(
-                          fontSize: 26.sp,
+                          fontSize: 28.sp,
                           fontWeight: FontWeight.bold,
                           color: isDark
                               ? AppColors.darkTextPrimary
                               : AppColors.primaryDark,
                         ),
                       ),
-                      SizedBox(height: 8.h),
+                      SizedBox(height: 6.h),
                       Text(
                         'صدقة جارية',
                         style: TextStyle(
-                          fontSize: 16.sp,
+                          fontSize: 17.sp,
                           color: AppColors.accentGold,
                           fontWeight: FontWeight.w600,
                         ),
                       ),
-                      const Spacer(),
+                      SizedBox(height: 16.h),
                       // Subtle skip indicator
                       Padding(
-                        padding: EdgeInsets.only(bottom: 16.h),
+                        padding: EdgeInsets.only(bottom: 12.h),
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             Text(
                               'اضغط للمتابعة',
                               style: TextStyle(
-                                fontSize: 13.sp,
+                                fontSize: 14.sp,
                                 color: isDark
                                     ? AppColors.darkTextSecondary
                                     : AppColors.textSecondary,
@@ -168,7 +169,7 @@ class _SplashScreenState extends State<SplashScreen>
                             SizedBox(width: 4.w),
                             Icon(
                               Icons.arrow_back_ios_new,
-                              size: 12.r,
+                              size: 13.r,
                               color: isDark
                                   ? AppColors.darkTextSecondary
                                   : AppColors.textSecondary,
