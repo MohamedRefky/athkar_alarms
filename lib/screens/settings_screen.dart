@@ -241,10 +241,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
     if (result != null && result > 0 && mounted) {
       if (isAudio) {
         context.read<SettingsCubit>().updateAudioCustomInterval(result);
-        context.read<SettingsCubit>().updateAudioFrequency(NotificationFrequency.custom);
       } else {
         context.read<SettingsCubit>().updateTextCustomInterval(result);
-        context.read<SettingsCubit>().updateTextFrequency(NotificationFrequency.custom);
       }
     }
   }
