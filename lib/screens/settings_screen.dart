@@ -195,7 +195,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   SizedBox(height: 10.h),
                   Container(
                     decoration: BoxDecoration(
-                      color: isDark ? AppColors.darkSurface : AppColors.surface,
                       borderRadius: BorderRadius.circular(16.r),
                       boxShadow: const [
                         BoxShadow(
@@ -205,101 +204,106 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         ),
                       ],
                     ),
-                    child: Column(
-                      children: [
-                        for (final freq in NotificationFrequency.values) ...[
-                          RadioListTile<NotificationFrequency>(
-                            value: freq,
-                            groupValue: settings.frequency,
-                            activeColor: AppColors.primary,
-                            title: Text(
-                              freq.label,
-                              style: TextStyle(
-                                fontSize: 16.sp,
-                                fontWeight: FontWeight.w600,
+                    child: Material(
+                      color: isDark ? AppColors.darkSurface : AppColors.surface,
+                      borderRadius: BorderRadius.circular(16.r),
+                      clipBehavior: Clip.antiAlias,
+                      child: Column(
+                        children: [
+                          for (final freq in NotificationFrequency.values) ...[
+                            RadioListTile<NotificationFrequency>(
+                              value: freq,
+                              groupValue: settings.frequency,
+                              activeColor: AppColors.primary,
+                              title: Text(
+                                freq.label,
+                                style: TextStyle(
+                                  fontSize: 16.sp,
+                                  fontWeight: FontWeight.w600,
+                                ),
                               ),
+                              onChanged: (val) {
+                                if (val != null) {
+                                  context
+                                      .read<SettingsCubit>()
+                                      .updateFrequency(val);
+                                }
+                              },
                             ),
-                            onChanged: (val) {
-                              if (val != null) {
-                                context
-                                    .read<SettingsCubit>()
-                                    .updateFrequency(val);
-                              }
-                            },
-                          ),
-                          if (freq == NotificationFrequency.onceDaily &&
-                              settings.frequency ==
-                                  NotificationFrequency.onceDaily) ...[
-                            Padding(
-                              padding: EdgeInsets.symmetric(
-                                  horizontal: 20.w, vertical: 8.h),
-                              child: Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Text(
-                                    'وقت الإشعار اليومي: ${settings.dailyHour.toString().padLeft(2, '0')}:${settings.dailyMinute.toString().padLeft(2, '0')}',
-                                    style: TextStyle(
-                                      fontSize: 15.sp,
-                                      fontWeight: FontWeight.bold,
-                                      color: AppColors.primary,
-                                    ),
-                                  ),
-                                  ElevatedButton.icon(
-                                    onPressed: () =>
-                                        _pickTime(context, settings),
-                                    icon: const Icon(LucideIcons.calendar,
-                                        size: 18),
-                                    label: const Text('تغيير الوقت'),
-                                    style: ElevatedButton.styleFrom(
-                                      padding: EdgeInsets.symmetric(
-                                          horizontal: 12.w, vertical: 8.h),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
-                          if (freq == NotificationFrequency.custom &&
-                              settings.frequency ==
-                                  NotificationFrequency.custom) ...[
-                            Padding(
-                              padding: EdgeInsets.all(16.r),
-                              child: Row(
-                                children: [
-                                  Expanded(
-                                    child: TextFormField(
-                                      controller: _customMinutesController,
-                                      keyboardType: TextInputType.number,
-                                      decoration: InputDecoration(
-                                        labelText: 'التكرار بالدقائق',
-                                        hintText: 'مثلاً: 45',
-                                        border: OutlineInputBorder(
-                                          borderRadius:
-                                              BorderRadius.circular(12.r),
-                                        ),
+                            if (freq == NotificationFrequency.onceDaily &&
+                                settings.frequency ==
+                                    NotificationFrequency.onceDaily) ...[
+                              Padding(
+                                padding: EdgeInsets.symmetric(
+                                    horizontal: 20.w, vertical: 8.h),
+                                child: Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Text(
+                                      'وقت الإشعار اليومي: ${settings.dailyHour.toString().padLeft(2, '0')}:${settings.dailyMinute.toString().padLeft(2, '0')}',
+                                      style: TextStyle(
+                                        fontSize: 15.sp,
+                                        fontWeight: FontWeight.bold,
+                                        color: AppColors.primary,
                                       ),
-                                      onChanged: (val) {
-                                        final min = int.tryParse(val);
-                                        if (min != null && min > 0) {
-                                          context
-                                              .read<SettingsCubit>()
-                                              .updateCustomInterval(min);
-                                        }
-                                      },
                                     ),
-                                  ),
-                                  SizedBox(width: 12.w),
-                                  Text('دقيقة',
-                                      style: TextStyle(fontSize: 16.sp)),
-                                ],
+                                    ElevatedButton.icon(
+                                      onPressed: () =>
+                                          _pickTime(context, settings),
+                                      icon: const Icon(LucideIcons.calendar,
+                                          size: 18),
+                                      label: const Text('تغيير الوقت'),
+                                      style: ElevatedButton.styleFrom(
+                                        padding: EdgeInsets.symmetric(
+                                            horizontal: 12.w, vertical: 8.h),
+                                      ),
+                                    ),
+                                  ],
+                                ),
                               ),
-                            ),
+                            ],
+                            if (freq == NotificationFrequency.custom &&
+                                settings.frequency ==
+                                    NotificationFrequency.custom) ...[
+                              Padding(
+                                padding: EdgeInsets.all(16.r),
+                                child: Row(
+                                  children: [
+                                    Expanded(
+                                      child: TextFormField(
+                                        controller: _customMinutesController,
+                                        keyboardType: TextInputType.number,
+                                        decoration: InputDecoration(
+                                          labelText: 'التكرار بالدقائق',
+                                          hintText: 'مثلاً: 45',
+                                          border: OutlineInputBorder(
+                                            borderRadius:
+                                                BorderRadius.circular(12.r),
+                                          ),
+                                        ),
+                                        onChanged: (val) {
+                                          final min = int.tryParse(val);
+                                          if (min != null && min > 0) {
+                                            context
+                                                .read<SettingsCubit>()
+                                                .updateCustomInterval(min);
+                                          }
+                                        },
+                                      ),
+                                    ),
+                                    SizedBox(width: 12.w),
+                                    Text('دقيقة',
+                                        style: TextStyle(fontSize: 16.sp)),
+                                  ],
+                                ),
+                              ),
+                            ],
+                            if (freq != NotificationFrequency.values.last)
+                              const Divider(height: 1),
                           ],
-                          if (freq != NotificationFrequency.values.last)
-                            const Divider(height: 1),
                         ],
-                      ],
+                      ),
                     ),
                   ),
 
@@ -314,7 +318,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   SizedBox(height: 10.h),
                   Container(
                     decoration: BoxDecoration(
-                      color: isDark ? AppColors.darkSurface : AppColors.surface,
                       borderRadius: BorderRadius.circular(16.r),
                       boxShadow: const [
                         BoxShadow(
@@ -324,39 +327,47 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         ),
                       ],
                     ),
-                    padding:
-                        EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
-                    child: Column(
-                      children: [
-                        SwitchListTile(
-                          value: settings.isAudioEnabled,
-                          activeThumbColor: AppColors.primary,
-                          title: Text(
-                            'تفعيل الصوت المصاحب للإشعار',
-                            style: TextStyle(
-                              fontSize: 16.sp,
-                              fontWeight: FontWeight.bold,
+                    child: Material(
+                      color: isDark ? AppColors.darkSurface : AppColors.surface,
+                      borderRadius: BorderRadius.circular(16.r),
+                      clipBehavior: Clip.antiAlias,
+                      child: Padding(
+                        padding: EdgeInsets.symmetric(
+                            horizontal: 16.w, vertical: 8.h),
+                        child: Column(
+                          children: [
+                            SwitchListTile(
+                              value: settings.isAudioEnabled,
+                              activeThumbColor: AppColors.primary,
+                              title: Text(
+                                'تفعيل الصوت المصاحب للإشعار',
+                                style: TextStyle(
+                                  fontSize: 16.sp,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              subtitle: Text(
+                                'تشغيل الصوت المخصص عند تلقي الإشعار أو فتح التطبيق',
+                                style: TextStyle(fontSize: 13.sp),
+                              ),
+                              onChanged: (val) {
+                                context.read<SettingsCubit>().toggleAudio(val);
+                              },
                             ),
-                          ),
-                          subtitle: Text(
-                            'تشغيل الصوت المخصص عند تلقي الإشعار أو فتح التطبيق',
-                            style: TextStyle(fontSize: 13.sp),
-                          ),
-                          onChanged: (val) {
-                            context.read<SettingsCubit>().toggleAudio(val);
-                          },
+                            const Divider(),
+                            ListTile(
+                              leading: const Icon(LucideIcons.bellRing,
+                                  color: AppColors.primary),
+                              title: const Text('طلب أذونات الإشعارات الجهاز'),
+                              subtitle: const Text(
+                                  'تأكد من تفعيل صلاحيات الإشعارات لضمان وصولها في موعدها'),
+                              trailing: const Icon(LucideIcons.chevronLeft),
+                              onTap: () =>
+                                  _requestNotificationPermissions(context),
+                            ),
+                          ],
                         ),
-                        const Divider(),
-                        ListTile(
-                          leading: const Icon(LucideIcons.bellRing,
-                              color: AppColors.primary),
-                          title: const Text('طلب أذونات الإشعارات الجهاز'),
-                          subtitle: const Text(
-                              'تأكد من تفعيل صلاحيات الإشعارات لضمان وصولها في موعدها'),
-                          trailing: const Icon(LucideIcons.chevronLeft),
-                          onTap: () => _requestNotificationPermissions(context),
-                        ),
-                      ],
+                      ),
                     ),
                   ),
 
@@ -371,7 +382,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   SizedBox(height: 10.h),
                   Container(
                     decoration: BoxDecoration(
-                      color: isDark ? AppColors.darkSurface : AppColors.surface,
                       borderRadius: BorderRadius.circular(16.r),
                       boxShadow: const [
                         BoxShadow(
@@ -381,89 +391,98 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         ),
                       ],
                     ),
-                    padding: EdgeInsets.all(16.r),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'يمكنك اختيار تسجيل بصوتك أو صوت أحد أفراد العائلة من جهازك وربطه بالأدعية:',
-                          style: TextStyle(
-                            fontSize: 14.sp,
-                            color: isDark
-                                ? AppColors.darkTextSecondary
-                                : AppColors.textSecondary,
-                          ),
-                        ),
-                        SizedBox(height: 12.h),
-                        BlocBuilder<DuaCubit, DuaState>(
-                          builder: (context, duaState) {
-                            if (duaState.duas.isEmpty) {
-                              return const Text('جاري تحميل الأدعية...');
-                            }
-                            return ListView.separated(
-                              shrinkWrap: true,
-                              physics: const NeverScrollableScrollPhysics(),
-                              itemCount: duaState.duas.length,
-                              separatorBuilder: (_, __) => const Divider(),
-                              itemBuilder: (context, index) {
-                                final dua = duaState.duas[index];
-                                final hasCustom =
-                                    settings.customAudioMap.containsKey(dua.id);
+                    child: Material(
+                      color: isDark ? AppColors.darkSurface : AppColors.surface,
+                      borderRadius: BorderRadius.circular(16.r),
+                      clipBehavior: Clip.antiAlias,
+                      child: Padding(
+                        padding: EdgeInsets.all(16.r),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'يمكنك اختيار تسجيل بصوتك أو صوت أحد أفراد العائلة من جهازك وربطه بالأدعية:',
+                              style: TextStyle(
+                                fontSize: 14.sp,
+                                color: isDark
+                                    ? AppColors.darkTextSecondary
+                                    : AppColors.textSecondary,
+                              ),
+                            ),
+                            SizedBox(height: 12.h),
+                            BlocBuilder<DuaCubit, DuaState>(
+                              builder: (context, duaState) {
+                                if (duaState.duas.isEmpty) {
+                                  return const Text('جاري تحميل الأدعية...');
+                                }
+                                return ListView.separated(
+                                  shrinkWrap: true,
+                                  physics: const NeverScrollableScrollPhysics(),
+                                  itemCount: duaState.duas.length,
+                                  separatorBuilder: (_, __) => const Divider(),
+                                  itemBuilder: (context, index) {
+                                    final dua = duaState.duas[index];
+                                    final hasCustom = settings.customAudioMap
+                                        .containsKey(dua.id);
 
-                                return ListTile(
-                                  contentPadding: EdgeInsets.zero,
-                                  title: Text(
-                                    'دعاء #${dua.id}: ${dua.getFormattedText(settings.motherName)}',
-                                    maxLines: 2,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: TextStyle(fontSize: 14.sp),
-                                  ),
-                                  subtitle: Text(
-                                    hasCustom
-                                        ? 'صوت مخصص: ${settings.customAudioMap[dua.id]?.split('/').last}'
-                                        : 'الصوت الافتراضي مسجل',
-                                    style: TextStyle(
-                                      fontSize: 12.sp,
-                                      color: hasCustom
-                                          ? AppColors.success
-                                          : AppColors.textHint,
-                                      fontWeight: hasCustom
-                                          ? FontWeight.bold
-                                          : FontWeight.normal,
-                                    ),
-                                  ),
-                                  trailing: Row(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      if (hasCustom)
-                                        IconButton(
-                                          icon: const Icon(LucideIcons.trash2,
-                                              color: AppColors.error),
-                                          onPressed: () {
-                                            context
-                                                .read<SettingsCubit>()
-                                                .removeCustomAudioForDua(
-                                                    dua.id);
-                                          },
-                                        ),
-                                      IconButton(
-                                        icon: Icon(
-                                          hasCustom
-                                              ? LucideIcons.fileCheck
-                                              : LucideIcons.upload,
-                                          color: AppColors.primary,
-                                        ),
-                                        onPressed: () => _pickCustomAudioFile(
-                                            context, dua.id),
+                                    return ListTile(
+                                      contentPadding: EdgeInsets.zero,
+                                      title: Text(
+                                        'دعاء #${dua.id}: ${dua.getFormattedText(settings.motherName)}',
+                                        maxLines: 2,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: TextStyle(fontSize: 14.sp),
                                       ),
-                                    ],
-                                  ),
+                                      subtitle: Text(
+                                        hasCustom
+                                            ? 'صوت مخصص: ${settings.customAudioMap[dua.id]?.split('/').last}'
+                                            : 'الصوت الافتراضي مسجل',
+                                        style: TextStyle(
+                                          fontSize: 12.sp,
+                                          color: hasCustom
+                                              ? AppColors.success
+                                              : AppColors.textHint,
+                                          fontWeight: hasCustom
+                                              ? FontWeight.bold
+                                              : FontWeight.normal,
+                                        ),
+                                      ),
+                                      trailing: Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          if (hasCustom)
+                                            IconButton(
+                                              icon: const Icon(
+                                                  LucideIcons.trash2,
+                                                  color: AppColors.error),
+                                              onPressed: () {
+                                                context
+                                                    .read<SettingsCubit>()
+                                                    .removeCustomAudioForDua(
+                                                        dua.id);
+                                              },
+                                            ),
+                                          IconButton(
+                                            icon: Icon(
+                                              hasCustom
+                                                  ? LucideIcons.fileCheck
+                                                  : LucideIcons.upload,
+                                              color: AppColors.primary,
+                                            ),
+                                            onPressed: () =>
+                                                _pickCustomAudioFile(
+                                                    context, dua.id),
+                                          ),
+                                        ],
+                                      ),
+                                    );
+                                  },
                                 );
                               },
-                            );
-                          },
+                            ),
+                          ],
                         ),
-                      ],
+                      ),
                     ),
                   ),
 
