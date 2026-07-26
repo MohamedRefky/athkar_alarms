@@ -1,0 +1,46 @@
+name: azkar
+description: "تطبيق اللهم ارحم أمي - أدعية وإشعارات دورية"
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.2.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_localizations:
+    sdk: flutter
+
+  # State Management & DI
+  flutter_bloc: ^8.1.6
+  equatable: ^2.0.5
+  get_it: ^8.0.3
+
+  # Storage & Utilities
+  shared_preferences: ^2.5.3
+  flutter_screenutil: ^5.9.3
+  timezone: ^0.9.4
+  permission_handler: ^11.3.1
+  file_picker: ^9.0.0
+
+  # Notifications & Audio
+  flutter_local_notifications: ^18.0.1
+  audioplayers: ^6.1.0
+
+  # Design & UI
+  google_fonts: ^6.2.1
+  lucide_icons_flutter: ^3.1.14
+  cupertino_icons: ^1.0.8
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+
+flutter:
+  uses-material-design: true
+
+  assets:
+    - assets/duas.json
+    - assets/audio/
