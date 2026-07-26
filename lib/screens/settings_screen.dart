@@ -369,7 +369,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         SwitchListTile(
                           value: settings.isAudioNotificationsEnabled,
                           activeTrackColor: AppColors.primary,
-                          activeColor: Colors.white,
+                          activeThumbColor: Colors.white,
                           thumbColor: WidgetStateProperty.resolveWith(
                             (states) => states.contains(WidgetState.selected)
                                 ? Colors.white
@@ -533,7 +533,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         SwitchListTile(
                           value: settings.isTextNotificationsEnabled,
                           activeTrackColor: AppColors.primary,
-                          activeColor: Colors.white,
+                          activeThumbColor: Colors.white,
                           thumbColor: WidgetStateProperty.resolveWith(
                             (states) => states.contains(WidgetState.selected)
                                 ? Colors.white
