@@ -199,6 +199,19 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         SwitchListTile(
                           value: settings.isAudioNotificationsEnabled,
                           activeTrackColor: AppColors.primary,
+                          activeColor: Colors.white,
+                          thumbColor: WidgetStateProperty.resolveWith(
+                            (states) => states.contains(WidgetState.selected)
+                                ? Colors.white
+                                : null,
+                          ),
+                          trackColor: WidgetStateProperty.resolveWith(
+                            (states) => states.contains(WidgetState.selected)
+                                ? AppColors.primary
+                                : null,
+                          ),
+                          trackOutlineColor:
+                              WidgetStateProperty.all(Colors.transparent),
                           title: Text(
                             'تفعيل نظام الإشعارات الصوتية',
                             style: TextStyle(
@@ -340,6 +353,19 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         SwitchListTile(
                           value: settings.isTextNotificationsEnabled,
                           activeTrackColor: AppColors.primary,
+                          activeColor: Colors.white,
+                          thumbColor: WidgetStateProperty.resolveWith(
+                            (states) => states.contains(WidgetState.selected)
+                                ? Colors.white
+                                : null,
+                          ),
+                          trackColor: WidgetStateProperty.resolveWith(
+                            (states) => states.contains(WidgetState.selected)
+                                ? AppColors.primary
+                                : null,
+                          ),
+                          trackOutlineColor:
+                              WidgetStateProperty.all(Colors.transparent),
                           title: Text(
                             'تفعيل إشعارات الأدعية المكتوبة',
                             style: TextStyle(
