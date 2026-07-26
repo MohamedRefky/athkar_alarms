@@ -70,23 +70,24 @@ class _SettingsScreenState extends State<SettingsScreen> {
       isScrollControlled: true,
       backgroundColor: isDark ? AppColors.darkSurface : AppColors.surface,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24.r)),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(28.r)),
       ),
       builder: (context) {
         return StatefulBuilder(
           builder: (context, setSheetState) {
             void addMinutes(int mins) {
               final current = int.tryParse(controller.text) ?? 0;
-              controller.text = (current + mins).toString();
+              final updatedVal = (current + mins).clamp(1, 1440);
+              controller.text = updatedVal.toString();
               setSheetState(() {});
             }
 
             return Padding(
               padding: EdgeInsets.only(
-                left: 20.w,
-                right: 20.w,
+                left: 24.w,
+                right: 24.w,
                 top: 20.h,
-                bottom: MediaQuery.of(context).viewInsets.bottom + 24.h,
+                bottom: MediaQuery.of(context).viewInsets.bottom + 28.h,
               ),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
@@ -94,119 +95,138 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 children: [
                   Center(
                     child: Container(
-                      width: 40.w,
-                      height: 4.h,
+                      width: 48.w,
+                      height: 5.h,
                       decoration: BoxDecoration(
                         color: AppColors.textHint.withValues(alpha: 0.3),
-                        borderRadius: BorderRadius.circular(2.r),
+                        borderRadius: BorderRadius.circular(3.r),
                       ),
                     ),
                   ),
-                  SizedBox(height: 16.h),
+                  SizedBox(height: 20.h),
                   Row(
                     children: [
-                      Icon(
-                        LucideIcons.timer,
-                        color: AppColors.primary,
-                        size: 24.r,
+                      Container(
+                        padding: EdgeInsets.all(10.r),
+                        decoration: BoxDecoration(
+                          color: AppColors.primary.withValues(alpha: 0.12),
+                          shape: BoxShape.circle,
+                        ),
+                        child: Icon(
+                          LucideIcons.timer,
+                          color: AppColors.primary,
+                          size: 24.r,
+                        ),
                       ),
-                      SizedBox(width: 10.w),
-                      Text(
-                        isAudio
-                            ? 'تخصيص الوقت الفاصل لإشعارات الصوت'
-                            : 'تخصيص الوقت الفاصل لإشعارات النص',
-                        style: TextStyle(
-                          fontSize: 16.sp,
-                          fontWeight: FontWeight.bold,
-                          color: isDark
-                              ? AppColors.darkTextPrimary
-                              : AppColors.textPrimary,
+                      SizedBox(width: 12.w),
+                      Expanded(
+                        child: Text(
+                          isAudio
+                              ? 'تحديد الوقت الفاصل لإشعارات الصوت'
+                              : 'تحديد الوقت الفاصل لإشعارات النص',
+                          style: TextStyle(
+                            fontSize: 17.sp,
+                            fontWeight: FontWeight.bold,
+                            color: isDark
+                                ? AppColors.darkTextPrimary
+                                : AppColors.textPrimary,
+                          ),
                         ),
                       ),
                     ],
                   ),
-                  SizedBox(height: 16.h),
+                  SizedBox(height: 20.h),
 
-                  // Preset Addition Chips
+                  // Preset Addition Buttons
                   Text(
-                    'إضافة سريعة بالدقائق:',
+                    'إضافة سريعة للوقت:',
                     style: TextStyle(
                       fontSize: 13.sp,
+                      fontWeight: FontWeight.w600,
                       color: AppColors.textHint,
                     ),
                   ),
-                  SizedBox(height: 8.h),
+                  SizedBox(height: 10.h),
                   Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      _buildPresetChip('+15 دقيقة', () => addMinutes(15)),
-                      _buildPresetChip('+30 دقيقة', () => addMinutes(30)),
-                      _buildPresetChip('+1 ساعة', () => addMinutes(60)),
-                      _buildPresetChip('+2 ساعة', () => addMinutes(120)),
+                      _buildPresetChip('+15د', () => addMinutes(15)),
+                      _buildPresetChip('+30د', () => addMinutes(30)),
+                      _buildPresetChip('+1س', () => addMinutes(60)),
+                      _buildPresetChip('+2س', () => addMinutes(120)),
                     ],
-                  ),
-
-                  SizedBox(height: 16.h),
-
-                  // Input Box
-                  TextField(
-                    controller: controller,
-                    keyboardType: TextInputType.number,
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontSize: 24.sp,
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.primary,
-                    ),
-                    decoration: InputDecoration(
-                      suffixText: 'دقيقة',
-                      suffixStyle: TextStyle(
-                        fontSize: 15.sp,
-                        fontWeight: FontWeight.bold,
-                        color: AppColors.textHint,
-                      ),
-                      filled: true,
-                      fillColor: isDark
-                          ? AppColors.darkBackground
-                          : AppColors.surfaceVariant,
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(16.r),
-                        borderSide: BorderSide.none,
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(16.r),
-                        borderSide: const BorderSide(
-                          color: AppColors.primary,
-                          width: 2,
-                        ),
-                      ),
-                    ),
                   ),
 
                   SizedBox(height: 20.h),
 
-                  // Confirm Action Button
+                  // Custom Input Field Box
+                  Container(
+                    padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 6.h),
+                    decoration: BoxDecoration(
+                      color: isDark
+                          ? AppColors.darkBackground
+                          : AppColors.surfaceVariant,
+                      borderRadius: BorderRadius.circular(20.r),
+                      border: Border.all(
+                        color: AppColors.primary.withValues(alpha: 0.3),
+                        width: 1.5,
+                      ),
+                    ),
+                    child: TextField(
+                      controller: controller,
+                      keyboardType: TextInputType.number,
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 28.sp,
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.primary,
+                      ),
+                      decoration: InputDecoration(
+                        suffixText: 'دقيقة',
+                        suffixStyle: TextStyle(
+                          fontSize: 16.sp,
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.textHint,
+                        ),
+                        border: InputBorder.none,
+                      ),
+                    ),
+                  ),
+
+                  SizedBox(height: 24.h),
+
+                  // Save Action Button
                   SizedBox(
                     width: double.infinity,
-                    height: 52.h,
+                    height: 54.h,
                     child: ElevatedButton(
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppColors.primary,
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(14.r),
+                          borderRadius: BorderRadius.circular(16.r),
                         ),
+                        elevation: 4,
+                        shadowColor: AppColors.primary.withValues(alpha: 0.4),
                       ),
                       onPressed: () {
                         final val = int.tryParse(controller.text);
                         Navigator.pop(context, val);
                       },
-                      child: Text(
-                        'حفظ الوقت الفاصل ⚡',
-                        style: TextStyle(
-                          fontSize: 16.sp,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
-                        ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(LucideIcons.checkCircle2,
+                              color: Colors.white, size: 20.r),
+                          SizedBox(width: 8.w),
+                          Text(
+                            'تأكيد وحفظ الوقت ⚡',
+                            style: TextStyle(
+                              fontSize: 16.sp,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   ),
@@ -232,20 +252,20 @@ class _SettingsScreenState extends State<SettingsScreen> {
   Widget _buildPresetChip(String label, VoidCallback onTap) {
     return InkWell(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(12.r),
+      borderRadius: BorderRadius.circular(14.r),
       child: Container(
-        padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
+        padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 10.h),
         decoration: BoxDecoration(
-          color: AppColors.primary.withValues(alpha: 0.1),
-          borderRadius: BorderRadius.circular(12.r),
+          color: AppColors.primary.withValues(alpha: 0.12),
+          borderRadius: BorderRadius.circular(14.r),
           border: Border.all(
-            color: AppColors.primary.withValues(alpha: 0.2),
+            color: AppColors.primary.withValues(alpha: 0.25),
           ),
         ),
         child: Text(
           label,
           style: TextStyle(
-            fontSize: 13.sp,
+            fontSize: 14.sp,
             fontWeight: FontWeight.bold,
             color: AppColors.primary,
           ),
@@ -423,20 +443,32 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                   ),
                                 ),
                                 SizedBox(height: 6.h),
-                                RadioListTile<int>(
-                                  value: 0,
-                                  groupValue: settings.selectedAudioIndex,
-                                  title: const Text(
-                                      'تتابع متسلسل بين الـ 16 صوت (صوت جديد كل فترة) 🔁'),
-                                  subtitle: const Text(
-                                      'الفترة الأولى صوت 1، الفترة التالية صوت 2... وهكذا'),
-                                  onChanged: (val) {
-                                    if (val != null) {
-                                      context
-                                          .read<SettingsCubit>()
-                                          .updateSelectedAudioIndex(val);
-                                    }
-                                  },
+                                Container(
+                                  decoration: BoxDecoration(
+                                    color: isDark
+                                        ? AppColors.darkBackground
+                                        : AppColors.surfaceVariant,
+                                    borderRadius: BorderRadius.circular(14.r),
+                                    border: Border.all(
+                                      color: AppColors.primary.withValues(alpha: 0.2),
+                                    ),
+                                  ),
+                                  child: RadioListTile<int>(
+                                    value: 0,
+                                    activeColor: AppColors.primary,
+                                    groupValue: settings.selectedAudioIndex,
+                                    title: const Text(
+                                        'تتابع متسلسل بين الـ 16 صوت (صوت جديد كل فترة) 🔁'),
+                                    subtitle: const Text(
+                                        'الفترة الأولى صوت 1، الفترة التالية صوت 2... وهكذا'),
+                                    onChanged: (val) {
+                                      if (val != null) {
+                                        context
+                                            .read<SettingsCubit>()
+                                            .updateSelectedAudioIndex(val);
+                                      }
+                                    },
+                                  ),
                                 ),
                               ],
                             ),
@@ -593,63 +625,73 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
     return Container(
       width: double.infinity,
-      padding: EdgeInsets.all(16.r),
+      padding: EdgeInsets.all(18.r),
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: isDark
-              ? [AppColors.darkSurface, const Color(0xFF1F332A)]
-              : [AppColors.primary.withValues(alpha: 0.08), Colors.white],
+              ? [AppColors.darkSurface, const Color(0xFF1B382B)]
+              : [AppColors.surfaceVariant, Colors.white],
           begin: Alignment.topRight,
           end: Alignment.bottomLeft,
         ),
-        borderRadius: BorderRadius.circular(16.r),
+        borderRadius: BorderRadius.circular(20.r),
         border: Border.all(
-          color: AppColors.primary.withValues(alpha: 0.3),
+          color: AppColors.accentGold.withValues(alpha: 0.4),
           width: 1.5,
         ),
         boxShadow: [
           BoxShadow(
-            color: AppColors.primary.withValues(alpha: 0.08),
-            blurRadius: 10.r,
-            offset: const Offset(0, 3),
+            color: AppColors.primary.withValues(alpha: 0.12),
+            blurRadius: 14.r,
+            offset: const Offset(0, 4),
           ),
         ],
       ),
       child: Column(
         children: [
+          // Current Duration Display Header
           Row(
             children: [
               Container(
-                padding: EdgeInsets.all(10.r),
+                padding: EdgeInsets.all(12.r),
                 decoration: BoxDecoration(
-                  color: AppColors.primary.withValues(alpha: 0.15),
+                  gradient: const LinearGradient(
+                    colors: [AppColors.primary, AppColors.primaryDark],
+                  ),
                   shape: BoxShape.circle,
+                  boxShadow: [
+                    BoxShadow(
+                      color: AppColors.primary.withValues(alpha: 0.3),
+                      blurRadius: 8.r,
+                    ),
+                  ],
                 ),
                 child: Icon(
                   LucideIcons.timer,
-                  color: AppColors.primary,
-                  size: 22.r,
+                  color: AppColors.accentGold,
+                  size: 24.r,
                 ),
               ),
-              SizedBox(width: 12.w),
+              SizedBox(width: 14.w),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'الوقت الفاصل الحالي للتكرار:',
+                      'الوقت الفاصل للتكرار الحالي:',
                       style: TextStyle(
                         fontSize: 13.sp,
+                        fontWeight: FontWeight.w600,
                         color: isDark
                             ? AppColors.darkTextSecondary
                             : AppColors.textSecondary,
                       ),
                     ),
-                    SizedBox(height: 2.h),
+                    SizedBox(height: 4.h),
                     Text(
-                      'يتكرر الإشعار كل: $intervalDisplay ⚡',
+                      'إشعار جديد كل: $intervalDisplay ⚡',
                       style: TextStyle(
-                        fontSize: 17.sp,
+                        fontSize: 18.sp,
                         fontWeight: FontWeight.bold,
                         color: AppColors.primary,
                       ),
@@ -659,33 +701,114 @@ class _SettingsScreenState extends State<SettingsScreen> {
               ),
             ],
           ),
-          SizedBox(height: 16.h),
-          SizedBox(
-            width: double.infinity,
-            height: 48.h,
-            child: ElevatedButton.icon(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primary,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(14.r),
-                ),
-                elevation: 2,
+
+          SizedBox(height: 18.h),
+
+          // Stepper +/- Controls & Direct Action Button
+          Row(
+            children: [
+              // Decrement Button (-15 mins)
+              _buildStepperButton(
+                icon: LucideIcons.minus,
+                label: '-15د',
+                onTap: () {
+                  final newMins = (intervalMins - 15).clamp(1, 1440);
+                  if (isAudio) {
+                    context.read<SettingsCubit>().updateAudioCustomInterval(newMins);
+                    context.read<SettingsCubit>().updateAudioFrequency(NotificationFrequency.custom);
+                  } else {
+                    context.read<SettingsCubit>().updateTextCustomInterval(newMins);
+                    context.read<SettingsCubit>().updateTextFrequency(NotificationFrequency.custom);
+                  }
+                },
               ),
-              icon: Icon(LucideIcons.sliders, color: Colors.white, size: 20.r),
-              label: Text(
-                'تغيير وتحديد الوقت بالدقائق ⏱️',
-                style: TextStyle(
-                  fontSize: 15.sp,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
+
+              SizedBox(width: 8.w),
+
+              // Main Custom Time Action Button
+              Expanded(
+                child: SizedBox(
+                  height: 48.h,
+                  child: ElevatedButton.icon(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.primary,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16.r),
+                      ),
+                      elevation: 3,
+                      shadowColor: AppColors.primary.withValues(alpha: 0.3),
+                    ),
+                    icon: Icon(LucideIcons.sliders, color: Colors.white, size: 18.r),
+                    label: Text(
+                      'تخصيص وقت مخصص ⚙️',
+                      style: TextStyle(
+                        fontSize: 14.sp,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      ),
+                    ),
+                    onPressed: () {
+                      _showCustomIntervalSheet(context, isAudio, intervalMins);
+                    },
+                  ),
                 ),
               ),
-              onPressed: () {
-                _showCustomIntervalSheet(context, isAudio, intervalMins);
-              },
-            ),
+
+              SizedBox(width: 8.w),
+
+              // Increment Button (+15 mins)
+              _buildStepperButton(
+                icon: LucideIcons.plus,
+                label: '+15د',
+                onTap: () {
+                  final newMins = (intervalMins + 15).clamp(1, 1440);
+                  if (isAudio) {
+                    context.read<SettingsCubit>().updateAudioCustomInterval(newMins);
+                    context.read<SettingsCubit>().updateAudioFrequency(NotificationFrequency.custom);
+                  } else {
+                    context.read<SettingsCubit>().updateTextCustomInterval(newMins);
+                    context.read<SettingsCubit>().updateTextFrequency(NotificationFrequency.custom);
+                  }
+                },
+              ),
+            ],
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildStepperButton({
+    required IconData icon,
+    required String label,
+    required VoidCallback onTap,
+  }) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(14.r),
+      child: Container(
+        padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 10.h),
+        decoration: BoxDecoration(
+          color: AppColors.primary.withValues(alpha: 0.12),
+          borderRadius: BorderRadius.circular(14.r),
+          border: Border.all(
+            color: AppColors.primary.withValues(alpha: 0.25),
+          ),
+        ),
+        child: Row(
+          children: [
+            Icon(icon, size: 16.r, color: AppColors.primary),
+            SizedBox(width: 2.w),
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: 12.sp,
+                fontWeight: FontWeight.bold,
+                color: AppColors.primary,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
