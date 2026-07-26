@@ -62,7 +62,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   ) async {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final controller = TextEditingController(
-      text: initialValue > 0 ? initialValue.toString() : '30',
+      text: initialValue > 0 ? initialValue.toString() : '60',
     );
 
     final result = await showModalBottomSheet<int>(
@@ -113,8 +113,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       SizedBox(width: 10.w),
                       Text(
                         isAudio
-                            ? 'تخصيص وقت تكرار الصوت بالدقائق'
-                            : 'تخصيص وقت تكرار النص بالدقائق',
+                            ? 'تخصيص الوقت الفاصل لإشعارات الصوت'
+                            : 'تخصيص الوقت الفاصل لإشعارات النص',
                         style: TextStyle(
                           fontSize: 16.sp,
                           fontWeight: FontWeight.bold,
@@ -129,7 +129,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
                   // Preset Addition Chips
                   Text(
-                    'إضافة سريعة للوقت:',
+                    'إضافة سريعة بالدقائق:',
                     style: TextStyle(
                       fontSize: 13.sp,
                       color: AppColors.textHint,
@@ -154,14 +154,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     keyboardType: TextInputType.number,
                     textAlign: TextAlign.center,
                     style: TextStyle(
-                      fontSize: 22.sp,
+                      fontSize: 24.sp,
                       fontWeight: FontWeight.bold,
                       color: AppColors.primary,
                     ),
                     decoration: InputDecoration(
                       suffixText: 'دقيقة',
                       suffixStyle: TextStyle(
-                        fontSize: 14.sp,
+                        fontSize: 15.sp,
                         fontWeight: FontWeight.bold,
                         color: AppColors.textHint,
                       ),
@@ -188,7 +188,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   // Confirm Action Button
                   SizedBox(
                     width: double.infinity,
-                    height: 50.h,
+                    height: 52.h,
                     child: ElevatedButton(
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppColors.primary,
@@ -201,7 +201,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         Navigator.pop(context, val);
                       },
                       child: Text(
-                        'حفظ الوقت وتفعيله ⚡',
+                        'حفظ الوقت الفاصل ⚡',
                         style: TextStyle(
                           fontSize: 16.sp,
                           fontWeight: FontWeight.bold,
@@ -252,29 +252,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
         ),
       ),
     );
-  }
-
-  IconData _getFrequencyIcon(NotificationFrequency freq) {
-    switch (freq) {
-      case NotificationFrequency.every15Minutes:
-        return LucideIcons.zap;
-      case NotificationFrequency.every30Minutes:
-        return LucideIcons.timer;
-      case NotificationFrequency.every1Hour:
-        return LucideIcons.clock;
-      case NotificationFrequency.every2Hours:
-        return LucideIcons.clock3;
-      case NotificationFrequency.every3Hours:
-        return LucideIcons.clock8;
-      case NotificationFrequency.every6Hours:
-        return LucideIcons.sun;
-      case NotificationFrequency.every12Hours:
-        return LucideIcons.moon;
-      case NotificationFrequency.onceDaily:
-        return LucideIcons.calendar;
-      case NotificationFrequency.custom:
-        return LucideIcons.sliders;
-    }
   }
 
   @override
@@ -359,7 +336,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   _buildSectionHeader(
                     context,
                     title: '1. الإشعارات وتكرار أصوات الأدعية 🎧',
-                    subtitle: 'تكرار أصوات المقاطع الـ 16 بتتابع زمني محدد',
+                    subtitle: 'تكرار أصوات المقاطع الـ 16 بتتابع زمني مخصص',
                     icon: LucideIcons.volume2,
                   ),
                   SizedBox(height: 12.h),
@@ -419,24 +396,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text(
-                                  'اختر معدل تكرار إشعارات الصوت:',
-                                  style: TextStyle(
-                                    fontSize: 14.sp,
-                                    fontWeight: FontWeight.bold,
-                                    color: isDark
-                                        ? AppColors.darkTextSecondary
-                                        : AppColors.textSecondary,
-                                  ),
-                                ),
-                                SizedBox(height: 12.h),
-
-                                // Premium Frequency Selector Grid
-                                _buildPremiumFrequencyGrid(
+                                // Single Custom Time Selector Card
+                                _buildSingleCustomTimeCard(
                                   context: context,
-                                  currentFreq: settings.audioFrequency,
                                   isAudio: true,
-                                  customMins: settings.audioCustomIntervalMinutes,
+                                  intervalMins: settings.getEffectiveAudioIntervalMinutes(),
                                   isDark: isDark,
                                 ),
 
@@ -545,30 +509,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           ),
                           Padding(
                             padding: EdgeInsets.all(16.r),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  'اختر معدل تكرار الإشعارات النصية:',
-                                  style: TextStyle(
-                                    fontSize: 14.sp,
-                                    fontWeight: FontWeight.bold,
-                                    color: isDark
-                                        ? AppColors.darkTextSecondary
-                                        : AppColors.textSecondary,
-                                  ),
-                                ),
-                                SizedBox(height: 12.h),
-
-                                // Premium Frequency Selector Grid
-                                _buildPremiumFrequencyGrid(
-                                  context: context,
-                                  currentFreq: settings.textFrequency,
-                                  isAudio: false,
-                                  customMins: settings.textCustomIntervalMinutes,
-                                  isDark: isDark,
-                                ),
-                              ],
+                            child: _buildSingleCustomTimeCard(
+                              context: context,
+                              isAudio: false,
+                              intervalMins: settings.getEffectiveTextIntervalMinutes(),
+                              isDark: isDark,
                             ),
                           ),
                         ],
@@ -636,165 +581,112 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
-  Widget _buildPremiumFrequencyGrid({
+  Widget _buildSingleCustomTimeCard({
     required BuildContext context,
-    required NotificationFrequency currentFreq,
     required bool isAudio,
-    required int customMins,
+    required int intervalMins,
     required bool isDark,
   }) {
-    return Column(
-      children: [
-        GridView.builder(
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 3,
-            crossAxisSpacing: 10.w,
-            mainAxisSpacing: 10.h,
-            childAspectRatio: 2.1,
-          ),
-          itemCount: NotificationFrequency.values.length,
-          itemBuilder: (context, index) {
-            final freq = NotificationFrequency.values[index];
-            final isSelected = currentFreq == freq;
-            final icon = _getFrequencyIcon(freq);
-            final labelText = freq == NotificationFrequency.custom && customMins > 0
-                ? '$customMins دقيقة'
-                : freq.label;
+    final String intervalDisplay = intervalMins >= 60 && intervalMins % 60 == 0
+        ? '${intervalMins ~/ 60} ساعة'
+        : '$intervalMins دقيقة';
 
-            return AnimatedContainer(
-              duration: const Duration(milliseconds: 200),
-              curve: Curves.easeInOut,
-              decoration: BoxDecoration(
-                gradient: isSelected
-                    ? const LinearGradient(
-                        colors: [AppColors.primary, AppColors.primaryDark],
-                        begin: Alignment.topRight,
-                        end: Alignment.bottomLeft,
-                      )
-                    : null,
-                color: isSelected
-                    ? null
-                    : (isDark
-                        ? AppColors.darkBackground
-                        : AppColors.surfaceVariant),
-                borderRadius: BorderRadius.circular(14.r),
-                border: Border.all(
-                  color: isSelected
-                      ? AppColors.accentGold
-                      : (isDark
-                          ? Colors.white.withValues(alpha: 0.08)
-                          : Colors.black.withValues(alpha: 0.05)),
-                  width: isSelected ? 2 : 1,
-                ),
-                boxShadow: isSelected
-                    ? [
-                        BoxShadow(
-                          color: AppColors.primary.withValues(alpha: 0.3),
-                          blurRadius: 8.r,
-                          offset: const Offset(0, 3),
-                        ),
-                      ]
-                    : null,
-              ),
-              child: Material(
-                color: Colors.transparent,
-                child: InkWell(
-                  borderRadius: BorderRadius.circular(14.r),
-                  onTap: () {
-                    if (freq == NotificationFrequency.custom) {
-                      _showCustomIntervalSheet(context, isAudio, customMins);
-                    } else {
-                      if (isAudio) {
-                        context
-                            .read<SettingsCubit>()
-                            .updateAudioFrequency(freq);
-                      } else {
-                        context
-                            .read<SettingsCubit>()
-                            .updateTextFrequency(freq);
-                      }
-                    }
-                  },
-                  child: Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 4.h),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          icon,
-                          size: 16.r,
-                          color: isSelected
-                              ? AppColors.accentGold
-                              : (isDark
-                                  ? AppColors.darkTextSecondary
-                                  : AppColors.textSecondary),
-                        ),
-                        SizedBox(width: 4.w),
-                        Flexible(
-                          child: Text(
-                            labelText,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: TextStyle(
-                              fontSize: 12.sp,
-                              fontWeight: isSelected
-                                  ? FontWeight.bold
-                                  : FontWeight.w600,
-                              color: isSelected
-                                  ? Colors.white
-                                  : (isDark
-                                      ? AppColors.darkTextPrimary
-                                      : AppColors.textPrimary),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-            );
-          },
+    return Container(
+      width: double.infinity,
+      padding: EdgeInsets.all(16.r),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: isDark
+              ? [AppColors.darkSurface, const Color(0xFF1F332A)]
+              : [AppColors.primary.withValues(alpha: 0.08), Colors.white],
+          begin: Alignment.topRight,
+          end: Alignment.bottomLeft,
         ),
-
-        SizedBox(height: 12.h),
-
-        // Active Status Summary Card Banner
-        Container(
-          padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 10.h),
-          decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(16.r),
+        border: Border.all(
+          color: AppColors.primary.withValues(alpha: 0.3),
+          width: 1.5,
+        ),
+        boxShadow: [
+          BoxShadow(
             color: AppColors.primary.withValues(alpha: 0.08),
-            borderRadius: BorderRadius.circular(12.r),
-            border: Border.all(
-              color: AppColors.primary.withValues(alpha: 0.2),
-            ),
+            blurRadius: 10.r,
+            offset: const Offset(0, 3),
           ),
-          child: Row(
+        ],
+      ),
+      child: Column(
+        children: [
+          Row(
             children: [
-              Icon(
-                LucideIcons.sparkles,
-                color: AppColors.primary,
-                size: 18.r,
+              Container(
+                padding: EdgeInsets.all(10.r),
+                decoration: BoxDecoration(
+                  color: AppColors.primary.withValues(alpha: 0.15),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  LucideIcons.timer,
+                  color: AppColors.primary,
+                  size: 22.r,
+                ),
               ),
-              SizedBox(width: 8.w),
+              SizedBox(width: 12.w),
               Expanded(
-                child: Text(
-                  isAudio
-                      ? 'سيتم إرسال إشعار صوتي جديد ينطق بالمقطع التالي كل (${currentFreq == NotificationFrequency.custom ? "$customMins دقيقة" : currentFreq.label}) ⚡'
-                      : 'سيتم إرسال دعاء مكتوب جديد كل (${currentFreq == NotificationFrequency.custom ? "$customMins دقيقة" : currentFreq.label}) 📖',
-                  style: TextStyle(
-                    fontSize: 12.sp,
-                    fontWeight: FontWeight.bold,
-                    color: AppColors.primary,
-                  ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'الوقت الفاصل الحالي للتكرار:',
+                      style: TextStyle(
+                        fontSize: 13.sp,
+                        color: isDark
+                            ? AppColors.darkTextSecondary
+                            : AppColors.textSecondary,
+                      ),
+                    ),
+                    SizedBox(height: 2.h),
+                    Text(
+                      'يتكرر الإشعار كل: $intervalDisplay ⚡',
+                      style: TextStyle(
+                        fontSize: 17.sp,
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.primary,
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ],
           ),
-        ),
-      ],
+          SizedBox(height: 16.h),
+          SizedBox(
+            width: double.infinity,
+            height: 48.h,
+            child: ElevatedButton.icon(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.primary,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(14.r),
+                ),
+                elevation: 2,
+              ),
+              icon: Icon(LucideIcons.sliders, color: Colors.white, size: 20.r),
+              label: Text(
+                'تغيير وتحديد الوقت بالدقائق ⏱️',
+                style: TextStyle(
+                  fontSize: 15.sp,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                ),
+              ),
+              onPressed: () {
+                _showCustomIntervalSheet(context, isAudio, intervalMins);
+              },
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -848,7 +740,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 ),
                 SizedBox(height: 4.h),
                 Text(
-                  'تكرار التسجيلات الصوتية بتتابع زمني مرن',
+                  'تخصيص وقت الإشعارات بحرية كاملة',
                   style: TextStyle(
                     fontSize: 13.sp,
                     color: Colors.white.withValues(alpha: 0.85),
