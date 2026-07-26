@@ -286,11 +286,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
       body: SafeArea(
         child: BlocConsumer<SettingsCubit, SettingsState>(
           listener: (context, state) {
-            final duaCubit = context.read<DuaCubit>();
-            context.read<SettingsCubit>().rescheduleNotifications(
-                  duas: duaCubit.state.duas,
-                  audioAzkar: duaCubit.state.audioAzkar,
-                );
+            // Only reschedule when save is complete, not during intermediate saving state
+            if (!state.isSaving) {
+              final duaCubit = context.read<DuaCubit>();
+              context.read<SettingsCubit>().rescheduleNotifications(
+                    duas: duaCubit.state.duas,
+                    audioAzkar: duaCubit.state.audioAzkar,
+                  );
+            }
           },
           builder: (context, state) {
             final settings = state.settings;

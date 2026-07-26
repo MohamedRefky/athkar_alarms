@@ -27,7 +27,6 @@ class NotificationService {
     tz.initializeTimeZones();
     _setLocalTimezone();
 
-
     const androidSettings = AndroidInitializationSettings('@mipmap/ic_launcher');
     const darwinSettings = DarwinInitializationSettings(
       requestAlertPermission: true,
@@ -53,38 +52,32 @@ class NotificationService {
   }
 
   void _setLocalTimezone() {
-    // On Android, DateTime.now().timeZoneName returns abbreviations like 'EET'
-    // which are NOT valid IANA timezone names. We need to find a matching
-    // IANA timezone based on the device's actual UTC offset.
     final now = DateTime.now();
     final offset = now.timeZoneOffset;
 
     debugPrint('🕐 [TZ] Device timeZoneName: ${now.timeZoneName}');
     debugPrint('🕐 [TZ] Device UTC offset: ${offset.inHours}h ${offset.inMinutes % 60}m');
 
-    // First try common IANA names for known offsets
     final knownTimezones = <int, String>{
-      2: 'Africa/Cairo',       // UTC+2 (Egypt, EET)
-      3: 'Asia/Riyadh',        // UTC+3 (Saudi, AST / EEST summer)
-      4: 'Asia/Dubai',         // UTC+4
-      5: 'Asia/Karachi',       // UTC+5
-      1: 'Europe/London',      // UTC+1
-      0: 'UTC',                // UTC+0
-      -5: 'America/New_York',  // UTC-5
+      2: 'Africa/Cairo',
+      3: 'Asia/Riyadh',
+      4: 'Asia/Dubai',
+      5: 'Asia/Karachi',
+      1: 'Europe/London',
+      0: 'UTC',
+      -5: 'America/New_York',
     };
 
     final offsetHours = offset.inHours;
 
-    // Try the known mapping first
     if (knownTimezones.containsKey(offsetHours)) {
       try {
         tz.setLocalLocation(tz.getLocation(knownTimezones[offsetHours]!));
-        debugPrint('🕐 [TZ] Set local timezone to: ${knownTimezones[offsetHours]} (from offset map)');
+        debugPrint('🕐 [TZ] Set timezone to: ${knownTimezones[offsetHours]}');
         return;
       } catch (_) {}
     }
 
-    // Fallback: search all IANA timezones for one matching our offset
     try {
       final tzNow = DateTime.now().toUtc();
       for (final name in tz.timeZoneDatabase.locations.keys) {
@@ -92,16 +85,15 @@ class NotificationService {
         final tzDateTime = tz.TZDateTime.from(tzNow, location);
         if (tzDateTime.timeZoneOffset == offset) {
           tz.setLocalLocation(location);
-          debugPrint('🕐 [TZ] Set local timezone to: $name (from IANA search)');
+          debugPrint('🕐 [TZ] Set timezone to: $name (IANA search)');
           return;
         }
       }
     } catch (_) {}
 
-    // Final fallback: Africa/Cairo
     try {
       tz.setLocalLocation(tz.getLocation('Africa/Cairo'));
-      debugPrint('🕐 [TZ] Set local timezone to: Africa/Cairo (fallback)');
+      debugPrint('🕐 [TZ] Set timezone to: Africa/Cairo (fallback)');
     } catch (_) {
       debugPrint('🕐 [TZ] ⚠️ FAILED to set any local timezone!');
     }
@@ -114,7 +106,6 @@ class NotificationService {
 
     if (androidImplementation == null) return;
 
-    // 1. Text Dua Channel
     const textChannel = AndroidNotificationChannel(
       _textChannelId,
       _textChannelName,
@@ -124,7 +115,6 @@ class NotificationService {
     );
     await androidImplementation.createNotificationChannel(textChannel);
 
-    // 2. Audio Azkar Channel (Default Sound: azkar_sound)
     const audioChannel = AndroidNotificationChannel(
       _audioChannelId,
       _audioChannelName,
@@ -177,10 +167,12 @@ class NotificationService {
       try {
         final canExact = await androidImplementation.canScheduleExactNotifications() ?? false;
         if (canExact) {
+          debugPrint('📋 [SCHEDULE] Using exactAllowWhileIdle mode');
           return AndroidScheduleMode.exactAllowWhileIdle;
         }
       } catch (_) {}
     }
+    debugPrint('📋 [SCHEDULE] Using inexactAllowWhileIdle mode');
     return AndroidScheduleMode.inexactAllowWhileIdle;
   }
 
@@ -193,7 +185,6 @@ class NotificationService {
     debugPrint('📋 [SCHEDULE] textEnabled=${settings.isTextNotificationsEnabled}, audioEnabled=${settings.isAudioNotificationsEnabled}');
     debugPrint('📋 [SCHEDULE] duas=${duas.length}, audioAzkar=${audioAzkar.length}');
     debugPrint('📋 [SCHEDULE] textInterval=${settings.getEffectiveTextIntervalMinutes()}min, audioInterval=${settings.getEffectiveAudioIntervalMinutes()}min');
-    debugPrint('📋 [SCHEDULE] tz.local=${tz.local.name}, tz.now=${tz.TZDateTime.now(tz.local)}');
 
     await cancelAllNotifications();
 
@@ -207,109 +198,67 @@ class NotificationService {
         audioAzkar: audioAzkar,
       );
     }
+
+    // Verify pending notifications
+    final pending = await _notificationsPlugin.pendingNotificationRequests();
+    debugPrint('📋 [SCHEDULE] ✅ Total pending notifications: ${pending.length}');
+    for (final p in pending) {
+      debugPrint('📋 [SCHEDULE]   → id=${p.id}, title=${p.title}');
+    }
   }
 
   // --- Text Notifications Scheduling ---
+  // Uses periodicallyShowWithDuration for reliable repeating delivery
   Future<void> _scheduleTextNotifications({
     required SettingsModel settings,
     required List<DuaModel> duas,
   }) async {
     final String motherName = settings.motherName;
     final int intervalMins = settings.getEffectiveTextIntervalMinutes();
-    final tzNow = tz.TZDateTime.now(tz.local);
     final scheduleMode = await _getScheduleMode();
 
     if (duas.isEmpty) return;
 
-    if (settings.textFrequency == NotificationFrequency.onceDaily) {
-      final now = DateTime.now();
-      var scheduledDate = DateTime(
-        now.year,
-        now.month,
-        now.day,
-        settings.textDailyHour,
-        settings.textDailyMinute,
-      );
+    final dua = (List<DuaModel>.from(duas)..shuffle()).first;
+    final bodyText = dua.getFormattedText(motherName);
 
-      if (scheduledDate.isBefore(now)) {
-        scheduledDate = scheduledDate.add(const Duration(days: 1));
-      }
+    const androidDetails = AndroidNotificationDetails(
+      _textChannelId,
+      _textChannelName,
+      channelDescription: _textChannelDesc,
+      importance: Importance.high,
+      priority: Priority.high,
+      playSound: true,
+      styleInformation: BigTextStyleInformation(''),
+    );
 
-      final tzScheduledDate = tz.TZDateTime.from(scheduledDate, tz.local);
-      final dua = (List<DuaModel>.from(duas)..shuffle()).first;
-      final bodyText = dua.getFormattedText(motherName);
+    const iosDetails = DarwinNotificationDetails(
+      presentSound: true,
+      presentAlert: true,
+      presentBadge: true,
+    );
 
-      const androidDetails = AndroidNotificationDetails(
-        _textChannelId,
-        _textChannelName,
-        channelDescription: _textChannelDesc,
-        importance: Importance.high,
-        priority: Priority.high,
-        playSound: true,
-        styleInformation: BigTextStyleInformation(''),
-      );
+    const details = NotificationDetails(android: androidDetails, iOS: iosDetails);
 
-      const iosDetails = DarwinNotificationDetails(
-        presentSound: true,
-        presentAlert: true,
-        presentBadge: true,
-      );
+    debugPrint('📝 [TEXT] Using periodicallyShowWithDuration: every $intervalMins minutes');
 
-      await _notificationsPlugin.zonedSchedule(
-        100, // ID for text daily
-        'اللهم ارحم أمي 🤍',
-        bodyText,
-        tzScheduledDate,
-        const NotificationDetails(android: androidDetails, iOS: iosDetails),
-        androidScheduleMode: scheduleMode,
-        uiLocalNotificationDateInterpretation:
-            UILocalNotificationDateInterpretation.absoluteTime,
-        matchDateTimeComponents: DateTimeComponents.time,
-        payload: 'dua_${dua.id}',
-      );
-    } else {
-      // Schedule multiple periodic text notifications based on intervalMins
-      final shuffledDuas = List<DuaModel>.from(duas)..shuffle();
-      final count = shuffledDuas.length.clamp(1, 10);
+    // Use periodicallyShowWithDuration - Android AlarmManager repeating
+    // This fires the FIRST notification after intervalMins, then repeats
+    await _notificationsPlugin.periodicallyShowWithDuration(
+      110, // notification id
+      'اللهم ارحم أمي 🤍',
+      bodyText,
+      Duration(minutes: intervalMins),
+      details,
+      androidScheduleMode: scheduleMode,
+      payload: 'dua_${dua.id}',
+    );
 
-      for (int i = 0; i < count; i++) {
-        final dua = shuffledDuas[i];
-        final tzScheduledDate = tzNow.add(Duration(minutes: intervalMins * (i + 1)));
-        final bodyText = dua.getFormattedText(motherName);
-        debugPrint('📝 [TEXT] Scheduling notification #${110 + i} at $tzScheduledDate (in ${intervalMins * (i + 1)} min)');
-
-        const androidDetails = AndroidNotificationDetails(
-          _textChannelId,
-          _textChannelName,
-          channelDescription: _textChannelDesc,
-          importance: Importance.high,
-          priority: Priority.high,
-          playSound: true,
-          styleInformation: BigTextStyleInformation(''),
-        );
-
-        const iosDetails = DarwinNotificationDetails(
-          presentSound: true,
-          presentAlert: true,
-          presentBadge: true,
-        );
-
-        await _notificationsPlugin.zonedSchedule(
-          110 + i,
-          'اللهم ارحم أمي 🤍',
-          bodyText,
-          tzScheduledDate,
-          const NotificationDetails(android: androidDetails, iOS: iosDetails),
-          androidScheduleMode: scheduleMode,
-          uiLocalNotificationDateInterpretation:
-              UILocalNotificationDateInterpretation.absoluteTime,
-          payload: 'dua_${dua.id}',
-        );
-      }
-    }
+    debugPrint('📝 [TEXT] ✅ Periodic text notification scheduled (id=110, every ${intervalMins}min)');
   }
 
-  // --- Audio Notifications Scheduling (Sequential Loop through all 16 audio recordings) ---
+  // --- Audio Notifications Scheduling ---
+  // Uses periodicallyShowWithDuration for reliable repeating delivery
   Future<void> _scheduleAudioNotifications({
     required SettingsModel settings,
     required List<AudioAzkarModel> audioAzkar,
@@ -318,60 +267,58 @@ class NotificationService {
 
     final int intervalMins = settings.getEffectiveAudioIntervalMinutes();
     final String motherName = settings.motherName;
-    final tzNow = tz.TZDateTime.now(tz.local);
     final scheduleMode = await _getScheduleMode();
 
-    // If specific audio index (>0) selected, use that single audio.
-    // Otherwise (0), cycle sequentially through all 16 audio recordings!
-    final List<AudioAzkarModel> sequence = (settings.selectedAudioIndex > 0 &&
-            settings.selectedAudioIndex <= audioAzkar.length)
-        ? [audioAzkar[settings.selectedAudioIndex - 1]]
-        : audioAzkar;
-
-    for (int i = 0; i < sequence.length; i++) {
-      final audioItem = sequence[i];
-      final tzScheduledDate = tzNow.add(Duration(minutes: intervalMins * (i + 1)));
-      debugPrint('🔊 [AUDIO] Scheduling notification #${200 + i} at $tzScheduledDate (in ${intervalMins * (i + 1)} min)');
-
-      final soundResource = audioItem.soundName; // e.g. 'audio1'
-      final soundFileWithExt = '${audioItem.soundName}.mp3';
-
-      final androidDetails = AndroidNotificationDetails(
-        'azkar_audio_channel_$soundResource',
-        'إشعار صوتي - ${audioItem.title}',
-        channelDescription: 'قناة الإشعار الصوتي الخاص ${audioItem.title}',
-        importance: Importance.high,
-        priority: Priority.high,
-        playSound: true,
-        sound: RawResourceAndroidNotificationSound(soundResource),
-      );
-
-      final iosDetails = DarwinNotificationDetails(
-        presentSound: true,
-        presentAlert: true,
-        sound: soundFileWithExt,
-      );
-
-      final details = NotificationDetails(
-        android: androidDetails,
-        iOS: iosDetails,
-      );
-
-      final titleText = 'دعاء صبي لأمي $motherName 🎧';
-      final bodyText = 'المقطع الصوتي #${audioItem.id}: ${audioItem.title}';
-
-      await _notificationsPlugin.zonedSchedule(
-        200 + i, // Unique notification ID per scheduled audio item
-        titleText,
-        bodyText,
-        tzScheduledDate,
-        details,
-        androidScheduleMode: scheduleMode,
-        uiLocalNotificationDateInterpretation:
-            UILocalNotificationDateInterpretation.absoluteTime,
-        payload: 'audio_${audioItem.id}',
-      );
+    // Pick the audio to use
+    final AudioAzkarModel audioItem;
+    if (settings.selectedAudioIndex > 0 &&
+        settings.selectedAudioIndex <= audioAzkar.length) {
+      audioItem = audioAzkar[settings.selectedAudioIndex - 1];
+    } else {
+      audioItem = audioAzkar.first;
     }
+
+    final soundResource = audioItem.soundName;
+    final soundFileWithExt = '${audioItem.soundName}.mp3';
+
+    final androidDetails = AndroidNotificationDetails(
+      'azkar_audio_channel_$soundResource',
+      'إشعار صوتي - ${audioItem.title}',
+      channelDescription: 'قناة الإشعار الصوتي الخاص ${audioItem.title}',
+      importance: Importance.high,
+      priority: Priority.high,
+      playSound: true,
+      sound: RawResourceAndroidNotificationSound(soundResource),
+    );
+
+    final iosDetails = DarwinNotificationDetails(
+      presentSound: true,
+      presentAlert: true,
+      sound: soundFileWithExt,
+    );
+
+    final details = NotificationDetails(
+      android: androidDetails,
+      iOS: iosDetails,
+    );
+
+    final titleText = 'دعاء صبي لأمي $motherName 🎧';
+    final bodyText = 'المقطع الصوتي #${audioItem.id}: ${audioItem.title}';
+
+    debugPrint('🔊 [AUDIO] Using periodicallyShowWithDuration: every $intervalMins minutes');
+
+    // Use periodicallyShowWithDuration - Android AlarmManager repeating
+    await _notificationsPlugin.periodicallyShowWithDuration(
+      200, // notification id
+      titleText,
+      bodyText,
+      Duration(minutes: intervalMins),
+      details,
+      androidScheduleMode: scheduleMode,
+      payload: 'audio_${audioItem.id}',
+    );
+
+    debugPrint('🔊 [AUDIO] ✅ Periodic audio notification scheduled (id=200, every ${intervalMins}min)');
   }
 
   // --- Trigger Instant Audio Test Notification ---
