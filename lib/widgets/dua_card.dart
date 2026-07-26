@@ -7,16 +7,12 @@ import '../app/app_colors.dart';
 class DuaCard extends StatefulWidget {
   final String formattedText;
   final String motherName;
-  final bool isPlayingAudio;
-  final VoidCallback onToggleAudio;
   final VoidCallback onNextDua;
 
   const DuaCard({
     super.key,
     required this.formattedText,
     required this.motherName,
-    required this.isPlayingAudio,
-    required this.onToggleAudio,
     required this.onNextDua,
   });
 
@@ -79,9 +75,6 @@ class _DuaCardState extends State<DuaCard> {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final displayName = widget.motherName.trim().isNotEmpty
-        ? widget.motherName.trim()
-        : 'أمي';
 
     return Container(
       decoration: BoxDecoration(
@@ -105,76 +98,45 @@ class _DuaCardState extends State<DuaCard> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
+            // Top Header Badge inside Card
             Row(
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                // Heart Badge
-                Expanded(
-                  child: Container(
-                    padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
-                    decoration: BoxDecoration(
-                      color: AppColors.primary.withValues(alpha: 0.1),
-                      borderRadius: BorderRadius.circular(20.r),
-                      border: Border.all(
-                        color: AppColors.primary.withValues(alpha: 0.2),
-                      ),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(
-                          LucideIcons.heartHandshake,
-                          color: AppColors.primary,
-                          size: 16.sp,
-                        ),
-                        SizedBox(width: 6.w),
-                        Expanded(
-                          child: Text(
-                            'دعاء لـ $displayName',
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: TextStyle(
-                              color: AppColors.primary,
-                              fontSize: 14.sp,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
-                      ],
+                Container(
+                  padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 6.h),
+                  decoration: BoxDecoration(
+                    color: AppColors.primary.withValues(alpha: 0.12),
+                    borderRadius: BorderRadius.circular(20.r),
+                    border: Border.all(
+                      color: AppColors.primary.withValues(alpha: 0.25),
                     ),
                   ),
-                ),
-
-                SizedBox(width: 8.w),
-
-                // Pray Counter Badge
-                GestureDetector(
-                  onTap: _incrementPrayCount,
-                  child: Container(
-                    padding:
-                        EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
-                    decoration: BoxDecoration(
-                      color: AppColors.accentGold.withValues(alpha: 0.15),
-                      borderRadius: BorderRadius.circular(20.r),
-                      border: Border.all(
-                        color: AppColors.accentGold.withValues(alpha: 0.4),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        LucideIcons.bookOpenText,
+                        color: AppColors.primary,
+                        size: 16.sp,
                       ),
-                    ),
-                    child: Text(
-                      '🤲 آمين (${_prayCount > 0 ? _prayCount : "+"})',
-                      style: TextStyle(
-                        color: AppColors.accentGold,
-                        fontSize: 13.sp,
-                        fontWeight: FontWeight.bold,
+                      SizedBox(width: 6.w),
+                      Text(
+                        'دعاء مبارك مستجاب 🤲',
+                        style: TextStyle(
+                          color: AppColors.primary,
+                          fontSize: 14.sp,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
-                    ),
+                    ],
                   ),
                 ),
               ],
             ),
 
-            SizedBox(height: 24.h),
+            SizedBox(height: 20.h),
 
-            // Quotation & Dua Text
+            // Opening Quote
             Row(
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
@@ -189,6 +151,7 @@ class _DuaCardState extends State<DuaCard> {
               ],
             ),
 
+            // Main Dua Text
             Padding(
               padding: EdgeInsets.symmetric(horizontal: 8.w),
               child: SelectableText(
@@ -205,6 +168,7 @@ class _DuaCardState extends State<DuaCard> {
               ),
             ),
 
+            // Closing Quote
             Row(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
@@ -217,6 +181,56 @@ class _DuaCardState extends State<DuaCard> {
                   ),
                 ),
               ],
+            ),
+
+            SizedBox(height: 16.h),
+
+            // "آمين" Button Directly Under the Dua Text
+            GestureDetector(
+              onTap: _incrementPrayCount,
+              child: Container(
+                padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 10.h),
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: isDark
+                        ? [const Color(0xFF2A3D34), AppColors.darkSurface]
+                        : [AppColors.accentGold.withValues(alpha: 0.18), Colors.white],
+                    begin: Alignment.topRight,
+                    end: Alignment.bottomLeft,
+                  ),
+                  borderRadius: BorderRadius.circular(24.r),
+                  border: Border.all(
+                    color: AppColors.accentGold.withValues(alpha: 0.5),
+                    width: 1.5,
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: AppColors.accentGold.withValues(alpha: 0.15),
+                      blurRadius: 10.r,
+                      offset: const Offset(0, 3),
+                    ),
+                  ],
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      LucideIcons.heart,
+                      color: AppColors.accentGold,
+                      size: 20.r,
+                    ),
+                    SizedBox(width: 8.w),
+                    Text(
+                      'آمين يارب العالمين 🤲 ${_prayCount > 0 ? "($_prayCount)" : ""}',
+                      style: TextStyle(
+                        color: isDark ? AppColors.accentGold : const Color(0xFFB58428),
+                        fontSize: 16.sp,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
             ),
 
             SizedBox(height: 20.h),
@@ -251,49 +265,17 @@ class _DuaCardState extends State<DuaCard> {
 
             SizedBox(height: 18.h),
 
-            // Card Action Bar
+            // Card Action Bar (Copy & Next Dua)
             Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
                 // Copy Button
                 _buildActionButton(
                   icon: LucideIcons.copy,
-                  label: 'نسخ',
+                  label: 'نسخ الدعاء',
                   onPressed: () => _copyToClipboard(context),
                   color: AppColors.primary,
                   isDark: isDark,
-                ),
-
-                // Main Audio Play Button
-                GestureDetector(
-                  onTap: widget.onToggleAudio,
-                  child: Container(
-                    width: 56.r,
-                    height: 56.r,
-                    decoration: BoxDecoration(
-                      color: widget.isPlayingAudio
-                          ? AppColors.error
-                          : AppColors.primary,
-                      shape: BoxShape.circle,
-                      boxShadow: [
-                        BoxShadow(
-                          color: (widget.isPlayingAudio
-                                  ? AppColors.error
-                                  : AppColors.primary)
-                              .withValues(alpha: 0.35),
-                          blurRadius: 12.r,
-                          offset: const Offset(0, 4),
-                        ),
-                      ],
-                    ),
-                    child: Icon(
-                      widget.isPlayingAudio
-                          ? LucideIcons.square
-                          : LucideIcons.volume2,
-                      color: Colors.white,
-                      size: 26.r,
-                    ),
-                  ),
                 ),
 
                 // Refresh / Next Dua Button
@@ -323,22 +305,25 @@ class _DuaCardState extends State<DuaCard> {
       onTap: onPressed,
       borderRadius: BorderRadius.circular(14.r),
       child: Padding(
-        padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
+        padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
         child: Column(
           children: [
             Container(
-              padding: EdgeInsets.all(10.r),
+              padding: EdgeInsets.all(12.r),
               decoration: BoxDecoration(
                 color: color.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(12.r),
+                borderRadius: BorderRadius.circular(14.r),
+                border: Border.all(
+                  color: color.withValues(alpha: 0.2),
+                ),
               ),
-              child: Icon(icon, color: color, size: 20.r),
+              child: Icon(icon, color: color, size: 22.r),
             ),
-            SizedBox(height: 4.h),
+            SizedBox(height: 6.h),
             Text(
               label,
               style: TextStyle(
-                fontSize: 12.sp,
+                fontSize: 13.sp,
                 fontWeight: FontWeight.bold,
                 color: isDark
                     ? AppColors.darkTextSecondary

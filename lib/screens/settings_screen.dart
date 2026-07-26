@@ -5,10 +5,10 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../app/app_colors.dart';
 import '../cubits/dua_cubit.dart';
-import '../cubits/dua_state.dart';
+
 import '../cubits/settings_cubit.dart';
 import '../cubits/settings_state.dart';
-import '../models/settings_model.dart';
+
 import '../services/notification_service.dart';
 import '../services/service_locator.dart';
 import 'onboarding_screen.dart';
@@ -396,10 +396,15 @@ class _SettingsScreenState extends State<SettingsScreen> {
                               color: AppColors.textHint,
                             ),
                           ),
-                          onChanged: (val) {
-                            context
-                                .read<SettingsCubit>()
-                                .toggleAudioNotifications(val);
+                          onChanged: (val) async {
+                            if (val) {
+                              await _requestNotificationPermissions(context);
+                            }
+                            if (context.mounted) {
+                              context
+                                  .read<SettingsCubit>()
+                                  .toggleAudioNotifications(val);
+                            }
                           },
                         ),
                         if (settings.isAudioNotificationsEnabled) ...[
@@ -472,6 +477,33 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                     ),
                                   ),
                                 ),
+                                SizedBox(height: 12.h),
+                                SizedBox(
+                                  width: double.infinity,
+                                  height: 44.h,
+                                  child: OutlinedButton.icon(
+                                    style: OutlinedButton.styleFrom(
+                                      foregroundColor: AppColors.primary,
+                                      side: const BorderSide(color: AppColors.primary),
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(14.r),
+                                      ),
+                                    ),
+                                    icon: Icon(LucideIcons.bellRing, size: 18.r),
+                                    label: const Text('تجربة إشعار وتسميع صوتي فوري الآن 🔊'),
+                                    onPressed: () async {
+                                      final duaCubit = context.read<DuaCubit>();
+                                      final audioList = duaCubit.state.audioAzkar;
+                                      if (audioList.isNotEmpty) {
+                                        final notificationService = sl<NotificationService>();
+                                        await notificationService.showInstantAudioNotification(
+                                          audioItem: audioList.first,
+                                          motherName: settings.motherName,
+                                        );
+                                      }
+                                    },
+                                  ),
+                                ),
                               ],
                             ),
                           ),
@@ -528,10 +560,15 @@ class _SettingsScreenState extends State<SettingsScreen> {
                               color: AppColors.textHint,
                             ),
                           ),
-                          onChanged: (val) {
-                            context
-                                .read<SettingsCubit>()
-                                .toggleTextNotifications(val);
+                          onChanged: (val) async {
+                            if (val) {
+                              await _requestNotificationPermissions(context);
+                            }
+                            if (context.mounted) {
+                              context
+                                  .read<SettingsCubit>()
+                                  .toggleTextNotifications(val);
+                            }
                           },
                         ),
                         if (settings.isTextNotificationsEnabled) ...[
@@ -543,60 +580,46 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           ),
                           Padding(
                             padding: EdgeInsets.all(16.r),
-                            child: _buildSingleCustomTimeCard(
-                              context: context,
-                              isAudio: false,
-                              intervalMins: settings.getEffectiveTextIntervalMinutes(),
-                              isDark: isDark,
+                            child: Column(
+                              children: [
+                                _buildSingleCustomTimeCard(
+                                  context: context,
+                                  isAudio: false,
+                                  intervalMins: settings.getEffectiveTextIntervalMinutes(),
+                                  isDark: isDark,
+                                ),
+                                SizedBox(height: 12.h),
+                                SizedBox(
+                                  width: double.infinity,
+                                  height: 44.h,
+                                  child: OutlinedButton.icon(
+                                    style: OutlinedButton.styleFrom(
+                                      foregroundColor: AppColors.primary,
+                                      side: const BorderSide(color: AppColors.primary),
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(14.r),
+                                      ),
+                                    ),
+                                    icon: Icon(LucideIcons.messageSquare, size: 18.r),
+                                    label: const Text('تجربة إشعار نصي فوري الآن 📖'),
+                                    onPressed: () async {
+                                      final duaCubit = context.read<DuaCubit>();
+                                      final duaList = duaCubit.state.duas;
+                                      if (duaList.isNotEmpty) {
+                                        final notificationService = sl<NotificationService>();
+                                        await notificationService.showInstantNotification(
+                                          title: 'اللهم ارحم أمي 🤍',
+                                          body: duaList.first.getFormattedText(settings.motherName),
+                                        );
+                                      }
+                                    },
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
                         ],
                       ],
-                    ),
-                  ),
-
-                  SizedBox(height: 24.h),
-
-                  // 4. Permissions Button Card
-                  _buildCardContainer(
-                    isDark: isDark,
-                    child: ListTile(
-                      contentPadding: EdgeInsets.zero,
-                      leading: Container(
-                        padding: EdgeInsets.all(10.r),
-                        decoration: BoxDecoration(
-                          color: AppColors.primary.withValues(alpha: 0.12),
-                          borderRadius: BorderRadius.circular(12.r),
-                        ),
-                        child: Icon(
-                          LucideIcons.bellRing,
-                          color: AppColors.primary,
-                          size: 22.r,
-                        ),
-                      ),
-                      title: Text(
-                        'إذن إشعارات النظام',
-                        style: TextStyle(
-                          fontSize: 15.sp,
-                          fontWeight: FontWeight.bold,
-                          color: isDark
-                              ? AppColors.darkTextPrimary
-                              : AppColors.textPrimary,
-                        ),
-                      ),
-                      subtitle: Text(
-                        'منح الإذن ليعمل النظام وإشعارات الصوت بالشكل المطلوب',
-                        style: TextStyle(
-                          fontSize: 12.sp,
-                          color: AppColors.textHint,
-                        ),
-                      ),
-                      trailing: Icon(
-                        LucideIcons.chevronLeft,
-                        size: 20.r,
-                        color: AppColors.textHint,
-                      ),
-                      onTap: () => _requestNotificationPermissions(context),
                     ),
                   ),
 

@@ -10,7 +10,6 @@ import '../cubits/settings_cubit.dart';
 import '../cubits/settings_state.dart';
 import '../widgets/dua_card.dart';
 import '../widgets/custom_button.dart';
-import '../widgets/audio_player_bar.dart';
 import 'onboarding_screen.dart';
 
 class HomeScreen extends StatelessWidget {
@@ -62,7 +61,6 @@ class HomeScreen extends StatelessWidget {
         child: BlocBuilder<SettingsCubit, SettingsState>(
           builder: (context, settingsState) {
             final motherName = settingsState.settings.motherName;
-            final customAudioMap = settingsState.settings.customAudioMap;
 
             return BlocBuilder<DuaCubit, DuaState>(
               builder: (context, duaState) {
@@ -118,7 +116,7 @@ class HomeScreen extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      // Subheader Header Banner
+                      // Subheader Header Banner (Mother Name Dedication at top only)
                       Container(
                         padding: EdgeInsets.symmetric(
                             horizontal: 18.w, vertical: 14.h),
@@ -162,8 +160,8 @@ class HomeScreen extends StatelessWidget {
                             Expanded(
                               child: Text(
                                 motherName.trim().isNotEmpty
-                                    ? 'دعاء وصلاة على روح المرحومة: $motherName'
-                                    : 'تذكير بالدعاء الصالح والأذكار للأم المتوفاة',
+                                    ? 'دعاء وصلاة لروح المرحومة: $motherName'
+                                    : 'تذكير بالدعاء الصالح للأم المتوفاة',
                                 style: TextStyle(
                                   fontSize: 15.sp,
                                   fontWeight: FontWeight.bold,
@@ -179,16 +177,10 @@ class HomeScreen extends StatelessWidget {
 
                       SizedBox(height: 20.h),
 
-                      // Dua Main Display Card
+                      // Dua Main Display Card (With 'آمين' button directly under the text)
                       DuaCard(
                         formattedText: formattedText,
                         motherName: motherName,
-                        isPlayingAudio: duaState.isPlayingAudio,
-                        onToggleAudio: () {
-                          context.read<DuaCubit>().toggleAudio(
-                                customAudioMap: customAudioMap,
-                              );
-                        },
                         onNextDua: () {
                           context.read<DuaCubit>().nextRandomDua();
                         },
@@ -196,48 +188,12 @@ class HomeScreen extends StatelessWidget {
 
                       SizedBox(height: 20.h),
 
-                      // Audio Player Bar if active or duration loaded
-                      if (duaState.isPlayingAudio ||
-                          duaState.audioDuration > Duration.zero) ...[
-                        AudioPlayerBar(
-                          isPlaying: duaState.isPlayingAudio,
-                          position: duaState.audioPosition,
-                          duration: duaState.audioDuration,
-                          onTogglePlay: () {
-                            context.read<DuaCubit>().toggleAudio(
-                                  customAudioMap: customAudioMap,
-                                );
-                          },
-                          onStop: () {
-                            context.read<DuaCubit>().stopAudio();
-                          },
-                        ),
-                        SizedBox(height: 20.h),
-                      ],
-
-                      // Main Action Buttons
+                      // Main Action Button (Random Dua Shuffle)
                       CustomButton(
                         text: 'دعاء عشوائي جديد فورًا 🤲',
                         icon: LucideIcons.shuffle,
                         onPressed: () {
                           context.read<DuaCubit>().nextRandomDua();
-                        },
-                      ),
-
-                      SizedBox(height: 12.h),
-
-                      CustomButton(
-                        text: duaState.isPlayingAudio
-                            ? 'إيقاف التلاوة والصوت ⏹️'
-                            : 'تشغيل الصوت المصاحب للدعاء 🔊',
-                        icon: duaState.isPlayingAudio
-                            ? LucideIcons.square
-                            : LucideIcons.volume2,
-                        isSecondary: true,
-                        onPressed: () {
-                          context.read<DuaCubit>().toggleAudio(
-                                customAudioMap: customAudioMap,
-                              );
                         },
                       ),
 

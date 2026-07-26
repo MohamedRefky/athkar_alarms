@@ -25,6 +25,15 @@ class NotificationService {
   Future<void> init() async {
     tz.initializeTimeZones();
 
+    try {
+      final String timeZoneName = DateTime.now().timeZoneName;
+      tz.setLocalLocation(tz.getLocation(timeZoneName));
+    } catch (_) {
+      try {
+        tz.setLocalLocation(tz.getLocation('Africa/Cairo'));
+      } catch (_) {}
+    }
+
     const androidSettings = AndroidInitializationSettings('@mipmap/ic_launcher');
     const darwinSettings = DarwinInitializationSettings(
       requestAlertPermission: true,
@@ -88,6 +97,10 @@ class NotificationService {
       final notificationGranted =
           await androidImplementation.requestNotificationsPermission() ?? false;
       granted = notificationGranted;
+
+      try {
+        await androidImplementation.requestExactAlarmsPermission();
+      } catch (_) {}
     }
 
     final iosImplementation =
@@ -105,6 +118,21 @@ class NotificationService {
     }
 
     return granted;
+  }
+
+  Future<AndroidScheduleMode> _getScheduleMode() async {
+    final androidImplementation = _notificationsPlugin
+        .resolvePlatformSpecificImplementation<
+            AndroidFlutterLocalNotificationsPlugin>();
+    if (androidImplementation != null) {
+      try {
+        final canExact = await androidImplementation.canScheduleExactNotifications() ?? false;
+        if (canExact) {
+          return AndroidScheduleMode.exactAllowWhileIdle;
+        }
+      } catch (_) {}
+    }
+    return AndroidScheduleMode.inexactAllowWhileIdle;
   }
 
   Future<void> scheduleNotifications({
@@ -132,6 +160,11 @@ class NotificationService {
     required List<DuaModel> duas,
   }) async {
     final String motherName = settings.motherName;
+    final int intervalMins = settings.getEffectiveTextIntervalMinutes();
+    final tzNow = tz.TZDateTime.now(tz.local);
+    final scheduleMode = await _getScheduleMode();
+
+    if (duas.isEmpty) return;
 
     if (settings.textFrequency == NotificationFrequency.onceDaily) {
       final now = DateTime.now();
@@ -148,7 +181,7 @@ class NotificationService {
       }
 
       final tzScheduledDate = tz.TZDateTime.from(scheduledDate, tz.local);
-      final dua = (duas..shuffle()).first;
+      final dua = (List<DuaModel>.from(duas)..shuffle()).first;
       final bodyText = dua.getFormattedText(motherName);
 
       const androidDetails = AndroidNotificationDetails(
@@ -168,46 +201,55 @@ class NotificationService {
       );
 
       await _notificationsPlugin.zonedSchedule(
-        100, // ID prefix for text daily
+        100, // ID for text daily
         'اللهم ارحم أمي 🤍',
         bodyText,
         tzScheduledDate,
         const NotificationDetails(android: androidDetails, iOS: iosDetails),
-        androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
+        androidScheduleMode: scheduleMode,
         uiLocalNotificationDateInterpretation:
             UILocalNotificationDateInterpretation.absoluteTime,
         matchDateTimeComponents: DateTimeComponents.time,
         payload: 'dua_${dua.id}',
       );
     } else {
-      final dua = (duas..shuffle()).first;
-      final bodyText = dua.getFormattedText(motherName);
+      // Schedule multiple periodic text notifications based on intervalMins
+      final shuffledDuas = List<DuaModel>.from(duas)..shuffle();
+      final count = shuffledDuas.length.clamp(1, 10);
 
-      const androidDetails = AndroidNotificationDetails(
-        _textChannelId,
-        _textChannelName,
-        channelDescription: _textChannelDesc,
-        importance: Importance.high,
-        priority: Priority.high,
-        playSound: true,
-        styleInformation: BigTextStyleInformation(''),
-      );
+      for (int i = 0; i < count; i++) {
+        final dua = shuffledDuas[i];
+        final tzScheduledDate = tzNow.add(Duration(minutes: intervalMins * (i + 1)));
+        final bodyText = dua.getFormattedText(motherName);
 
-      const iosDetails = DarwinNotificationDetails(
-        presentSound: true,
-        presentAlert: true,
-        presentBadge: true,
-      );
+        const androidDetails = AndroidNotificationDetails(
+          _textChannelId,
+          _textChannelName,
+          channelDescription: _textChannelDesc,
+          importance: Importance.high,
+          priority: Priority.high,
+          playSound: true,
+          styleInformation: BigTextStyleInformation(''),
+        );
 
-      await _notificationsPlugin.periodicallyShow(
-        101, // ID for text periodic
-        'اللهم ارحم أمي 🤍',
-        bodyText,
-        RepeatInterval.hourly,
-        const NotificationDetails(android: androidDetails, iOS: iosDetails),
-        payload: 'dua_${dua.id}',
-        androidScheduleMode: AndroidScheduleMode.inexact,
-      );
+        const iosDetails = DarwinNotificationDetails(
+          presentSound: true,
+          presentAlert: true,
+          presentBadge: true,
+        );
+
+        await _notificationsPlugin.zonedSchedule(
+          110 + i,
+          'اللهم ارحم أمي 🤍',
+          bodyText,
+          tzScheduledDate,
+          const NotificationDetails(android: androidDetails, iOS: iosDetails),
+          androidScheduleMode: scheduleMode,
+          uiLocalNotificationDateInterpretation:
+              UILocalNotificationDateInterpretation.absoluteTime,
+          payload: 'dua_${dua.id}',
+        );
+      }
     }
   }
 
@@ -220,7 +262,8 @@ class NotificationService {
 
     final int intervalMins = settings.getEffectiveAudioIntervalMinutes();
     final String motherName = settings.motherName;
-    final now = DateTime.now();
+    final tzNow = tz.TZDateTime.now(tz.local);
+    final scheduleMode = await _getScheduleMode();
 
     // If specific audio index (>0) selected, use that single audio.
     // Otherwise (0), cycle sequentially through all 16 audio recordings!
@@ -231,8 +274,7 @@ class NotificationService {
 
     for (int i = 0; i < sequence.length; i++) {
       final audioItem = sequence[i];
-      final scheduledTime = now.add(Duration(minutes: intervalMins * (i + 1)));
-      final tzScheduledDate = tz.TZDateTime.from(scheduledTime, tz.local);
+      final tzScheduledDate = tzNow.add(Duration(minutes: intervalMins * (i + 1)));
 
       final soundResource = audioItem.soundName; // e.g. 'audio1'
       final soundFileWithExt = '${audioItem.soundName}.mp3';
@@ -267,10 +309,9 @@ class NotificationService {
         bodyText,
         tzScheduledDate,
         details,
-        androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
+        androidScheduleMode: scheduleMode,
         uiLocalNotificationDateInterpretation:
             UILocalNotificationDateInterpretation.absoluteTime,
-        matchDateTimeComponents: DateTimeComponents.time,
         payload: 'audio_${audioItem.id}',
       );
     }
@@ -302,8 +343,8 @@ class NotificationService {
 
     await _notificationsPlugin.show(
       998,
-      audioItem.title,
-      'إشعار تجريبي بصوت: ${audioItem.title} 🎧',
+      'دعاء صبي لأمي $motherName 🎧',
+      'إشعار تجريبي بصوت: ${audioItem.title} 🔊',
       NotificationDetails(android: androidDetails, iOS: iosDetails),
       payload: 'audio_${audioItem.id}',
     );
