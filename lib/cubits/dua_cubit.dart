@@ -6,6 +6,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:audioplayers/audioplayers.dart';
 
 import '../models/dua_model.dart';
+import '../models/audio_azkar_model.dart';
 import '../services/audio_service.dart';
 import '../services/preferences_service.dart';
 import 'dua_state.dart';
@@ -39,9 +40,20 @@ class DuaCubit extends Cubit<DuaState> {
   Future<void> loadDuas() async {
     emit(state.copyWith(isLoading: true, errorMessage: null));
     try {
+      // Load written duas
       final jsonString = await rootBundle.loadString('assets/duas.json');
       final List<dynamic> jsonList = jsonDecode(jsonString);
       final duas = jsonList.map((j) => DuaModel.fromJson(j)).toList();
+
+      // Load audio azkar
+      List<AudioAzkarModel> audioAzkar = [];
+      try {
+        final audioJsonString =
+            await rootBundle.loadString('assets/audio_azkar.json');
+        final List<dynamic> audioJsonList = jsonDecode(audioJsonString);
+        audioAzkar =
+            audioJsonList.map((j) => AudioAzkarModel.fromJson(j)).toList();
+      } catch (_) {}
 
       DuaModel? initialDua;
       final lastId = _prefsService.getLastDuaId();
@@ -56,7 +68,9 @@ class DuaCubit extends Cubit<DuaState> {
 
       emit(state.copyWith(
         duas: duas,
+        audioAzkar: audioAzkar,
         currentDua: initialDua,
+        currentAudioAzkar: audioAzkar.isNotEmpty ? audioAzkar.first : null,
         isLoading: false,
       ));
     } catch (e) {
@@ -87,9 +101,11 @@ class DuaCubit extends Cubit<DuaState> {
     ));
   }
 
-  void selectDuaById(int id, {bool autoPlayAudio = false, Map<int, String>? customAudioMap}) {
+  void selectDuaById(int id,
+      {bool autoPlayAudio = false, Map<int, String>? customAudioMap}) {
     if (state.duas.isEmpty) return;
-    final found = state.duas.firstWhere((d) => d.id == id, orElse: () => state.duas.first);
+    final found =
+        state.duas.firstWhere((d) => d.id == id, orElse: () => state.duas.first);
 
     _prefsService.saveLastDuaId(found.id);
     emit(state.copyWith(
@@ -121,6 +137,19 @@ class DuaCubit extends Cubit<DuaState> {
       assetAudio: dua.audio,
       customAudioPath: customPath,
     );
+  }
+
+  Future<void> playAudioAzkarItem(AudioAzkarModel item) async {
+    if (state.currentAudioAzkar?.id == item.id && state.isPlayingAudio) {
+      await _audioService.stop();
+      emit(state.copyWith(isPlayingAudio: false));
+    } else {
+      emit(state.copyWith(
+        currentAudioAzkar: item,
+        audioPosition: Duration.zero,
+      ));
+      await _audioService.playAsset(item.audio);
+    }
   }
 
   Future<void> stopAudio() async {

@@ -1,6 +1,7 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../models/settings_model.dart';
 import '../models/dua_model.dart';
+import '../models/audio_azkar_model.dart';
 import '../services/preferences_service.dart';
 import '../services/notification_service.dart';
 import 'settings_state.dart';
@@ -17,26 +18,56 @@ class SettingsCubit extends Cubit<SettingsState> {
     await _saveAndReschedule(updated);
   }
 
-  void updateFrequency(NotificationFrequency frequency) async {
-    final updated = state.settings.copyWith(frequency: frequency);
+  // --- Text Notification Settings ---
+  void toggleTextNotifications(bool enabled) async {
+    final updated = state.settings.copyWith(isTextNotificationsEnabled: enabled);
     await _saveAndReschedule(updated);
   }
 
-  void updateCustomInterval(int minutes) async {
-    final updated = state.settings.copyWith(customIntervalMinutes: minutes);
+  void updateTextFrequency(NotificationFrequency frequency) async {
+    final updated = state.settings.copyWith(textFrequency: frequency);
     await _saveAndReschedule(updated);
   }
 
-  void toggleAudio(bool enabled) async {
-    final updated = state.settings.copyWith(isAudioEnabled: enabled);
+  void updateTextCustomInterval(int minutes) async {
+    final updated = state.settings.copyWith(textCustomIntervalMinutes: minutes);
     await _saveAndReschedule(updated);
   }
 
-  void updateDailyTime(int hour, int minute) async {
+  void updateTextDailyTime(int hour, int minute) async {
     final updated = state.settings.copyWith(
-      dailyHour: hour,
-      dailyMinute: minute,
+      textDailyHour: hour,
+      textDailyMinute: minute,
     );
+    await _saveAndReschedule(updated);
+  }
+
+  // --- Audio Notification Settings ---
+  void toggleAudioNotifications(bool enabled) async {
+    final updated = state.settings.copyWith(isAudioNotificationsEnabled: enabled);
+    await _saveAndReschedule(updated);
+  }
+
+  void updateAudioFrequency(NotificationFrequency frequency) async {
+    final updated = state.settings.copyWith(audioFrequency: frequency);
+    await _saveAndReschedule(updated);
+  }
+
+  void updateAudioCustomInterval(int minutes) async {
+    final updated = state.settings.copyWith(audioCustomIntervalMinutes: minutes);
+    await _saveAndReschedule(updated);
+  }
+
+  void updateAudioDailyTime(int hour, int minute) async {
+    final updated = state.settings.copyWith(
+      audioDailyHour: hour,
+      audioDailyMinute: minute,
+    );
+    await _saveAndReschedule(updated);
+  }
+
+  void updateSelectedAudioIndex(int index) async {
+    final updated = state.settings.copyWith(selectedAudioIndex: index);
     await _saveAndReschedule(updated);
   }
 
@@ -60,10 +91,14 @@ class SettingsCubit extends Cubit<SettingsState> {
     emit(state.copyWith(settings: newSettings, isSaving: false));
   }
 
-  Future<void> rescheduleNotifications(List<DuaModel> duas) async {
+  Future<void> rescheduleNotifications({
+    required List<DuaModel> duas,
+    List<AudioAzkarModel> audioAzkar = const [],
+  }) async {
     await _notificationService.scheduleNotifications(
       settings: state.settings,
       duas: duas,
+      audioAzkar: audioAzkar,
     );
   }
 }

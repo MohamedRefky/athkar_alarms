@@ -10,6 +10,7 @@ import '../cubits/settings_cubit.dart';
 import '../services/notification_service.dart';
 import '../services/service_locator.dart';
 import 'home_screen.dart';
+import 'audio_azkar_screen.dart';
 import 'settings_screen.dart';
 
 class ShellScreen extends StatefulWidget {
@@ -25,6 +26,7 @@ class _ShellScreenState extends State<ShellScreen> {
 
   final List<Widget> _pages = const [
     HomeScreen(),
+    AudioAzkarScreen(),
     SettingsScreen(),
   ];
 
@@ -38,19 +40,35 @@ class _ShellScreenState extends State<ShellScreen> {
     final notificationService = sl<NotificationService>();
     _notificationSub =
         notificationService.selectNotificationStream.stream.listen((payload) {
-      if (payload != null && payload.startsWith('dua_')) {
-        final idStr = payload.replaceFirst('dua_', '');
-        final duaId = int.tryParse(idStr);
-        if (duaId != null && mounted) {
-          setState(() {
-            _currentIndex = 0; // Switch to Home
-          });
-          final settings = context.read<SettingsCubit>().state.settings;
-          context.read<DuaCubit>().selectDuaById(
-                duaId,
-                autoPlayAudio: settings.isAudioEnabled,
-                customAudioMap: settings.customAudioMap,
-              );
+      if (payload != null) {
+        if (payload.startsWith('dua_')) {
+          final idStr = payload.replaceFirst('dua_', '');
+          final duaId = int.tryParse(idStr);
+          if (duaId != null && mounted) {
+            setState(() {
+              _currentIndex = 0; // Switch to Home (Text Duas)
+            });
+            final settings = context.read<SettingsCubit>().state.settings;
+            context.read<DuaCubit>().selectDuaById(
+                  duaId,
+                  autoPlayAudio: settings.isAudioNotificationsEnabled,
+                  customAudioMap: settings.customAudioMap,
+                );
+          }
+        } else if (payload.startsWith('audio_')) {
+          final idStr = payload.replaceFirst('audio_', '');
+          final audioId = int.tryParse(idStr);
+          if (audioId != null && mounted) {
+            setState(() {
+              _currentIndex = 1; // Switch to Audio Recordings tab
+            });
+            final audioList = context.read<DuaCubit>().state.audioAzkar;
+            final found = audioList.firstWhere(
+              (a) => a.id == audioId,
+              orElse: () => audioList.first,
+            );
+            context.read<DuaCubit>().playAudioAzkarItem(found);
+          }
         }
       }
     });
@@ -80,8 +98,8 @@ class _ShellScreenState extends State<ShellScreen> {
     return SafeArea(
       child: Container(
         height: 62.h,
-        margin: EdgeInsets.only(left: 32.w, right: 32.w, bottom: 16.h),
-        padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 6.h),
+        margin: EdgeInsets.only(left: 20.w, right: 20.w, bottom: 16.h),
+        padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 6.h),
         decoration: BoxDecoration(
           color: isDark ? AppColors.darkSurface : AppColors.surface,
           borderRadius: BorderRadius.circular(32.r),
@@ -103,12 +121,18 @@ class _ShellScreenState extends State<ShellScreen> {
           children: [
             _buildNavItem(
               index: 0,
-              icon: LucideIcons.home,
-              label: 'الرئيسية',
+              icon: LucideIcons.bookOpenText,
+              label: 'أدعية مكتوبة',
               isDark: isDark,
             ),
             _buildNavItem(
               index: 1,
+              icon: LucideIcons.volume2,
+              label: 'تسجيلات صوتية',
+              isDark: isDark,
+            ),
+            _buildNavItem(
+              index: 2,
               icon: LucideIcons.settings,
               label: 'الإعدادات',
               isDark: isDark,
@@ -142,7 +166,7 @@ class _ShellScreenState extends State<ShellScreen> {
           child: AnimatedContainer(
             duration: const Duration(milliseconds: 250),
             padding: EdgeInsets.symmetric(
-              horizontal: isSelected ? 22.w : 16.w,
+              horizontal: isSelected ? 16.w : 12.w,
               vertical: 8.h,
             ),
             decoration: BoxDecoration(
@@ -171,11 +195,11 @@ class _ShellScreenState extends State<ShellScreen> {
                           : AppColors.textSecondary),
                 ),
                 if (isSelected) ...[
-                  SizedBox(width: 8.w),
+                  SizedBox(width: 6.w),
                   Text(
                     label,
                     style: TextStyle(
-                      fontSize: 14.sp,
+                      fontSize: 13.sp,
                       fontWeight: FontWeight.bold,
                       color: Colors.white,
                     ),

@@ -6,57 +6,109 @@ class PreferencesService {
   final SharedPreferences _prefs;
 
   static const String keyMotherName = 'mother_name';
-  static const String keyFrequencyIndex = 'frequency_index';
-  static const String keyCustomInterval = 'custom_interval_minutes';
-  static const String keyIsAudioEnabled = 'is_audio_enabled';
-  static const String keyDailyHour = 'daily_hour';
-  static const String keyDailyMinute = 'daily_minute';
+
+  // Text Notifications Keys
+  static const String keyIsTextEnabled = 'is_text_notifications_enabled';
+  static const String keyTextFrequencyIndex = 'text_frequency_index';
+  static const String keyTextCustomInterval = 'text_custom_interval_minutes';
+  static const String keyTextDailyHour = 'text_daily_hour';
+  static const String keyTextDailyMinute = 'text_daily_minute';
+
+  // Audio Notifications Keys
+  static const String keyIsAudioEnabled = 'is_audio_notifications_enabled';
+  static const String keyAudioFrequencyIndex = 'audio_frequency_index';
+  static const String keyAudioCustomInterval = 'audio_custom_interval_minutes';
+  static const String keyAudioDailyHour = 'audio_daily_hour';
+  static const String keyAudioDailyMinute = 'audio_daily_minute';
+  static const String keySelectedAudioIndex = 'selected_audio_index';
+
   static const String keyCustomAudioMap = 'custom_audio_map';
   static const String keyLastDuaId = 'last_dua_id';
 
   PreferencesService(this._prefs);
 
   SettingsModel getSettings() {
-    final motherName = _prefs.getString(keyMotherName) ?? 'صباح عجمي أحمد محمد ريان';
-    final freqIndex = _prefs.getInt(keyFrequencyIndex) ?? NotificationFrequency.every3Hours.index;
-    final customInterval = _prefs.getInt(keyCustomInterval) ?? 120;
+    final motherName =
+        _prefs.getString(keyMotherName) ?? 'صباح عجمي أحمد محمد ريان';
+
+    // Text settings
+    final isTextEnabled = _prefs.getBool(keyIsTextEnabled) ?? true;
+    final textFreqIdx =
+        _prefs.getInt(keyTextFrequencyIndex) ?? NotificationFrequency.every3Hours.index;
+    final textCustomInterval = _prefs.getInt(keyTextCustomInterval) ?? 180;
+    final textDailyHour = _prefs.getInt(keyTextDailyHour) ?? 9;
+    final textDailyMinute = _prefs.getInt(keyTextDailyMinute) ?? 0;
+
+    // Audio settings
     final isAudioEnabled = _prefs.getBool(keyIsAudioEnabled) ?? true;
-    final dailyHour = _prefs.getInt(keyDailyHour) ?? 9;
-    final dailyMinute = _prefs.getInt(keyDailyMinute) ?? 0;
-    
+    final audioFreqIdx =
+        _prefs.getInt(keyAudioFrequencyIndex) ?? NotificationFrequency.every6Hours.index;
+    final audioCustomInterval = _prefs.getInt(keyAudioCustomInterval) ?? 360;
+    final audioDailyHour = _prefs.getInt(keyAudioDailyHour) ?? 17;
+    final audioDailyMinute = _prefs.getInt(keyAudioDailyMinute) ?? 0;
+    final selectedAudioIndex = _prefs.getInt(keySelectedAudioIndex) ?? 0;
+
     final customAudioJson = _prefs.getString(keyCustomAudioMap);
     Map<int, String> customAudioMap = {};
     if (customAudioJson != null) {
       try {
         final decoded = jsonDecode(customAudioJson) as Map<String, dynamic>;
-        customAudioMap = decoded.map((key, value) => MapEntry(int.parse(key), value as String));
+        customAudioMap =
+            decoded.map((key, value) => MapEntry(int.parse(key), value as String));
       } catch (_) {}
     }
 
-    final safeFreqIndex = (freqIndex >= 0 && freqIndex < NotificationFrequency.values.length)
-        ? freqIndex
-        : NotificationFrequency.every3Hours.index;
+    final safeTextFreqIdx =
+        (textFreqIdx >= 0 && textFreqIdx < NotificationFrequency.values.length)
+            ? textFreqIdx
+            : NotificationFrequency.every3Hours.index;
+
+    final safeAudioFreqIdx =
+        (audioFreqIdx >= 0 && audioFreqIdx < NotificationFrequency.values.length)
+            ? audioFreqIdx
+            : NotificationFrequency.every6Hours.index;
 
     return SettingsModel(
       motherName: motherName,
-      frequency: NotificationFrequency.values[safeFreqIndex],
-      customIntervalMinutes: customInterval,
-      isAudioEnabled: isAudioEnabled,
-      dailyHour: dailyHour,
-      dailyMinute: dailyMinute,
+      isTextNotificationsEnabled: isTextEnabled,
+      textFrequency: NotificationFrequency.values[safeTextFreqIdx],
+      textCustomIntervalMinutes: textCustomInterval,
+      textDailyHour: textDailyHour,
+      textDailyMinute: textDailyMinute,
+      isAudioNotificationsEnabled: isAudioEnabled,
+      audioFrequency: NotificationFrequency.values[safeAudioFreqIdx],
+      audioCustomIntervalMinutes: audioCustomInterval,
+      audioDailyHour: audioDailyHour,
+      audioDailyMinute: audioDailyMinute,
+      selectedAudioIndex: selectedAudioIndex,
       customAudioMap: customAudioMap,
     );
   }
 
   Future<void> saveSettings(SettingsModel settings) async {
     await _prefs.setString(keyMotherName, settings.motherName);
-    await _prefs.setInt(keyFrequencyIndex, settings.frequency.index);
-    await _prefs.setInt(keyCustomInterval, settings.customIntervalMinutes);
-    await _prefs.setBool(keyIsAudioEnabled, settings.isAudioEnabled);
-    await _prefs.setInt(keyDailyHour, settings.dailyHour);
-    await _prefs.setInt(keyDailyMinute, settings.dailyMinute);
-    
-    final jsonMap = settings.customAudioMap.map((key, value) => MapEntry(key.toString(), value));
+
+    // Text settings
+    await _prefs.setBool(
+        keyIsTextEnabled, settings.isTextNotificationsEnabled);
+    await _prefs.setInt(keyTextFrequencyIndex, settings.textFrequency.index);
+    await _prefs.setInt(
+        keyTextCustomInterval, settings.textCustomIntervalMinutes);
+    await _prefs.setInt(keyTextDailyHour, settings.textDailyHour);
+    await _prefs.setInt(keyTextDailyMinute, settings.textDailyMinute);
+
+    // Audio settings
+    await _prefs.setBool(
+        keyIsAudioEnabled, settings.isAudioNotificationsEnabled);
+    await _prefs.setInt(keyAudioFrequencyIndex, settings.audioFrequency.index);
+    await _prefs.setInt(
+        keyAudioCustomInterval, settings.audioCustomIntervalMinutes);
+    await _prefs.setInt(keyAudioDailyHour, settings.audioDailyHour);
+    await _prefs.setInt(keyAudioDailyMinute, settings.audioDailyMinute);
+    await _prefs.setInt(keySelectedAudioIndex, settings.selectedAudioIndex);
+
+    final jsonMap =
+        settings.customAudioMap.map((key, value) => MapEntry(key.toString(), value));
     await _prefs.setString(keyCustomAudioMap, jsonEncode(jsonMap));
   }
 
