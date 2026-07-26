@@ -141,15 +141,15 @@ class SettingsModel extends Equatable {
   }
 
   int getEffectiveTextIntervalMinutes() {
-    if (audioFrequency == NotificationFrequency.custom || textCustomIntervalMinutes > 0) {
-      return textCustomIntervalMinutes > 0 ? textCustomIntervalMinutes : 60;
+    if (textCustomIntervalMinutes > 0) {
+      return textCustomIntervalMinutes;
     }
     return textFrequency.intervalMinutes;
   }
 
   int getEffectiveAudioIntervalMinutes() {
-    if (audioFrequency == NotificationFrequency.custom || audioCustomIntervalMinutes > 0) {
-      return audioCustomIntervalMinutes > 0 ? audioCustomIntervalMinutes : 60;
+    if (audioCustomIntervalMinutes > 0) {
+      return audioCustomIntervalMinutes;
     }
     return audioFrequency.intervalMinutes;
   }

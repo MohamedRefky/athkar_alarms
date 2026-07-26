@@ -617,15 +617,24 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
+  String _formatIntervalText(int mins) {
+    if (mins <= 0) return '1 دقيقة';
+    if (mins < 60) return '$mins دقيقة';
+    if (mins == 60) return 'ساعة واحدة';
+    if (mins == 120) return 'ساعتين';
+    if (mins % 60 == 0) return '${mins ~/ 60} ساعات';
+    final h = mins ~/ 60;
+    final m = mins % 60;
+    return '$h ساعة و $m دقيقة';
+  }
+
   Widget _buildSingleCustomTimeCard({
     required BuildContext context,
     required bool isAudio,
     required int intervalMins,
     required bool isDark,
   }) {
-    final String intervalDisplay = intervalMins >= 60 && intervalMins % 60 == 0
-        ? '${intervalMins ~/ 60} ساعة'
-        : '$intervalMins دقيقة';
+    final String intervalDisplay = _formatIntervalText(intervalMins);
 
     return Container(
       width: double.infinity,
