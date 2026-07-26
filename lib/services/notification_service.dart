@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:timezone/data/latest_all.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
@@ -24,15 +25,8 @@ class NotificationService {
 
   Future<void> init() async {
     tz.initializeTimeZones();
+    _setLocalTimezone();
 
-    try {
-      final String timeZoneName = DateTime.now().timeZoneName;
-      tz.setLocalLocation(tz.getLocation(timeZoneName));
-    } catch (_) {
-      try {
-        tz.setLocalLocation(tz.getLocation('Africa/Cairo'));
-      } catch (_) {}
-    }
 
     const androidSettings = AndroidInitializationSettings('@mipmap/ic_launcher');
     const darwinSettings = DarwinInitializationSettings(
@@ -56,6 +50,61 @@ class NotificationService {
     );
 
     await _createNotificationChannels();
+  }
+
+  void _setLocalTimezone() {
+    // On Android, DateTime.now().timeZoneName returns abbreviations like 'EET'
+    // which are NOT valid IANA timezone names. We need to find a matching
+    // IANA timezone based on the device's actual UTC offset.
+    final now = DateTime.now();
+    final offset = now.timeZoneOffset;
+
+    debugPrint('🕐 [TZ] Device timeZoneName: ${now.timeZoneName}');
+    debugPrint('🕐 [TZ] Device UTC offset: ${offset.inHours}h ${offset.inMinutes % 60}m');
+
+    // First try common IANA names for known offsets
+    final knownTimezones = <int, String>{
+      2: 'Africa/Cairo',       // UTC+2 (Egypt, EET)
+      3: 'Asia/Riyadh',        // UTC+3 (Saudi, AST / EEST summer)
+      4: 'Asia/Dubai',         // UTC+4
+      5: 'Asia/Karachi',       // UTC+5
+      1: 'Europe/London',      // UTC+1
+      0: 'UTC',                // UTC+0
+      -5: 'America/New_York',  // UTC-5
+    };
+
+    final offsetHours = offset.inHours;
+
+    // Try the known mapping first
+    if (knownTimezones.containsKey(offsetHours)) {
+      try {
+        tz.setLocalLocation(tz.getLocation(knownTimezones[offsetHours]!));
+        debugPrint('🕐 [TZ] Set local timezone to: ${knownTimezones[offsetHours]} (from offset map)');
+        return;
+      } catch (_) {}
+    }
+
+    // Fallback: search all IANA timezones for one matching our offset
+    try {
+      final tzNow = DateTime.now().toUtc();
+      for (final name in tz.timeZoneDatabase.locations.keys) {
+        final location = tz.getLocation(name);
+        final tzDateTime = tz.TZDateTime.from(tzNow, location);
+        if (tzDateTime.timeZoneOffset == offset) {
+          tz.setLocalLocation(location);
+          debugPrint('🕐 [TZ] Set local timezone to: $name (from IANA search)');
+          return;
+        }
+      }
+    } catch (_) {}
+
+    // Final fallback: Africa/Cairo
+    try {
+      tz.setLocalLocation(tz.getLocation('Africa/Cairo'));
+      debugPrint('🕐 [TZ] Set local timezone to: Africa/Cairo (fallback)');
+    } catch (_) {
+      debugPrint('🕐 [TZ] ⚠️ FAILED to set any local timezone!');
+    }
   }
 
   Future<void> _createNotificationChannels() async {
@@ -140,6 +189,12 @@ class NotificationService {
     required List<DuaModel> duas,
     List<AudioAzkarModel> audioAzkar = const [],
   }) async {
+    debugPrint('📋 [SCHEDULE] ===== scheduleNotifications called =====');
+    debugPrint('📋 [SCHEDULE] textEnabled=${settings.isTextNotificationsEnabled}, audioEnabled=${settings.isAudioNotificationsEnabled}');
+    debugPrint('📋 [SCHEDULE] duas=${duas.length}, audioAzkar=${audioAzkar.length}');
+    debugPrint('📋 [SCHEDULE] textInterval=${settings.getEffectiveTextIntervalMinutes()}min, audioInterval=${settings.getEffectiveAudioIntervalMinutes()}min');
+    debugPrint('📋 [SCHEDULE] tz.local=${tz.local.name}, tz.now=${tz.TZDateTime.now(tz.local)}');
+
     await cancelAllNotifications();
 
     if (settings.isTextNotificationsEnabled && duas.isNotEmpty) {
@@ -221,6 +276,7 @@ class NotificationService {
         final dua = shuffledDuas[i];
         final tzScheduledDate = tzNow.add(Duration(minutes: intervalMins * (i + 1)));
         final bodyText = dua.getFormattedText(motherName);
+        debugPrint('📝 [TEXT] Scheduling notification #${110 + i} at $tzScheduledDate (in ${intervalMins * (i + 1)} min)');
 
         const androidDetails = AndroidNotificationDetails(
           _textChannelId,
@@ -275,6 +331,7 @@ class NotificationService {
     for (int i = 0; i < sequence.length; i++) {
       final audioItem = sequence[i];
       final tzScheduledDate = tzNow.add(Duration(minutes: intervalMins * (i + 1)));
+      debugPrint('🔊 [AUDIO] Scheduling notification #${200 + i} at $tzScheduledDate (in ${intervalMins * (i + 1)} min)');
 
       final soundResource = audioItem.soundName; // e.g. 'audio1'
       final soundFileWithExt = '${audioItem.soundName}.mp3';
