@@ -17,7 +17,10 @@ class PreferencesService {
   PreferencesService(this._prefs);
 
   SettingsModel getSettings() {
-    final motherName = _prefs.getString(keyMotherName) ?? '';
+    final rawMotherName = _prefs.getString(keyMotherName);
+    final motherName = (rawMotherName != null && rawMotherName.trim().isNotEmpty)
+        ? rawMotherName
+        : 'صباح عجمي أحمد محمد ريان';
     final freqIndex = _prefs.getInt(keyFrequencyIndex) ?? NotificationFrequency.every3Hours.index;
     final customInterval = _prefs.getInt(keyCustomInterval) ?? 120;
     final isAudioEnabled = _prefs.getBool(keyIsAudioEnabled) ?? true;

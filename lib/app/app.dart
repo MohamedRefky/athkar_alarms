@@ -7,6 +7,7 @@ import '../cubits/settings_cubit.dart';
 import '../cubits/dua_cubit.dart';
 import '../services/service_locator.dart';
 import '../screens/shell_screen.dart';
+import '../screens/splash_screen.dart';
 import 'app_theme.dart';
 
 class AzkarApp extends StatelessWidget {
@@ -44,7 +45,7 @@ class AzkarApp extends StatelessWidget {
               GlobalWidgetsLocalizations.delegate,
               GlobalCupertinoLocalizations.delegate,
             ],
-            home: const ShellScreen(),
+            home: const SplashScreen(),
           ),
         );
       },

@@ -44,3 +44,5 @@ flutter:
   assets:
     - assets/duas.json
     - assets/audio/
+    - assets/image/
+
