@@ -295,47 +295,52 @@ class NotificationService {
     final String motherName = settings.motherName;
     final scheduleMode = await _getScheduleMode();
 
-    final AudioAzkarModel audioItem;
-    if (settings.selectedAudioIndex > 0 &&
-        settings.selectedAudioIndex <= audioAzkar.length) {
-      audioItem = audioAzkar[settings.selectedAudioIndex - 1];
-    } else {
-      audioItem = audioAzkar.first;
-    }
-
-    final soundResource = audioItem.soundName;
-    final soundFileWithExt = '${audioItem.soundName}.mp3';
-
-    final androidDetails = AndroidNotificationDetails(
-      'azkar_audio_channel_$soundResource',
-      'إشعار صوتي - ${audioItem.title}',
-      channelDescription: 'قناة الإشعار الصوتي الخاص ${audioItem.title}',
-      importance: Importance.max,
-      priority: Priority.max,
-      playSound: true,
-      sound: RawResourceAndroidNotificationSound(soundResource),
-    );
-
-    final iosDetails = DarwinNotificationDetails(
-      presentSound: true,
-      presentAlert: true,
-      sound: soundFileWithExt,
-    );
-
-    final details = NotificationDetails(
-      android: androidDetails,
-      iOS: iosDetails,
-    );
-
-    final titleText = 'دعاء صبي لأمي $motherName 🎧';
-    final bodyText = 'المقطع الصوتي #${audioItem.id}: ${audioItem.title}';
-
     final now = tz.TZDateTime.now(tz.local);
     const int count = 25;
+
+    // Shuffle audio list for random order if auto-rotation is selected
+    final shuffledAudio = List<AudioAzkarModel>.from(audioAzkar)..shuffle();
 
     debugPrint('🔊 [AUDIO] Scheduling $count exact audio notifications every $intervalMins min');
 
     for (int i = 1; i <= count; i++) {
+      final AudioAzkarModel audioItem;
+      if (settings.selectedAudioIndex > 0 &&
+          settings.selectedAudioIndex <= audioAzkar.length) {
+        // Specific audio file chosen by user
+        audioItem = audioAzkar[settings.selectedAudioIndex - 1];
+      } else {
+        // Rotate through all audio files automatically
+        audioItem = shuffledAudio[(i - 1) % shuffledAudio.length];
+      }
+
+      final soundResource = audioItem.soundName;
+      final soundFileWithExt = '${audioItem.soundName}.mp3';
+
+      final androidDetails = AndroidNotificationDetails(
+        'azkar_audio_channel_$soundResource',
+        'إشعار صوتي - ${audioItem.title}',
+        channelDescription: 'قناة الإشعار الصوتي الخاص ${audioItem.title}',
+        importance: Importance.max,
+        priority: Priority.max,
+        playSound: true,
+        sound: RawResourceAndroidNotificationSound(soundResource),
+      );
+
+      final iosDetails = DarwinNotificationDetails(
+        presentSound: true,
+        presentAlert: true,
+        sound: soundFileWithExt,
+      );
+
+      final details = NotificationDetails(
+        android: androidDetails,
+        iOS: iosDetails,
+      );
+
+      final titleText = 'دعاء لأمي $motherName 🎧';
+      final bodyText = '${audioItem.title} 🔊';
+
       final scheduledDate = now.add(Duration(minutes: intervalMins * i));
       final notificationId = 200 + i;
 
@@ -356,7 +361,7 @@ class NotificationService {
       }
     }
 
-    debugPrint('🔊 [AUDIO] ✅ Successfully scheduled $count exact audio notifications');
+    debugPrint('🔊 [AUDIO] ✅ Successfully scheduled $count exact audio notifications with rotation');
   }
 
   // --- Trigger Instant Audio Test Notification ---
