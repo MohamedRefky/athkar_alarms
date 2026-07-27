@@ -97,57 +97,49 @@ class _SplashScreenState extends State<SplashScreen>
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       SizedBox(height: 12.h),
-                      // Prominent Image Frame adapting to image natural aspect ratio
-                      Flexible(
-                        fit: FlexFit.loose,
-                        child: Container(
-                          width: double.infinity,
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(28.r),
-                            boxShadow: [
-                              BoxShadow(
-                                color: AppColors.primary.withValues(alpha: 0.25),
-                                blurRadius: 24.r,
-                                spreadRadius: 2.r,
-                                offset: const Offset(0, 10),
-                              ),
-                            ],
-                          ),
-                          child: BlocBuilder<SettingsCubit, SettingsState>(
-                            builder: (context, settingsState) {
-                              final customPath =
-                                  settingsState.settings.customSplashImagePath;
-                              final bool hasCustomFile = customPath != null &&
-                                  customPath.isNotEmpty &&
-                                  File(customPath).existsSync();
+                      // Clean Image Frame with soft green border matching exact image dimensions
+                      BlocBuilder<SettingsCubit, SettingsState>(
+                        builder: (context, settingsState) {
+                          final customPath =
+                              settingsState.settings.customSplashImagePath;
+                          final bool hasCustomFile = customPath != null &&
+                              customPath.isNotEmpty &&
+                              File(customPath).existsSync();
 
-                              return ClipRRect(
-                                borderRadius: BorderRadius.circular(28.r),
-                                child: hasCustomFile
-                                    ? Image.file(
-                                        File(customPath),
-                                        fit: BoxFit.fitWidth,
-                                        filterQuality: FilterQuality.high,
-                                        isAntiAlias: true,
-                                        errorBuilder:
-                                            (context, error, stackTrace) {
-                                          return Image.asset(
-                                            'assets/image/image.jpeg',
-                                            fit: BoxFit.fitWidth,
-                                            filterQuality: FilterQuality.high,
-                                          );
-                                        },
-                                      )
-                                    : Image.asset(
-                                        'assets/image/image.jpeg',
-                                        fit: BoxFit.fitWidth,
-                                        filterQuality: FilterQuality.high,
-                                        isAntiAlias: true,
-                                      ),
-                              );
-                            },
-                          ),
-                        ),
+                          return Container(
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(20.r),
+                              border: Border.all(
+                                color: AppColors.primary.withValues(alpha: 0.35),
+                                width: 1.5,
+                              ),
+                            ),
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(18.5.r),
+                              child: hasCustomFile
+                                  ? Image.file(
+                                      File(customPath),
+                                      fit: BoxFit.contain,
+                                      filterQuality: FilterQuality.high,
+                                      isAntiAlias: true,
+                                      errorBuilder:
+                                          (context, error, stackTrace) {
+                                        return Image.asset(
+                                          'assets/image/image.jpeg',
+                                          fit: BoxFit.contain,
+                                          filterQuality: FilterQuality.high,
+                                        );
+                                      },
+                                    )
+                                  : Image.asset(
+                                      'assets/image/image.jpeg',
+                                      fit: BoxFit.contain,
+                                      filterQuality: FilterQuality.high,
+                                      isAntiAlias: true,
+                                    ),
+                            ),
+                          );
+                        },
                       ),
                       SizedBox(height: 20.h),
                       Text(
