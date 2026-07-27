@@ -103,68 +103,69 @@ class OnboardingScreen extends StatelessWidget {
                       height: 1.3,
                     ),
                   ),
-              SizedBox(height: 12.h),
-              Text(
-                'نرجو الفاتحة والدعاء لها بالرحمة والمغفرة',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 15.sp,
-                  fontWeight: FontWeight.w600,
-                  color: AppColors.accentGold,
-                ),
-              ),
-
-              SizedBox(height: 20.h),
-
-              // Surah Al-Fatiha Card Component
-              const Expanded(
-                child: SurahFatihaCard(),
-              ),
-
-              SizedBox(height: 20.h),
-
-              // Action Button - Navigate to Main App
-              SizedBox(
-                width: double.infinity,
-                height: 54.h,
-                child: ElevatedButton(
-                  onPressed: () => _navigateToHome(context),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.primary,
-                    foregroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16.r),
+                  SizedBox(height: 12.h),
+                  Text(
+                    'نرجو الفاتحة والدعاء لها بالرحمة والمغفرة',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 15.sp,
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.accentGold,
                     ),
-                    elevation: 4,
-                    shadowColor: AppColors.primary.withValues(alpha: 0.3),
                   ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        'الدخول إلى التطبيق',
-                        style: TextStyle(
-                          fontSize: 18.sp,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      SizedBox(width: 8.w),
-                      Icon(
-                        Icons.arrow_forward,
-                        size: 20.r,
-                        color: Colors.white,
-                      ),
-                    ],
-                  ),
-                ),
-              ),
 
-              SizedBox(height: 8.h),
-            ],
-          );
-        },
+                  SizedBox(height: 20.h),
+
+                  // Surah Al-Fatiha Card Component
+                  const Expanded(
+                    child: SurahFatihaCard(),
+                  ),
+
+                  SizedBox(height: 20.h),
+
+                  // Action Button - Navigate to Main App
+                  SizedBox(
+                    width: double.infinity,
+                    height: 54.h,
+                    child: ElevatedButton(
+                      onPressed: () => _navigateToHome(context),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.primary,
+                        foregroundColor: Colors.white,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(16.r),
+                        ),
+                        elevation: 4,
+                        shadowColor: AppColors.primary.withValues(alpha: 0.3),
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            'الدخول إلى التطبيق',
+                            style: TextStyle(
+                              fontSize: 18.sp,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          SizedBox(width: 8.w),
+                          Icon(
+                            Icons.arrow_forward,
+                            size: 20.r,
+                            color: Colors.white,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+
+                  SizedBox(height: 8.h),
+                ],
+              ),
+            );
+          },
+        ),
       ),
-    ),
-  );
-}
+    );
+  }
 }
