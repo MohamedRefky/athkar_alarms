@@ -94,25 +94,19 @@ class _SplashScreenState extends State<SplashScreen>
                 child: Padding(
                   padding: EdgeInsets.symmetric(horizontal: 28.w, vertical: 12.h),
                   child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       SizedBox(height: 12.h),
-                      // Large Prominent Image Frame
-                      Expanded(
+                      // Prominent Image Frame adapting to image natural aspect ratio
+                      Flexible(
+                        fit: FlexFit.loose,
                         child: Container(
                           width: double.infinity,
-                          padding: EdgeInsets.all(16.r),
                           decoration: BoxDecoration(
-                            color: isDark
-                                ? AppColors.darkSurface.withValues(alpha: 0.5)
-                                : AppColors.surface.withValues(alpha: 0.5),
                             borderRadius: BorderRadius.circular(28.r),
-                            border: Border.all(
-                              color: AppColors.primary.withValues(alpha: 0.2),
-                              width: 1.5,
-                            ),
                             boxShadow: [
                               BoxShadow(
-                                color: AppColors.primary.withValues(alpha: 0.2),
+                                color: AppColors.primary.withValues(alpha: 0.25),
                                 blurRadius: 24.r,
                                 spreadRadius: 2.r,
                                 offset: const Offset(0, 10),
@@ -128,31 +122,28 @@ class _SplashScreenState extends State<SplashScreen>
                                   File(customPath).existsSync();
 
                               return ClipRRect(
-                                borderRadius: BorderRadius.circular(20.r),
-                                child: Padding(
-                                  padding: EdgeInsets.all(12.r),
-                                  child: hasCustomFile
-                                      ? Image.file(
-                                          File(customPath),
-                                          fit: BoxFit.contain,
-                                          filterQuality: FilterQuality.high,
-                                          isAntiAlias: true,
-                                          errorBuilder:
-                                              (context, error, stackTrace) {
-                                            return Image.asset(
-                                              'assets/image/image.jpeg',
-                                              fit: BoxFit.contain,
-                                              filterQuality: FilterQuality.high,
-                                            );
-                                          },
-                                        )
-                                      : Image.asset(
-                                          'assets/image/image.jpeg',
-                                          fit: BoxFit.contain,
-                                          filterQuality: FilterQuality.high,
-                                          isAntiAlias: true,
-                                        ),
-                                ),
+                                borderRadius: BorderRadius.circular(28.r),
+                                child: hasCustomFile
+                                    ? Image.file(
+                                        File(customPath),
+                                        fit: BoxFit.fitWidth,
+                                        filterQuality: FilterQuality.high,
+                                        isAntiAlias: true,
+                                        errorBuilder:
+                                            (context, error, stackTrace) {
+                                          return Image.asset(
+                                            'assets/image/image.jpeg',
+                                            fit: BoxFit.fitWidth,
+                                            filterQuality: FilterQuality.high,
+                                          );
+                                        },
+                                      )
+                                    : Image.asset(
+                                        'assets/image/image.jpeg',
+                                        fit: BoxFit.fitWidth,
+                                        filterQuality: FilterQuality.high,
+                                        isAntiAlias: true,
+                                      ),
                               );
                             },
                           ),

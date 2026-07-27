@@ -408,7 +408,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         Container(
                           height: 140.h,
                           width: double.infinity,
-                          padding: EdgeInsets.all(6.r),
                           decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(16.r),
                             border: Border.all(
@@ -423,13 +422,15 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                     File(settings.customSplashImagePath!).existsSync()
                                 ? Image.file(
                                     File(settings.customSplashImagePath!),
-                                    fit: BoxFit.contain,
+                                    fit: BoxFit.cover,
                                     width: double.infinity,
+                                    height: double.infinity,
                                   )
                                 : Image.asset(
                                     'assets/image/image.jpeg',
-                                    fit: BoxFit.contain,
+                                    fit: BoxFit.cover,
                                     width: double.infinity,
+                                    height: double.infinity,
                                   ),
                           ),
                         ),
