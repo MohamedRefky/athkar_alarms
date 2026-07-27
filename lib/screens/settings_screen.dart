@@ -151,7 +151,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     ),
                     icon: Icon(LucideIcons.zap, size: 18.r),
                     label: Text(
-                      'تفعيل كافّة الأذونات بضغطة واحدة ⚡',
+                      'تفعيل كافّة الأذونات',
                       style: TextStyle(
                         fontSize: 14.sp,
                         fontWeight: FontWeight.bold,
@@ -192,9 +192,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   ),
                   icon: Icon(LucideIcons.settings, size: 16.r),
                   label: Text(
-                    'إعدادات الموبايل (لهواتف شاومي / سامسونج) ⚙️',
+                    'إعدادات الهاتف ',
                     style: TextStyle(
-                      fontSize: 12.5.sp,
+                      fontSize: 13.sp,
                       fontWeight: FontWeight.w600,
                     ),
                   ),
