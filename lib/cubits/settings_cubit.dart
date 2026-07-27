@@ -107,11 +107,14 @@ class SettingsCubit extends Cubit<SettingsState> {
   Future<void> rescheduleNotifications({
     required List<DuaModel> duas,
     List<AudioAzkarModel> audioAzkar = const [],
+    bool onlyIfEmpty = false,
   }) async {
     await _notificationService.scheduleNotifications(
       settings: state.settings,
       duas: duas,
       audioAzkar: audioAzkar,
+      onlyIfEmpty: onlyIfEmpty,
     );
   }
 }
+

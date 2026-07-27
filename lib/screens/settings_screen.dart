@@ -73,11 +73,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ),
           title: Row(
             children: [
-              Icon(LucideIcons.bellRing, color: AppColors.primary, size: 24.r),
+              Icon(LucideIcons.shieldAlert, color: AppColors.primary, size: 24.r),
               SizedBox(width: 8.w),
               Expanded(
                 child: Text(
-                  'ضمان العمل عند قفل الشاشة 🔔',
+                  'حل مشكلة تأخير وقفل الشاشة 🔔',
                   style: TextStyle(
                     fontSize: 16.sp,
                     fontWeight: FontWeight.bold,
@@ -89,74 +89,131 @@ class _SettingsScreenState extends State<SettingsScreen> {
               ),
             ],
           ),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'لضمان نطق الأذكار وسماع الأصوات أثناء قفل الشاشة أو سكون الموبايل:',
-                style: TextStyle(
-                  fontSize: 13.sp,
-                  height: 1.4,
-                  fontWeight: FontWeight.w600,
-                  color: isDark
-                      ? AppColors.darkTextPrimary
-                      : AppColors.textPrimary,
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'لضمان وصول الإشعارات والأصوات في وقتها أثناء سكون الفون وقفل الشاشة:',
+                  style: TextStyle(
+                    fontSize: 13.sp,
+                    height: 1.4,
+                    fontWeight: FontWeight.w600,
+                    color: isDark
+                        ? AppColors.darkTextPrimary
+                        : AppColors.textPrimary,
+                  ),
                 ),
-              ),
-              SizedBox(height: 12.h),
-              _buildDialogStepRow(
-                '1️⃣',
-                'فعّل "عرض الإشعارات على شاشة القفل".',
-                isDark,
-              ),
-              SizedBox(height: 8.h),
-              _buildDialogStepRow(
-                '2️⃣',
-                'فعّل "السماح بالصوت والنغمات".',
-                isDark,
-              ),
-              SizedBox(height: 8.h),
-              _buildDialogStepRow(
-                '3️⃣',
-                'اختر "بدون قيود" (Unrestricted) في البطارية.',
-                isDark,
-              ),
-            ],
+                SizedBox(height: 12.h),
+                _buildDialogStepRow(
+                  '1️⃣',
+                  'استثناء التطبيق من موفر البطارية (اختيار "بدون قيود Unrestricted").',
+                  isDark,
+                ),
+                SizedBox(height: 8.h),
+                _buildDialogStepRow(
+                  '2️⃣',
+                  'منح إذن "المنبهات والتذكيرات الدقيقة" (Exact Alarms).',
+                  isDark,
+                ),
+                SizedBox(height: 8.h),
+                _buildDialogStepRow(
+                  '3️⃣',
+                  'تفعيل "عرض الإشعارات على شاشة القفل" و"التشغيل التلقائي Auto-start" (لهواتف شاومي وحمايات الموبايل).',
+                  isDark,
+                ),
+              ],
+            ),
           ),
           actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(dialogContext),
-              child: Text(
-                'حسناً، فهمت',
-                style: TextStyle(
-                  color: isDark
-                      ? AppColors.darkTextSecondary
-                      : AppColors.textSecondary,
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                ElevatedButton.icon(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primary,
+                    foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12.r),
+                    ),
+                    padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h),
+                  ),
+                  icon: Icon(LucideIcons.batteryCharging, size: 16.r),
+                  label: Text(
+                    '1. طلب استثناء موفر البطارية 🔋',
+                    style: TextStyle(
+                      fontSize: 13.sp,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  onPressed: () async {
+                    Navigator.pop(dialogContext);
+                    final notificationService = sl<NotificationService>();
+                    final res = await notificationService.requestIgnoreBatteryOptimizations();
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(res
+                              ? 'تم استثناء التطبيق من موفر البطارية بنجاح ⚡'
+                              : 'يرجى اختيار "بدون قيود" من إعدادات البطارية'),
+                          backgroundColor: res ? AppColors.primary : AppColors.accentGold,
+                          behavior: SnackBarBehavior.floating,
+                        ),
+                      );
+                    }
+                  },
                 ),
-              ),
-            ),
-            ElevatedButton.icon(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primary,
-                foregroundColor: Colors.white,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12.r),
+                SizedBox(height: 6.h),
+                OutlinedButton.icon(
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: AppColors.primary,
+                    side: const BorderSide(color: AppColors.primary),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12.r),
+                    ),
+                    padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h),
+                  ),
+                  icon: Icon(LucideIcons.alarmClock, size: 16.r),
+                  label: Text(
+                    '2. إذن المنبهات الدقيقة ⏰',
+                    style: TextStyle(
+                      fontSize: 13.sp,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  onPressed: () async {
+                    Navigator.pop(dialogContext);
+                    final notificationService = sl<NotificationService>();
+                    await notificationService.requestExactAlarmPermission();
+                  },
                 ),
-                padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h),
-              ),
-              icon: Icon(LucideIcons.settings, size: 16.r),
-              label: Text(
-                'فتح إعدادات الموبايل ⚙️',
-                style: TextStyle(
-                  fontSize: 13.sp,
-                  fontWeight: FontWeight.bold,
+                SizedBox(height: 6.h),
+                OutlinedButton.icon(
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: isDark ? AppColors.darkTextSecondary : AppColors.textSecondary,
+                    side: BorderSide(
+                      color: isDark ? AppColors.darkTextSecondary : AppColors.textSecondary,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12.r),
+                    ),
+                    padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h),
+                  ),
+                  icon: Icon(LucideIcons.settings, size: 16.r),
+                  label: Text(
+                    '3. فتح إعدادات الموبايل العامة ⚙️',
+                    style: TextStyle(
+                      fontSize: 13.sp,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  onPressed: () async {
+                    Navigator.pop(dialogContext);
+                    await openAppSettings();
+                  },
                 ),
-              ),
-              onPressed: () async {
-                Navigator.pop(dialogContext);
-                await openAppSettings();
-              },
+              ],
             ),
           ],
         );

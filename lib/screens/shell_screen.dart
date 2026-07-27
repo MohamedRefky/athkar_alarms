@@ -49,6 +49,7 @@ class _ShellScreenState extends State<ShellScreen> {
       context.read<SettingsCubit>().rescheduleNotifications(
             duas: duaCubit.state.duas,
             audioAzkar: duaCubit.state.audioAzkar,
+            onlyIfEmpty: true,
           );
     }
   }
@@ -108,6 +109,7 @@ class _ShellScreenState extends State<ShellScreen> {
         context.read<SettingsCubit>().rescheduleNotifications(
               duas: state.duas,
               audioAzkar: state.audioAzkar,
+              onlyIfEmpty: true,
             );
       },
       child: Scaffold(

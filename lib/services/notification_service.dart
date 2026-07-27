@@ -138,6 +138,10 @@ class NotificationService {
         final alarmStatus = await Permission.scheduleExactAlarm.request();
         debugPrint('🔔 [PERM] Exact Alarm permission status: $alarmStatus');
       }
+      if (await Permission.ignoreBatteryOptimizations.isDenied) {
+        final batteryStatus = await Permission.ignoreBatteryOptimizations.request();
+        debugPrint('🔔 [PERM] Battery optimization permission status: $batteryStatus');
+      }
     } catch (e) {
       debugPrint('🔔 [PERM] Error with permission_handler: $e');
     }
@@ -175,6 +179,33 @@ class NotificationService {
     return granted;
   }
 
+  Future<bool> requestIgnoreBatteryOptimizations() async {
+    try {
+      final status = await Permission.ignoreBatteryOptimizations.request();
+      debugPrint('🔔 [PERM] Direct battery optimization request status: $status');
+      return status.isGranted;
+    } catch (e) {
+      debugPrint('🔔 [PERM] Error requesting ignoreBatteryOptimizations: $e');
+      return false;
+    }
+  }
+
+  Future<bool> requestExactAlarmPermission() async {
+    try {
+      final androidImplementation = _notificationsPlugin
+          .resolvePlatformSpecificImplementation<
+              AndroidFlutterLocalNotificationsPlugin>();
+      if (androidImplementation != null) {
+        await androidImplementation.requestExactAlarmsPermission();
+      }
+      final status = await Permission.scheduleExactAlarm.request();
+      return status.isGranted;
+    } catch (e) {
+      debugPrint('🔔 [PERM] Error requesting scheduleExactAlarm: $e');
+      return false;
+    }
+  }
+
   Future<AndroidScheduleMode> _getScheduleMode() async {
     final androidImplementation = _notificationsPlugin
         .resolvePlatformSpecificImplementation<
@@ -183,12 +214,14 @@ class NotificationService {
       try {
         final canExact = await androidImplementation.canScheduleExactNotifications() ?? false;
         if (canExact) {
-          debugPrint('📋 [SCHEDULE] Using exactAllowWhileIdle mode');
-          return AndroidScheduleMode.exactAllowWhileIdle;
+          debugPrint('📋 [SCHEDULE] Using alarmClock mode for exact background wakeup');
+          return AndroidScheduleMode.alarmClock;
         }
-      } catch (_) {}
+      } catch (e) {
+        debugPrint('📋 [SCHEDULE] Error checking canScheduleExactNotifications: $e');
+      }
     }
-    debugPrint('📋 [SCHEDULE] Using inexactAllowWhileIdle mode');
+    debugPrint('📋 [SCHEDULE] Using inexactAllowWhileIdle mode fallback');
     return AndroidScheduleMode.inexactAllowWhileIdle;
   }
 
@@ -196,8 +229,18 @@ class NotificationService {
     required SettingsModel settings,
     required List<DuaModel> duas,
     List<AudioAzkarModel> audioAzkar = const [],
+    bool onlyIfEmpty = false,
   }) async {
-    debugPrint('📋 [SCHEDULE] ===== scheduleNotifications called =====');
+    debugPrint('📋 [SCHEDULE] ===== scheduleNotifications called (onlyIfEmpty=$onlyIfEmpty) =====');
+
+    if (onlyIfEmpty) {
+      final pendingCount = (await _notificationsPlugin.pendingNotificationRequests()).length;
+      if (pendingCount > 0) {
+        debugPrint('📋 [SCHEDULE] ⏩ Already has $pendingCount pending notifications. Skipping reschedule.');
+        return;
+      }
+    }
+
     debugPrint('📋 [SCHEDULE] textEnabled=${settings.isTextNotificationsEnabled}, audioEnabled=${settings.isAudioNotificationsEnabled}');
     debugPrint('📋 [SCHEDULE] duas=${duas.length}, audioAzkar=${audioAzkar.length}');
     debugPrint('📋 [SCHEDULE] textInterval=${settings.getEffectiveTextIntervalMinutes()}min, audioInterval=${settings.getEffectiveAudioIntervalMinutes()}min');
@@ -222,6 +265,7 @@ class NotificationService {
       debugPrint('📋 [SCHEDULE]   → id=${p.id}, title=${p.title}');
     }
   }
+
 
   // --- Text Notifications Scheduling ---
   // Uses zonedSchedule with exactAllowWhileIdle for exact delivery timing
