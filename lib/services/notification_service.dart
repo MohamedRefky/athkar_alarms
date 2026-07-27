@@ -113,6 +113,7 @@ class NotificationService {
       description: _textChannelDesc,
       importance: Importance.max,
       playSound: true,
+      audioAttributesUsage: AudioAttributesUsage.notification,
     );
     await androidImplementation.createNotificationChannel(textChannel);
 
@@ -123,6 +124,7 @@ class NotificationService {
       importance: Importance.max,
       playSound: true,
       sound: RawResourceAndroidNotificationSound('azkar_sound'),
+      audioAttributesUsage: AudioAttributesUsage.alarm,
     );
     await androidImplementation.createNotificationChannel(audioChannel);
   }
@@ -240,6 +242,9 @@ class NotificationService {
       importance: Importance.max,
       priority: Priority.max,
       playSound: true,
+      audioAttributesUsage: AudioAttributesUsage.notification,
+      visibility: NotificationVisibility.public,
+      category: AndroidNotificationCategory.reminder,
       styleInformation: BigTextStyleInformation(''),
     );
 
@@ -325,6 +330,9 @@ class NotificationService {
         priority: Priority.max,
         playSound: true,
         sound: RawResourceAndroidNotificationSound(soundResource),
+        audioAttributesUsage: AudioAttributesUsage.alarm,
+        visibility: NotificationVisibility.public,
+        category: AndroidNotificationCategory.alarm,
       );
 
       final iosDetails = DarwinNotificationDetails(
@@ -376,10 +384,13 @@ class NotificationService {
       'azkar_instant_audio_channel_$soundResource',
       'إشعار تجربة الصوت',
       channelDescription: 'قناة تجربة أصوات الإشعارات الصوتية',
-      importance: Importance.high,
-      priority: Priority.high,
+      importance: Importance.max,
+      priority: Priority.max,
       playSound: true,
       sound: RawResourceAndroidNotificationSound(soundResource),
+      audioAttributesUsage: AudioAttributesUsage.alarm,
+      visibility: NotificationVisibility.public,
+      category: AndroidNotificationCategory.alarm,
     );
 
     final iosDetails = DarwinNotificationDetails(
@@ -390,7 +401,7 @@ class NotificationService {
 
     await _notificationsPlugin.show(
       998,
-      'دعاء صبي لأمي $motherName 🎧',
+      'دعاء لأمي $motherName 🎧',
       'إشعار تجريبي بصوت: ${audioItem.title} 🔊',
       NotificationDetails(android: androidDetails, iOS: iosDetails),
       payload: 'audio_${audioItem.id}',
