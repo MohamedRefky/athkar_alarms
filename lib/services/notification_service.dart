@@ -16,13 +16,11 @@ class NotificationService {
       StreamController<String?>.broadcast();
 
   // Distinct channels
-  static const String _textChannelId = 'azkar_text_channel_v1';
+  static const String _textChannelId = 'azkar_text_channel_v2';
   static const String _textChannelName = 'إشعارات الأدعية المكتوبة';
   static const String _textChannelDesc = 'تذكيرات دورية بالأدعية المكتوبة للأم المتوفاة';
 
-  static const String _audioChannelId = 'azkar_audio_channel_v1';
-  static const String _audioChannelName = 'الإشعارات والتسجيلات الصوتية';
-  static const String _audioChannelDesc = 'إشعارات صوتية مخصصة للأدعية';
+  static const String _audioChannelPrefix = 'azkar_audio_v2_';
 
   Future<void> init() async {
     tz.initializeTimeZones();
@@ -107,6 +105,7 @@ class NotificationService {
 
     if (androidImplementation == null) return;
 
+    // 1. Text Notification Channel
     const textChannel = AndroidNotificationChannel(
       _textChannelId,
       _textChannelName,
@@ -117,16 +116,26 @@ class NotificationService {
     );
     await androidImplementation.createNotificationChannel(textChannel);
 
-    const audioChannel = AndroidNotificationChannel(
-      _audioChannelId,
-      _audioChannelName,
-      description: _audioChannelDesc,
-      importance: Importance.max,
-      playSound: true,
-      sound: RawResourceAndroidNotificationSound('azkar_sound'),
-      audioAttributesUsage: AudioAttributesUsage.alarm,
-    );
-    await androidImplementation.createNotificationChannel(audioChannel);
+    // 2. Pre-create All Audio Sound Channels with Alarm Attributes & Max Importance for LockScreen Playback
+    final sounds = [
+      'azkar_sound',
+      for (int i = 1; i <= 16; i++) 'audio$i',
+    ];
+
+    for (final sound in sounds) {
+      final audioChannel = AndroidNotificationChannel(
+        '$_audioChannelPrefix$sound',
+        'إشعار صوتي - $sound',
+        description: 'قناة الإشعار الصوتي الخاص بالمقطع $sound',
+        importance: Importance.max,
+        playSound: true,
+        sound: RawResourceAndroidNotificationSound(sound),
+        audioAttributesUsage: AudioAttributesUsage.alarm,
+        enableVibration: true,
+      );
+      await androidImplementation.createNotificationChannel(audioChannel);
+    }
+    debugPrint('🔔 [CHANNELS] Pre-created text and all audio notification channels successfully');
   }
 
   Future<bool> requestPermissions() async {
@@ -367,7 +376,7 @@ class NotificationService {
       final soundFileWithExt = '${audioItem.soundName}.mp3';
 
       final androidDetails = AndroidNotificationDetails(
-        'azkar_audio_channel_$soundResource',
+        '$_audioChannelPrefix$soundResource',
         'إشعار صوتي - ${audioItem.title}',
         channelDescription: 'قناة الإشعار الصوتي الخاص ${audioItem.title}',
         importance: Importance.max,
@@ -377,6 +386,7 @@ class NotificationService {
         audioAttributesUsage: AudioAttributesUsage.alarm,
         visibility: NotificationVisibility.public,
         category: AndroidNotificationCategory.alarm,
+        enableVibration: true,
       );
 
       final iosDetails = DarwinNotificationDetails(
@@ -409,7 +419,22 @@ class NotificationService {
           payload: 'audio_${audioItem.id}',
         );
       } catch (e) {
-        debugPrint('🔊 [AUDIO] Error scheduling audio notification $notificationId: $e');
+        debugPrint('🔊 [AUDIO] Error with $scheduleMode: $e. Retrying fallback.');
+        try {
+          await _notificationsPlugin.zonedSchedule(
+            notificationId,
+            titleText,
+            bodyText,
+            scheduledDate,
+            details,
+            androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+            uiLocalNotificationDateInterpretation:
+                UILocalNotificationDateInterpretation.absoluteTime,
+            payload: 'audio_${audioItem.id}',
+          );
+        } catch (e2) {
+          debugPrint('🔊 [AUDIO] Fallback error scheduling notification $notificationId: $e2');
+        }
       }
     }
 
@@ -425,7 +450,7 @@ class NotificationService {
     final soundFileWithExt = '${audioItem.soundName}.mp3';
 
     final androidDetails = AndroidNotificationDetails(
-      'azkar_instant_audio_channel_$soundResource',
+      '$_audioChannelPrefix$soundResource',
       'إشعار تجربة الصوت',
       channelDescription: 'قناة تجربة أصوات الإشعارات الصوتية',
       importance: Importance.max,
@@ -435,6 +460,7 @@ class NotificationService {
       audioAttributesUsage: AudioAttributesUsage.alarm,
       visibility: NotificationVisibility.public,
       category: AndroidNotificationCategory.alarm,
+      enableVibration: true,
     );
 
     final iosDetails = DarwinNotificationDetails(
