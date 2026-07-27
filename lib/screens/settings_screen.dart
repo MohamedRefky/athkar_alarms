@@ -1,16 +1,15 @@
 import 'dart:io';
+
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
-import 'package:file_picker/file_picker.dart';
 
 import '../app/app_colors.dart';
 import '../cubits/dua_cubit.dart';
-
 import '../cubits/settings_cubit.dart';
 import '../cubits/settings_state.dart';
-
 import '../services/notification_service.dart';
 import '../services/service_locator.dart';
 import 'onboarding_screen.dart';
@@ -149,15 +148,20 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      _buildPresetChip('+15د', () => setSheetState(() => addMinutes(15))),
-                      _buildPresetChip('+30د', () => setSheetState(() => addMinutes(30))),
-                      _buildPresetChip('+1س', () => setSheetState(() => addMinutes(60))),
-                      _buildPresetChip('+2س', () => setSheetState(() => addMinutes(120))),
+                      _buildPresetChip(
+                          '+15د', () => setSheetState(() => addMinutes(15))),
+                      _buildPresetChip(
+                          '+30د', () => setSheetState(() => addMinutes(30))),
+                      _buildPresetChip(
+                          '+1س', () => setSheetState(() => addMinutes(60))),
+                      _buildPresetChip(
+                          '+2س', () => setSheetState(() => addMinutes(120))),
                     ],
                   ),
                   SizedBox(height: 20.h),
                   Container(
-                    padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 6.h),
+                    padding:
+                        EdgeInsets.symmetric(horizontal: 16.w, vertical: 6.h),
                     decoration: BoxDecoration(
                       color: isDark
                           ? AppColors.darkBackground
@@ -301,7 +305,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   _buildSectionHeader(
                     context,
                     title: 'اسم الوالدة المتوفاة 🤍',
-                    subtitle: 'تخصيص نص ونية الدعاء باسمها في كافة الشاشات والإشعارات',
+                    subtitle:
+                        'تخصيص نص ونية الدعاء باسمها في كافة الشاشات والإشعارات',
                     icon: LucideIcons.heart,
                   ),
                   SizedBox(height: 12.h),
@@ -347,7 +352,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                 borderRadius: BorderRadius.circular(12.r),
                               ),
                             ),
-                            icon: Icon(LucideIcons.save, color: Colors.white, size: 18.r),
+                            icon: Icon(LucideIcons.save,
+                                color: Colors.white, size: 18.r),
                             label: Text(
                               'حفظ وتحديث الاسم 💾',
                               style: TextStyle(
@@ -358,7 +364,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                             ),
                             onPressed: () {
                               final name = _nameController.text.trim();
-                              context.read<SettingsCubit>().updateMotherName(name);
+                              context
+                                  .read<SettingsCubit>()
+                                  .updateMotherName(name);
                               FocusScope.of(context).unfocus();
                               ScaffoldMessenger.of(context).showSnackBar(
                                 SnackBar(
@@ -397,7 +405,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   _buildSectionHeader(
                     context,
                     title: 'صورة شاشة البداية (Splash Screen) 🖼️',
-                    subtitle: 'تغيير وتخصيص الصورة المعروضة عند فتح التطبيق من المعرض',
+                    subtitle:
+                        'تغيير وتخصيص الصورة المعروضة عند فتح التطبيق من المعرض',
                     icon: LucideIcons.image,
                   ),
                   SizedBox(height: 12.h),
@@ -406,32 +415,115 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     child: Column(
                       children: [
                         Container(
-                          height: 140.h,
+                          height: 220.h,
                           width: double.infinity,
                           decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(16.r),
+                            color: isDark
+                                ? AppColors.darkBackground
+                                : AppColors.surfaceVariant,
+                            borderRadius: BorderRadius.circular(20.r),
                             border: Border.all(
-                              color: AppColors.primary.withValues(alpha: 0.3),
+                              color: AppColors.primary.withValues(alpha: 0.35),
                               width: 1.5,
                             ),
                           ),
                           child: ClipRRect(
-                            borderRadius: BorderRadius.circular(15.r),
-                            child: settings.customSplashImagePath != null &&
-                                    settings.customSplashImagePath!.isNotEmpty &&
-                                    File(settings.customSplashImagePath!).existsSync()
-                                ? Image.file(
-                                    File(settings.customSplashImagePath!),
-                                    fit: BoxFit.cover,
-                                    width: double.infinity,
-                                    height: double.infinity,
-                                  )
-                                : Image.asset(
-                                    'assets/image/image.jpeg',
-                                    fit: BoxFit.cover,
-                                    width: double.infinity,
-                                    height: double.infinity,
-                                  ),
+                            borderRadius: BorderRadius.circular(18.5.r),
+                            child: Builder(
+                              builder: (context) {
+                                final hasCustomFile =
+                                    settings.customSplashImagePath != null &&
+                                        settings.customSplashImagePath!
+                                            .isNotEmpty &&
+                                        File(settings.customSplashImagePath!)
+                                            .existsSync();
+
+                                return Stack(
+                                  alignment: Alignment.center,
+                                  children: [
+                                    // Ambient background matching image colors seamlessly
+                                    Positioned.fill(
+                                      child: Opacity(
+                                        opacity: 0.2,
+                                        child: hasCustomFile
+                                            ? Image.file(
+                                                File(settings
+                                                    .customSplashImagePath!),
+                                                fit: BoxFit.cover,
+                                              )
+                                            : Image.asset(
+                                                'assets/image/image.jpeg',
+                                                fit: BoxFit.cover,
+                                              ),
+                                      ),
+                                    ),
+                                    // Full uncropped crisp foreground image
+                                    Center(
+                                      child: hasCustomFile
+                                          ? Image.file(
+                                              File(settings
+                                                  .customSplashImagePath!),
+                                              fit: BoxFit.cover,
+                                              filterQuality: FilterQuality.high,
+                                            )
+                                          : Image.asset(
+                                              'assets/image/image.jpeg',
+                                              fit: BoxFit.cover,
+                                              filterQuality: FilterQuality.high,
+                                            ),
+                                    ),
+                                    // Status Badge Overlay
+                                    Positioned(
+                                      top: 10.h,
+                                      right: 10.w,
+                                      child: Container(
+                                        padding: EdgeInsets.symmetric(
+                                            horizontal: 10.w, vertical: 5.h),
+                                        decoration: BoxDecoration(
+                                          color: (hasCustomFile
+                                                  ? AppColors.primary
+                                                  : AppColors.accentGold)
+                                              .withValues(alpha: 0.9),
+                                          borderRadius:
+                                              BorderRadius.circular(20.r),
+                                          boxShadow: [
+                                            BoxShadow(
+                                              color: Colors.black
+                                                  .withValues(alpha: 0.2),
+                                              blurRadius: 6.r,
+                                              offset: const Offset(0, 2),
+                                            ),
+                                          ],
+                                        ),
+                                        child: Row(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            Icon(
+                                              hasCustomFile
+                                                  ? LucideIcons.checkCircle2
+                                                  : LucideIcons.image,
+                                              size: 13.r,
+                                              color: Colors.white,
+                                            ),
+                                            SizedBox(width: 5.w),
+                                            Text(
+                                              hasCustomFile
+                                                  ? 'صورة مخصصة ✨'
+                                                  : 'الصورة الافتراضية 📱',
+                                              style: TextStyle(
+                                                fontSize: 12.sp,
+                                                fontWeight: FontWeight.bold,
+                                                color: Colors.white,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                );
+                              },
+                            ),
                           ),
                         ),
                         SizedBox(height: 14.h),
@@ -441,7 +533,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                               child: OutlinedButton.icon(
                                 style: OutlinedButton.styleFrom(
                                   foregroundColor: AppColors.primary,
-                                  side: const BorderSide(color: AppColors.primary),
+                                  side: const BorderSide(
+                                      color: AppColors.primary),
                                   shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(12.r),
                                   ),
@@ -460,7 +553,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                     : () async {
                                         setState(() => _isPickingImage = true);
                                         try {
-                                          final result = await FilePicker.platform
+                                          final result = await FilePicker
+                                              .platform
                                               .pickFiles(
                                             type: FileType.image,
                                             allowMultiple: false,
@@ -475,7 +569,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                             // Copy picked image to persistent directory
                                             String savedPath = imagePath;
                                             try {
-                                              final pickedFile = File(imagePath);
+                                              final pickedFile =
+                                                  File(imagePath);
                                               final persistentDir = Directory(
                                                   '${pickedFile.parent.parent.path}/persistent_splash');
                                               if (!persistentDir.existsSync()) {
@@ -487,7 +582,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                                   .last;
                                               final targetFile = File(
                                                   '${persistentDir.path}/splash_image.$extension');
-                                              await pickedFile.copy(targetFile.path);
+                                              await pickedFile
+                                                  .copy(targetFile.path);
                                               savedPath = targetFile.path;
                                             } catch (_) {}
 
@@ -547,7 +643,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                               OutlinedButton.icon(
                                 style: OutlinedButton.styleFrom(
                                   foregroundColor: AppColors.error,
-                                  side: const BorderSide(color: AppColors.error),
+                                  side:
+                                      const BorderSide(color: AppColors.error),
                                   shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(12.r),
                                   ),
@@ -671,7 +768,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                 _buildSingleCustomTimeCard(
                                   context: context,
                                   isAudio: true,
-                                  intervalMins: settings.getEffectiveAudioIntervalMinutes(),
+                                  intervalMins: settings
+                                      .getEffectiveAudioIntervalMinutes(),
                                   isDark: isDark,
                                 ),
 
@@ -701,7 +799,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                         : AppColors.surfaceVariant,
                                     borderRadius: BorderRadius.circular(14.r),
                                     border: Border.all(
-                                      color: AppColors.primary.withValues(alpha: 0.2),
+                                      color: AppColors.primary
+                                          .withValues(alpha: 0.2),
                                     ),
                                   ),
                                   child: Material(
@@ -732,19 +831,26 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                   child: OutlinedButton.icon(
                                     style: OutlinedButton.styleFrom(
                                       foregroundColor: AppColors.primary,
-                                      side: const BorderSide(color: AppColors.primary),
+                                      side: const BorderSide(
+                                          color: AppColors.primary),
                                       shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(14.r),
+                                        borderRadius:
+                                            BorderRadius.circular(14.r),
                                       ),
                                     ),
-                                    icon: Icon(LucideIcons.bellRing, size: 18.r),
-                                    label: const Text('تجربة إشعار وتسميع صوتي فوري الآن 🔊'),
+                                    icon:
+                                        Icon(LucideIcons.bellRing, size: 18.r),
+                                    label: const Text(
+                                        'تجربة إشعار وتسميع صوتي فوري الآن 🔊'),
                                     onPressed: () async {
                                       final duaCubit = context.read<DuaCubit>();
-                                      final audioList = duaCubit.state.audioAzkar;
+                                      final audioList =
+                                          duaCubit.state.audioAzkar;
                                       if (audioList.isNotEmpty) {
-                                        final notificationService = sl<NotificationService>();
-                                        await notificationService.showInstantAudioNotification(
+                                        final notificationService =
+                                            sl<NotificationService>();
+                                        await notificationService
+                                            .showInstantAudioNotification(
                                           audioItem: audioList.first,
                                           motherName: settings.motherName,
                                         );
@@ -833,7 +939,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                 _buildSingleCustomTimeCard(
                                   context: context,
                                   isAudio: false,
-                                  intervalMins: settings.getEffectiveTextIntervalMinutes(),
+                                  intervalMins: settings
+                                      .getEffectiveTextIntervalMinutes(),
                                   isDark: isDark,
                                 ),
                                 SizedBox(height: 12.h),
@@ -843,21 +950,28 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                   child: OutlinedButton.icon(
                                     style: OutlinedButton.styleFrom(
                                       foregroundColor: AppColors.primary,
-                                      side: const BorderSide(color: AppColors.primary),
+                                      side: const BorderSide(
+                                          color: AppColors.primary),
                                       shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(14.r),
+                                        borderRadius:
+                                            BorderRadius.circular(14.r),
                                       ),
                                     ),
-                                    icon: Icon(LucideIcons.messageSquare, size: 18.r),
-                                    label: const Text('تجربة إشعار نصي فوري الآن 📖'),
+                                    icon: Icon(LucideIcons.messageSquare,
+                                        size: 18.r),
+                                    label: const Text(
+                                        'تجربة إشعار نصي فوري الآن 📖'),
                                     onPressed: () async {
                                       final duaCubit = context.read<DuaCubit>();
                                       final duaList = duaCubit.state.duas;
                                       if (duaList.isNotEmpty) {
-                                        final notificationService = sl<NotificationService>();
-                                        await notificationService.showInstantNotification(
+                                        final notificationService =
+                                            sl<NotificationService>();
+                                        await notificationService
+                                            .showInstantNotification(
                                           title: 'اللهم ارحم أمي 🤍',
-                                          body: duaList.first.getFormattedText(settings.motherName),
+                                          body: duaList.first.getFormattedText(
+                                              settings.motherName),
                                         );
                                       }
                                     },
@@ -1102,7 +1216,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
               style: TextStyle(
                 fontSize: 16.sp,
                 fontWeight: FontWeight.bold,
-                color: isDark ? AppColors.darkTextPrimary : AppColors.textPrimary,
+                color:
+                    isDark ? AppColors.darkTextPrimary : AppColors.textPrimary,
               ),
             ),
           ],

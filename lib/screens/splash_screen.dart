@@ -107,33 +107,41 @@ class _SplashScreenState extends State<SplashScreen>
                               File(customPath).existsSync();
 
                           return Container(
+                            height: 340.h,
+                            width: double.infinity,
                             decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(20.r),
+                              borderRadius: BorderRadius.circular(24.r),
                               border: Border.all(
                                 color: AppColors.primary.withValues(alpha: 0.35),
                                 width: 1.5,
                               ),
                             ),
                             child: ClipRRect(
-                              borderRadius: BorderRadius.circular(18.5.r),
+                              borderRadius: BorderRadius.circular(22.5.r),
                               child: hasCustomFile
                                   ? Image.file(
                                       File(customPath),
-                                      fit: BoxFit.contain,
+                                      fit: BoxFit.cover,
+                                      width: double.infinity,
+                                      height: double.infinity,
                                       filterQuality: FilterQuality.high,
                                       isAntiAlias: true,
                                       errorBuilder:
                                           (context, error, stackTrace) {
                                         return Image.asset(
                                           'assets/image/image.jpeg',
-                                          fit: BoxFit.contain,
+                                          fit: BoxFit.cover,
+                                          width: double.infinity,
+                                          height: double.infinity,
                                           filterQuality: FilterQuality.high,
                                         );
                                       },
                                     )
                                   : Image.asset(
                                       'assets/image/image.jpeg',
-                                      fit: BoxFit.contain,
+                                      fit: BoxFit.cover,
+                                      width: double.infinity,
+                                      height: double.infinity,
                                       filterQuality: FilterQuality.high,
                                       isAntiAlias: true,
                                     ),
