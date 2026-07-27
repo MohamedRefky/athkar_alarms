@@ -1,14 +1,12 @@
 import 'dart:async';
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-import 'package:permission_handler/permission_handler.dart';
 import 'package:timezone/data/latest_all.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
-
-import '../models/audio_azkar_model.dart';
-import '../models/dua_model.dart';
+import 'package:permission_handler/permission_handler.dart';
 import '../models/settings_model.dart';
+import '../models/dua_model.dart';
+import '../models/audio_azkar_model.dart';
 
 class NotificationService {
   final FlutterLocalNotificationsPlugin _notificationsPlugin =
@@ -20,8 +18,7 @@ class NotificationService {
   // Distinct channels
   static const String _textChannelId = 'azkar_text_channel_v2';
   static const String _textChannelName = 'إشعارات الأدعية المكتوبة';
-  static const String _textChannelDesc =
-      'تذكيرات دورية بالأدعية المكتوبة للأم المتوفاة';
+  static const String _textChannelDesc = 'تذكيرات دورية بالأدعية المكتوبة للأم المتوفاة';
 
   static const String _audioChannelPrefix = 'azkar_audio_v2_';
 
@@ -29,8 +26,7 @@ class NotificationService {
     tz.initializeTimeZones();
     _setLocalTimezone();
 
-    const androidSettings =
-        AndroidInitializationSettings('@mipmap/ic_launcher');
+    const androidSettings = AndroidInitializationSettings('@mipmap/ic_launcher');
     const darwinSettings = DarwinInitializationSettings(
       requestAlertPermission: true,
       requestBadgePermission: true,
@@ -60,8 +56,7 @@ class NotificationService {
     final offset = now.timeZoneOffset;
 
     debugPrint('🕐 [TZ] Device timeZoneName: ${now.timeZoneName}');
-    debugPrint(
-        '🕐 [TZ] Device UTC offset: ${offset.inHours}h ${offset.inMinutes % 60}m');
+    debugPrint('🕐 [TZ] Device UTC offset: ${offset.inHours}h ${offset.inMinutes % 60}m');
 
     final knownTimezones = <int, String>{
       2: 'Africa/Cairo',
@@ -105,8 +100,8 @@ class NotificationService {
   }
 
   Future<void> _createNotificationChannels() async {
-    final androidImplementation =
-        _notificationsPlugin.resolvePlatformSpecificImplementation<
+    final androidImplementation = _notificationsPlugin
+        .resolvePlatformSpecificImplementation<
             AndroidFlutterLocalNotificationsPlugin>();
 
     if (androidImplementation == null) return;
@@ -196,10 +191,8 @@ class NotificationService {
         debugPrint('🔔 [PERM] Exact Alarm permission status: $alarmStatus');
       }
       if (await Permission.ignoreBatteryOptimizations.isDenied) {
-        final batteryStatus =
-            await Permission.ignoreBatteryOptimizations.request();
-        debugPrint(
-            '🔔 [PERM] Battery optimization permission status: $batteryStatus');
+        final batteryStatus = await Permission.ignoreBatteryOptimizations.request();
+        debugPrint('🔔 [PERM] Battery optimization permission status: $batteryStatus');
       }
     } catch (e) {
       debugPrint('🔔 [PERM] Error with permission_handler: $e');
@@ -225,12 +218,13 @@ class NotificationService {
         _notificationsPlugin.resolvePlatformSpecificImplementation<
             IOSFlutterLocalNotificationsPlugin>();
     if (iosImplementation != null) {
-      final notificationGranted = await iosImplementation.requestPermissions(
-            alert: true,
-            badge: true,
-            sound: true,
-          ) ??
-          false;
+      final notificationGranted =
+          await iosImplementation.requestPermissions(
+                alert: true,
+                badge: true,
+                sound: true,
+              ) ??
+              false;
       granted = notificationGranted;
     }
 
@@ -238,11 +232,32 @@ class NotificationService {
     return granted;
   }
 
+  /// نداء واحد بسيط يطلب كل الأذونات المطلوبة ورا بعض من غير ما اليوزر
+  /// يحتاج يفهم أي حاجة تقنية. مناسب لزرار واحد في الواجهة زي
+  /// "فعّل التنبيهات".
+  Future<bool> setupEverything() async {
+    debugPrint('🚀 [SETUP] Starting one-tap permission setup...');
+
+    // 1. إذن الإشعارات نفسه (Android 13+ / iOS)
+    final notificationsOk = await requestPermissions();
+    debugPrint('🚀 [SETUP] Notifications permission granted: $notificationsOk');
+
+    // 2. إذن التنبيه الدقيق (عشان الإشعار ييجي في وقته بالظبط)
+    await requestExactAlarmPermission();
+
+    // 3. تجاهل توفير البطارية (عشان النظام مايوقفش التطبيق في الخلفية)
+    await requestIgnoreBatteryOptimizations();
+
+    await _logDiagnostics();
+    debugPrint('🚀 [SETUP] ✅ One-tap setup finished');
+
+    return notificationsOk;
+  }
+
   Future<bool> requestIgnoreBatteryOptimizations() async {
     try {
       final status = await Permission.ignoreBatteryOptimizations.request();
-      debugPrint(
-          '🔔 [PERM] Direct battery optimization request status: $status');
+      debugPrint('🔔 [PERM] Direct battery optimization request status: $status');
       return status.isGranted;
     } catch (e) {
       debugPrint('🔔 [PERM] Error requesting ignoreBatteryOptimizations: $e');
@@ -252,8 +267,8 @@ class NotificationService {
 
   Future<bool> requestExactAlarmPermission() async {
     try {
-      final androidImplementation =
-          _notificationsPlugin.resolvePlatformSpecificImplementation<
+      final androidImplementation = _notificationsPlugin
+          .resolvePlatformSpecificImplementation<
               AndroidFlutterLocalNotificationsPlugin>();
       if (androidImplementation != null) {
         await androidImplementation.requestExactAlarmsPermission();
@@ -267,22 +282,18 @@ class NotificationService {
   }
 
   Future<AndroidScheduleMode> _getScheduleMode() async {
-    final androidImplementation =
-        _notificationsPlugin.resolvePlatformSpecificImplementation<
+    final androidImplementation = _notificationsPlugin
+        .resolvePlatformSpecificImplementation<
             AndroidFlutterLocalNotificationsPlugin>();
     if (androidImplementation != null) {
       try {
-        final canExact =
-            await androidImplementation.canScheduleExactNotifications() ??
-                false;
+        final canExact = await androidImplementation.canScheduleExactNotifications() ?? false;
         if (canExact) {
-          debugPrint(
-              '📋 [SCHEDULE] Using alarmClock mode for exact background wakeup');
+          debugPrint('📋 [SCHEDULE] Using alarmClock mode for exact background wakeup');
           return AndroidScheduleMode.alarmClock;
         }
       } catch (e) {
-        debugPrint(
-            '📋 [SCHEDULE] Error checking canScheduleExactNotifications: $e');
+        debugPrint('📋 [SCHEDULE] Error checking canScheduleExactNotifications: $e');
       }
     }
     debugPrint('📋 [SCHEDULE] Using inexactAllowWhileIdle mode fallback');
@@ -295,25 +306,19 @@ class NotificationService {
     List<AudioAzkarModel> audioAzkar = const [],
     bool onlyIfEmpty = false,
   }) async {
-    debugPrint(
-        '📋 [SCHEDULE] ===== scheduleNotifications called (onlyIfEmpty=$onlyIfEmpty) =====');
+    debugPrint('📋 [SCHEDULE] ===== scheduleNotifications called (onlyIfEmpty=$onlyIfEmpty) =====');
 
     if (onlyIfEmpty) {
-      final pendingCount =
-          (await _notificationsPlugin.pendingNotificationRequests()).length;
+      final pendingCount = (await _notificationsPlugin.pendingNotificationRequests()).length;
       if (pendingCount > 0) {
-        debugPrint(
-            '📋 [SCHEDULE] ⏩ Already has $pendingCount pending notifications. Skipping reschedule.');
+        debugPrint('📋 [SCHEDULE] ⏩ Already has $pendingCount pending notifications. Skipping reschedule.');
         return;
       }
     }
 
-    debugPrint(
-        '📋 [SCHEDULE] textEnabled=${settings.isTextNotificationsEnabled}, audioEnabled=${settings.isAudioNotificationsEnabled}');
-    debugPrint(
-        '📋 [SCHEDULE] duas=${duas.length}, audioAzkar=${audioAzkar.length}');
-    debugPrint(
-        '📋 [SCHEDULE] textInterval=${settings.getEffectiveTextIntervalMinutes()}min, audioInterval=${settings.getEffectiveAudioIntervalMinutes()}min');
+    debugPrint('📋 [SCHEDULE] textEnabled=${settings.isTextNotificationsEnabled}, audioEnabled=${settings.isAudioNotificationsEnabled}');
+    debugPrint('📋 [SCHEDULE] duas=${duas.length}, audioAzkar=${audioAzkar.length}');
+    debugPrint('📋 [SCHEDULE] textInterval=${settings.getEffectiveTextIntervalMinutes()}min, audioInterval=${settings.getEffectiveAudioIntervalMinutes()}min');
 
     await cancelAllNotifications();
 
@@ -330,12 +335,12 @@ class NotificationService {
 
     // Verify pending notifications
     final pending = await _notificationsPlugin.pendingNotificationRequests();
-    debugPrint(
-        '📋 [SCHEDULE] ✅ Total pending notifications: ${pending.length}');
+    debugPrint('📋 [SCHEDULE] ✅ Total pending notifications: ${pending.length}');
     for (final p in pending) {
       debugPrint('📋 [SCHEDULE]   → id=${p.id}, title=${p.title}');
     }
   }
+
 
   // --- Text Notifications Scheduling ---
   // Uses zonedSchedule with exactAllowWhileIdle for exact delivery timing
@@ -368,15 +373,13 @@ class NotificationService {
       presentBadge: true,
     );
 
-    const details =
-        NotificationDetails(android: androidDetails, iOS: iosDetails);
+    const details = NotificationDetails(android: androidDetails, iOS: iosDetails);
 
     final now = tz.TZDateTime.now(tz.local);
     final shuffledDuas = List<DuaModel>.from(duas)..shuffle();
     const int count = 25;
 
-    debugPrint(
-        '📝 [TEXT] Scheduling $count exact text notifications every $intervalMins min');
+    debugPrint('📝 [TEXT] Scheduling $count exact text notifications every $intervalMins min');
 
     int scheduled = 0;
 
@@ -400,8 +403,7 @@ class NotificationService {
         );
         scheduled++;
       } catch (e) {
-        debugPrint(
-            '📝 [TEXT] Error scheduling notification $notificationId with $scheduleMode: $e. Retrying fallback.');
+        debugPrint('📝 [TEXT] Error scheduling notification $notificationId with $scheduleMode: $e. Retrying fallback.');
         try {
           await _notificationsPlugin.zonedSchedule(
             notificationId,
@@ -416,14 +418,12 @@ class NotificationService {
           );
           scheduled++;
         } catch (e2) {
-          debugPrint(
-              '📝 [TEXT] Fallback error scheduling notification $notificationId: $e2');
+          debugPrint('📝 [TEXT] Fallback error scheduling notification $notificationId: $e2');
         }
       }
     }
 
-    debugPrint(
-        '📝 [TEXT] ✅ Successfully scheduled $scheduled/$count text notifications');
+    debugPrint('📝 [TEXT] ✅ Successfully scheduled $scheduled/$count text notifications');
   }
 
   // --- Audio Notifications Scheduling ---
@@ -444,8 +444,7 @@ class NotificationService {
     // Shuffle audio list for random order if auto-rotation is selected
     final shuffledAudio = List<AudioAzkarModel>.from(audioAzkar)..shuffle();
 
-    debugPrint(
-        '🔊 [AUDIO] Scheduling $count exact audio notifications every $intervalMins min');
+    debugPrint('🔊 [AUDIO] Scheduling $count exact audio notifications every $intervalMins min');
 
     int scheduled = 0;
 
@@ -508,8 +507,7 @@ class NotificationService {
         );
         scheduled++;
       } catch (e) {
-        debugPrint(
-            '🔊 [AUDIO] Error with $scheduleMode: $e. Retrying fallback.');
+        debugPrint('🔊 [AUDIO] Error with $scheduleMode: $e. Retrying fallback.');
         try {
           await _notificationsPlugin.zonedSchedule(
             notificationId,
@@ -524,14 +522,12 @@ class NotificationService {
           );
           scheduled++;
         } catch (e2) {
-          debugPrint(
-              '🔊 [AUDIO] Fallback error scheduling notification $notificationId: $e2');
+          debugPrint('🔊 [AUDIO] Fallback error scheduling notification $notificationId: $e2');
         }
       }
     }
 
-    debugPrint(
-        '🔊 [AUDIO] ✅ Successfully scheduled $scheduled/$count audio notifications with rotation');
+    debugPrint('🔊 [AUDIO] ✅ Successfully scheduled $scheduled/$count audio notifications with rotation');
   }
 
   // --- Trigger Instant Audio Test Notification ---
@@ -570,11 +566,9 @@ class NotificationService {
         NotificationDetails(android: androidDetails, iOS: iosDetails),
         payload: 'audio_${audioItem.id}',
       );
-      debugPrint(
-          '🔊 [TEST] Instant audio notification shown for: $soundResource');
+      debugPrint('🔊 [TEST] Instant audio notification shown for: $soundResource');
     } catch (e) {
-      debugPrint(
-          '🔊 [TEST] ❌ FAILED to show instant audio notification for "$soundResource": $e');
+      debugPrint('🔊 [TEST] ❌ FAILED to show instant audio notification for "$soundResource": $e');
     }
   }
 
