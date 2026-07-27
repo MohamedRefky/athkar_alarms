@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../app/app_colors.dart';
 import '../cubits/settings_cubit.dart';
@@ -114,74 +115,97 @@ class _SplashScreenState extends State<SplashScreen>
                           return Column(
                             children: [
                               Container(
-                                width: 210.r,
-                                height: 210.r,
+                                height: 340.h,
+                                width: double.infinity,
                                 decoration: BoxDecoration(
-                                  shape: BoxShape.circle,
-                                  gradient: SweepGradient(
-                                    colors: [
-                                      AppColors.accentGold,
-                                      AppColors.primary,
-                                      AppColors.primaryDark,
-                                      AppColors.accentGold,
-                                    ],
+                                  borderRadius: BorderRadius.circular(24.r),
+                                  border: Border.all(
+                                    color: AppColors.primary.withValues(alpha: 0.35),
+                                    width: 1.5,
                                   ),
                                   boxShadow: [
                                     BoxShadow(
-                                      color: AppColors.primary.withValues(alpha: isDark ? 0.5 : 0.25),
-                                      blurRadius: 28.r,
-                                      spreadRadius: 4.r,
-                                    ),
-                                    BoxShadow(
-                                      color: AppColors.accentGold.withValues(alpha: 0.3),
-                                      blurRadius: 18.r,
+                                      color: AppColors.primary
+                                          .withValues(alpha: isDark ? 0.35 : 0.12),
+                                      blurRadius: 20.r,
                                       spreadRadius: 1.r,
                                     ),
                                   ],
                                 ),
-                                padding: EdgeInsets.all(4.r),
-                                child: Container(
-                                  decoration: BoxDecoration(
-                                    shape: BoxShape.circle,
-                                    color: isDark ? AppColors.darkSurface : Colors.white,
-                                  ),
-                                  child: ClipOval(
-                                    child: hasCustomFile
-                                        ? Image.file(
-                                            File(customPath),
-                                            fit: BoxFit.cover,
-                                            width: double.infinity,
-                                            height: double.infinity,
-                                            filterQuality: FilterQuality.high,
-                                          )
-                                        : Container(
-                                            decoration: BoxDecoration(
-                                              gradient: LinearGradient(
-                                                colors: isDark
-                                                    ? [const Color(0xFF1B382B), AppColors.darkSurface]
-                                                    : [AppColors.surfaceVariant, Colors.white],
-                                                begin: Alignment.topRight,
-                                                end: Alignment.bottomLeft,
-                                              ),
-                                            ),
-                                            child: Column(
-                                              mainAxisAlignment: MainAxisAlignment.center,
-                                              children: [
-                                                Icon(
-                                                  Icons.volunteer_activism,
-                                                  size: 72.r,
-                                                  color: AppColors.primary,
-                                                ),
-                                                SizedBox(height: 6.h),
-                                                Icon(
-                                                  Icons.auto_awesome,
-                                                  size: 20.r,
-                                                  color: AppColors.accentGold,
-                                                ),
-                                              ],
+                                child: ClipRRect(
+                                  borderRadius: BorderRadius.circular(22.5.r),
+                                  child: hasCustomFile
+                                      ? Image.file(
+                                          File(customPath),
+                                          fit: BoxFit.cover,
+                                          width: double.infinity,
+                                          height: double.infinity,
+                                          filterQuality: FilterQuality.high,
+                                        )
+                                      : Container(
+                                          width: double.infinity,
+                                          height: double.infinity,
+                                          decoration: BoxDecoration(
+                                            gradient: LinearGradient(
+                                              colors: isDark
+                                                  ? [
+                                                      const Color(0xFF1B382B),
+                                                      AppColors.darkSurface
+                                                    ]
+                                                  : [
+                                                      AppColors.surfaceVariant,
+                                                      Colors.white
+                                                    ],
+                                              begin: Alignment.topRight,
+                                              end: Alignment.bottomLeft,
                                             ),
                                           ),
-                                  ),
+                                          child: Column(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.center,
+                                            children: [
+                                              Container(
+                                                padding: EdgeInsets.all(22.r),
+                                                decoration: BoxDecoration(
+                                                  shape: BoxShape.circle,
+                                                  color: AppColors.primary
+                                                      .withValues(alpha: 0.12),
+                                                  border: Border.all(
+                                                    color: AppColors.accentGold
+                                                        .withValues(alpha: 0.4),
+                                                    width: 1.5,
+                                                  ),
+                                                ),
+                                                child: Icon(
+                                                  Icons.volunteer_activism,
+                                                  size: 80.r,
+                                                  color: AppColors.primary,
+                                                ),
+                                              ),
+                                              SizedBox(height: 14.h),
+                                              Row(
+                                                mainAxisSize: MainAxisSize.min,
+                                                children: [
+                                                  Icon(
+                                                    LucideIcons.sparkles,
+                                                    size: 18.r,
+                                                    color: AppColors.accentGold,
+                                                  ),
+                                                  SizedBox(width: 6.w),
+                                                  Text(
+                                                    'صدقة جارية',
+                                                    style: TextStyle(
+                                                      fontSize: 16.sp,
+                                                      fontWeight:
+                                                          FontWeight.bold,
+                                                      color: AppColors.primary,
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                            ],
+                                          ),
+                                        ),
                                 ),
                               ),
                               SizedBox(height: 28.h),

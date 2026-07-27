@@ -1,4 +1,7 @@
 import 'dart:io';
+
+import 'package:azkar/services/preferences_service.dart';
+import 'package:azkar/services/service_locator.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -87,7 +90,7 @@ class _InitialSetupSheetState extends State<InitialSetupSheet> {
     }
   }
 
-  void _saveAndClose() {
+  void _saveAndClose() async {
     final name = _nameController.text.trim();
     final settingsCubit = context.read<SettingsCubit>();
 
@@ -97,6 +100,10 @@ class _InitialSetupSheetState extends State<InitialSetupSheet> {
     // Update image
     settingsCubit.updateCustomSplashImagePath(_pickedImagePath);
 
+    // Mark first time setup as completed so it NEVER shows again
+    final prefs = sl<PreferencesService>();
+    await prefs.setHasCompletedInitialSetup(true);
+
     // Reschedule notifications with new name/image
     final duaCubit = context.read<DuaCubit>();
     settingsCubit.rescheduleNotifications(
@@ -105,31 +112,41 @@ class _InitialSetupSheetState extends State<InitialSetupSheet> {
       onlyIfEmpty: false,
     );
 
-    Navigator.pop(context);
+    if (mounted) {
+      Navigator.pop(context);
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Row(
-          children: [
-            Icon(LucideIcons.checkCircle2, color: Colors.white, size: 20.r),
-            SizedBox(width: 10.w),
-            Expanded(
-              child: Text(
-                name.isNotEmpty
-                    ? 'تم حفظ بيانات "$name" وتخصيص التطبيق والإشعارات 🤍'
-                    : 'تم تخصيص التطبيق بنجاح 🤍',
-                style: const TextStyle(fontWeight: FontWeight.bold),
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Row(
+            children: [
+              Icon(LucideIcons.checkCircle2, color: Colors.white, size: 20.r),
+              SizedBox(width: 10.w),
+              Expanded(
+                child: Text(
+                  name.isNotEmpty
+                      ? 'تم حفظ بيانات "$name" وتخصيص التطبيق والإشعارات 🤍'
+                      : 'تم تخصيص التطبيق بنجاح 🤍',
+                  style: const TextStyle(fontWeight: FontWeight.bold),
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
+          backgroundColor: AppColors.primary,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12.r),
+          ),
         ),
-        backgroundColor: AppColors.primary,
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12.r),
-        ),
-      ),
-    );
+      );
+    }
+  }
+
+  void _skipAndClose() async {
+    final prefs = sl<PreferencesService>();
+    await prefs.setHasCompletedInitialSetup(true);
+    if (mounted) {
+      Navigator.pop(context);
+    }
   }
 
   @override
@@ -208,7 +225,9 @@ class _InitialSetupSheetState extends State<InitialSetupSheet> {
             textAlign: TextAlign.center,
             style: TextStyle(
               fontSize: 13.sp,
-              color: isDark ? AppColors.darkTextSecondary : AppColors.textSecondary,
+              color: isDark
+                  ? AppColors.darkTextSecondary
+                  : AppColors.textSecondary,
               height: 1.4,
             ),
           ),
@@ -225,15 +244,18 @@ class _InitialSetupSheetState extends State<InitialSetupSheet> {
             ),
             decoration: InputDecoration(
               hintText: 'اسم المتوفى (مثال: أمي فاطمة / أبي أحمد)...',
-              hintStyle: TextStyle(fontSize: 13.5.sp, color: AppColors.textHint),
+              hintStyle:
+                  TextStyle(fontSize: 13.5.sp, color: AppColors.textHint),
               prefixIcon: Icon(
                 LucideIcons.userCheck,
                 color: AppColors.primary,
                 size: 20.r,
               ),
               filled: true,
-              fillColor: isDark ? AppColors.darkBackground : AppColors.surfaceVariant,
-              contentPadding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
+              fillColor:
+                  isDark ? AppColors.darkBackground : AppColors.surfaceVariant,
+              contentPadding:
+                  EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(16.r),
                 borderSide: BorderSide(
@@ -265,7 +287,9 @@ class _InitialSetupSheetState extends State<InitialSetupSheet> {
               width: double.infinity,
               padding: EdgeInsets.all(14.r),
               decoration: BoxDecoration(
-                color: isDark ? AppColors.darkBackground : AppColors.surfaceVariant,
+                color: isDark
+                    ? AppColors.darkBackground
+                    : AppColors.surfaceVariant,
                 borderRadius: BorderRadius.circular(20.r),
                 border: Border.all(
                   color: (hasImage ? AppColors.primary : AppColors.accentGold)
@@ -307,7 +331,9 @@ class _InitialSetupSheetState extends State<InitialSetupSheet> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          hasImage ? 'تم اختيار صورة الفقيد ✨' : 'إضافة صورة للمتوفى (اختياري) 🖼️',
+                          hasImage
+                              ? 'تم اختيار صورة الفقيد ✨'
+                              : 'إضافة صورة للمتوفى (اختياري) 🖼️',
                           style: TextStyle(
                             fontSize: 14.sp,
                             fontWeight: FontWeight.bold,
@@ -331,7 +357,8 @@ class _InitialSetupSheetState extends State<InitialSetupSheet> {
                   ),
                   if (hasImage)
                     IconButton(
-                      icon: Icon(LucideIcons.x, color: AppColors.error, size: 20.r),
+                      icon: Icon(LucideIcons.x,
+                          color: AppColors.error, size: 20.r),
                       onPressed: () {
                         setState(() {
                           _pickedImagePath = null;
@@ -380,7 +407,7 @@ class _InitialSetupSheetState extends State<InitialSetupSheet> {
 
           // Secondary Skip Button
           TextButton(
-            onPressed: () => Navigator.pop(context),
+            onPressed: _skipAndClose,
             child: Text(
               'المتابعة كصدقة عامة والتعديل لاحقاً',
               style: TextStyle(

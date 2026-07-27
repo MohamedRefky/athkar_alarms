@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:azkar/cubits/dua_state.dart';
+import 'package:azkar/services/preferences_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -44,8 +45,9 @@ class _ShellScreenState extends State<ShellScreen> {
   void _checkFirstTimeSetup() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
-      final settings = context.read<SettingsCubit>().state.settings;
-      if (settings.motherName.trim().isEmpty) {
+      final prefs = sl<PreferencesService>();
+      final alreadyDone = prefs.getHasCompletedInitialSetup();
+      if (!alreadyDone) {
         InitialSetupSheet.show(context);
       }
     });

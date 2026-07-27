@@ -25,8 +25,17 @@ class PreferencesService {
   static const String keyCustomSplashImagePath = 'custom_splash_image_path';
   static const String keyCustomAudioMap = 'custom_audio_map';
   static const String keyLastDuaId = 'last_dua_id';
+  static const String keyHasCompletedInitialSetup = 'has_completed_initial_setup';
 
   PreferencesService(this._prefs);
+
+  bool getHasCompletedInitialSetup() {
+    return _prefs.getBool(keyHasCompletedInitialSetup) ?? false;
+  }
+
+  Future<void> setHasCompletedInitialSetup(bool value) async {
+    await _prefs.setBool(keyHasCompletedInitialSetup, value);
+  }
 
   SettingsModel getSettings() {
     final motherName =
