@@ -85,7 +85,7 @@ class SettingsModel extends Equatable {
   final Map<int, String> customAudioMap;
 
   const SettingsModel({
-    this.motherName = 'صباح عجمي أحمد محمد ريان',
+    this.motherName = '',
     this.isTextNotificationsEnabled = true,
     this.textFrequency = NotificationFrequency.custom,
     this.textCustomIntervalMinutes = 180,

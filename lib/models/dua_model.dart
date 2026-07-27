@@ -46,7 +46,8 @@ class DuaModel extends Equatable {
   }
 
   String getFormattedText(String motherName) {
-    final name = motherName.trim().isNotEmpty ? motherName.trim() : 'أمي';
+    final trimmed = motherName.trim();
+    final name = trimmed.isNotEmpty ? trimmed : 'المتوفى';
     return text.replaceAll('{mother_name}', name);
   }
 

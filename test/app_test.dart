@@ -16,7 +16,7 @@ void main() {
       expect(formatted, equals('اللهم اغفر لـ صباح عجمي وارحمها'));
     });
 
-    test('Should fallback to "أمي" when mother name is empty', () {
+    test('Should fallback to "المتوفى" when mother name is empty', () {
       const dua = DuaModel(
         id: 1,
         text: 'اللهم اغفر لـ {mother_name} وارحمها',
@@ -24,7 +24,7 @@ void main() {
       );
 
       final formatted = dua.getFormattedText('  ');
-      expect(formatted, equals('اللهم اغفر لـ أمي وارحمها'));
+      expect(formatted, equals('اللهم اغفر لـ المتوفى وارحمها'));
     });
   });
 

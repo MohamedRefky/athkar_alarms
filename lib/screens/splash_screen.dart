@@ -97,7 +97,7 @@ class _SplashScreenState extends State<SplashScreen>
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       SizedBox(height: 12.h),
-                      // Clean Image Frame with soft green border matching exact image dimensions
+                      // Large Elegant Emblem Icon or Custom Framed Image
                       BlocBuilder<SettingsCubit, SettingsState>(
                         builder: (context, settingsState) {
                           final customPath =
@@ -105,71 +105,111 @@ class _SplashScreenState extends State<SplashScreen>
                           final bool hasCustomFile = customPath != null &&
                               customPath.isNotEmpty &&
                               File(customPath).existsSync();
+                          final motherName = settingsState.settings.motherName.trim();
 
-                          return Container(
-                            height: 340.h,
-                            width: double.infinity,
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(24.r),
-                              border: Border.all(
-                                color: AppColors.primary.withValues(alpha: 0.35),
-                                width: 1.5,
-                              ),
-                            ),
-                            child: ClipRRect(
-                              borderRadius: BorderRadius.circular(22.5.r),
-                              child: hasCustomFile
-                                  ? Image.file(
-                                      File(customPath),
-                                      fit: BoxFit.cover,
-                                      width: double.infinity,
-                                      height: double.infinity,
-                                      filterQuality: FilterQuality.high,
-                                      isAntiAlias: true,
-                                      errorBuilder:
-                                          (context, error, stackTrace) {
-                                        return Image.asset(
-                                          'assets/image/image.jpeg',
-                                          fit: BoxFit.cover,
-                                          width: double.infinity,
-                                          height: double.infinity,
-                                          filterQuality: FilterQuality.high,
-                                        );
-                                      },
-                                    )
-                                  : Image.asset(
-                                      'assets/image/image.jpeg',
-                                      fit: BoxFit.cover,
-                                      width: double.infinity,
-                                      height: double.infinity,
-                                      filterQuality: FilterQuality.high,
-                                      isAntiAlias: true,
+                          final splashTitle = motherName.isNotEmpty
+                              ? 'اللهم ارحم $motherName 🤍'
+                              : 'اللهم ارحم موتانا وموتى المسلمين';
+
+                          return Column(
+                            children: [
+                              Container(
+                                width: 210.r,
+                                height: 210.r,
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  gradient: SweepGradient(
+                                    colors: [
+                                      AppColors.accentGold,
+                                      AppColors.primary,
+                                      AppColors.primaryDark,
+                                      AppColors.accentGold,
+                                    ],
+                                  ),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: AppColors.primary.withValues(alpha: isDark ? 0.5 : 0.25),
+                                      blurRadius: 28.r,
+                                      spreadRadius: 4.r,
                                     ),
-                            ),
+                                    BoxShadow(
+                                      color: AppColors.accentGold.withValues(alpha: 0.3),
+                                      blurRadius: 18.r,
+                                      spreadRadius: 1.r,
+                                    ),
+                                  ],
+                                ),
+                                padding: EdgeInsets.all(4.r),
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    color: isDark ? AppColors.darkSurface : Colors.white,
+                                  ),
+                                  child: ClipOval(
+                                    child: hasCustomFile
+                                        ? Image.file(
+                                            File(customPath),
+                                            fit: BoxFit.cover,
+                                            width: double.infinity,
+                                            height: double.infinity,
+                                            filterQuality: FilterQuality.high,
+                                          )
+                                        : Container(
+                                            decoration: BoxDecoration(
+                                              gradient: LinearGradient(
+                                                colors: isDark
+                                                    ? [const Color(0xFF1B382B), AppColors.darkSurface]
+                                                    : [AppColors.surfaceVariant, Colors.white],
+                                                begin: Alignment.topRight,
+                                                end: Alignment.bottomLeft,
+                                              ),
+                                            ),
+                                            child: Column(
+                                              mainAxisAlignment: MainAxisAlignment.center,
+                                              children: [
+                                                Icon(
+                                                  Icons.volunteer_activism,
+                                                  size: 72.r,
+                                                  color: AppColors.primary,
+                                                ),
+                                                SizedBox(height: 6.h),
+                                                Icon(
+                                                  Icons.auto_awesome,
+                                                  size: 20.r,
+                                                  color: AppColors.accentGold,
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                  ),
+                                ),
+                              ),
+                              SizedBox(height: 28.h),
+                              Text(
+                                splashTitle,
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  fontSize: 26.sp,
+                                  fontWeight: FontWeight.bold,
+                                  color: isDark
+                                      ? AppColors.darkTextPrimary
+                                      : AppColors.primaryDark,
+                                ),
+                              ),
+                              SizedBox(height: 6.h),
+                              Text(
+                                'صدقة جارية 🕊️',
+                                style: TextStyle(
+                                  fontSize: 17.sp,
+                                  color: AppColors.accentGold,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ],
                           );
                         },
                       ),
-                      SizedBox(height: 20.h),
-                      Text(
-                        'اللهم ارحم أمي',
-                        style: TextStyle(
-                          fontSize: 28.sp,
-                          fontWeight: FontWeight.bold,
-                          color: isDark
-                              ? AppColors.darkTextPrimary
-                              : AppColors.primaryDark,
-                        ),
-                      ),
-                      SizedBox(height: 6.h),
-                      Text(
-                        'صدقة جارية',
-                        style: TextStyle(
-                          fontSize: 17.sp,
-                          color: AppColors.accentGold,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                      SizedBox(height: 16.h),
+                      SizedBox(height: 24.h),
                       // Subtle skip indicator
                       Padding(
                         padding: EdgeInsets.only(bottom: 12.h),

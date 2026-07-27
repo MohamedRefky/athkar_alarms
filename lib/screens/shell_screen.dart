@@ -11,6 +11,7 @@ import '../cubits/dua_cubit.dart';
 import '../cubits/settings_cubit.dart';
 import '../services/notification_service.dart';
 import '../services/service_locator.dart';
+import '../widgets/initial_setup_sheet.dart';
 import 'audio_azkar_screen.dart';
 import 'home_screen.dart';
 import 'settings_screen.dart';
@@ -37,6 +38,17 @@ class _ShellScreenState extends State<ShellScreen> {
     super.initState();
     _listenToNotificationPayloads();
     _initPermissionsAndSchedule();
+    _checkFirstTimeSetup();
+  }
+
+  void _checkFirstTimeSetup() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      final settings = context.read<SettingsCubit>().state.settings;
+      if (settings.motherName.trim().isEmpty) {
+        InitialSetupSheet.show(context);
+      }
+    });
   }
 
   Future<void> _initPermissionsAndSchedule() async {

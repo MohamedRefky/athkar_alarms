@@ -23,20 +23,26 @@ class HomeScreen extends StatelessWidget {
       backgroundColor: isDark ? AppColors.darkBackground : AppColors.background,
       appBar: AppBar(
         centerTitle: true,
-        title: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(LucideIcons.heart, color: AppColors.primary, size: 22.r),
-            SizedBox(width: 8.w),
-            Text(
-              'اللهم ارحم أمي',
-              style: TextStyle(
-                fontSize: 22.sp,
-                fontWeight: FontWeight.bold,
-                color: isDark ? AppColors.darkTextPrimary : AppColors.primaryDark,
-              ),
-            ),
-          ],
+        title: BlocBuilder<SettingsCubit, SettingsState>(
+          builder: (context, settingsState) {
+            final name = settingsState.settings.motherName.trim();
+            final titleText = name.isNotEmpty ? 'اللهم ارحم $name' : 'اللهم ارحم موتانا';
+            return Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(LucideIcons.heart, color: AppColors.primary, size: 22.r),
+                SizedBox(width: 8.w),
+                Text(
+                  titleText,
+                  style: TextStyle(
+                    fontSize: 22.sp,
+                    fontWeight: FontWeight.bold,
+                    color: isDark ? AppColors.darkTextPrimary : AppColors.primaryDark,
+                  ),
+                ),
+              ],
+            );
+          },
         ),
         actions: [
           IconButton(

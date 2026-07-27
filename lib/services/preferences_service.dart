@@ -30,7 +30,7 @@ class PreferencesService {
 
   SettingsModel getSettings() {
     final motherName =
-        _prefs.getString(keyMotherName) ?? 'صباح عجمي أحمد محمد ريان';
+        _prefs.getString(keyMotherName) ?? '';
 
     // Text settings
     final isTextEnabled = _prefs.getBool(keyIsTextEnabled) ?? true;
