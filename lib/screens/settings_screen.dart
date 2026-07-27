@@ -41,22 +41,20 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   Future<void> _requestNotificationPermissions(BuildContext context) async {
     final notificationService = sl<NotificationService>();
-    final granted = await notificationService.requestPermissions();
+    final granted = await notificationService.setupEverything();
 
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
             granted
-                ? 'تم منح إذن الإشعارات بنجاح'
-                : 'لم يتم منح إذن الإشعارات، يرجى التفعيل من إعدادات الهاتف',
+                ? 'تم تفعيل جميع أذونات الإشعارات بنجاح ⚡'
+                : 'يرجى منح الأذونات المطلوبة لضمان عمل الإشعارات',
           ),
-          backgroundColor: granted ? AppColors.primary : AppColors.error,
+          backgroundColor: granted ? AppColors.primary : AppColors.accentGold,
           behavior: SnackBarBehavior.floating,
         ),
       );
-
-      _showLockScreenPermissionDialog(context);
     }
   }
 
@@ -66,146 +64,138 @@ class _SettingsScreenState extends State<SettingsScreen> {
       builder: (dialogContext) {
         final isDark = Theme.of(dialogContext).brightness == Brightness.dark;
         return AlertDialog(
-          backgroundColor:
-              isDark ? AppColors.darkSurface : Colors.white,
+          backgroundColor: isDark ? AppColors.darkSurface : Colors.white,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20.r),
+            borderRadius: BorderRadius.circular(24.r),
           ),
           title: Row(
             children: [
-              Icon(LucideIcons.shieldAlert, color: AppColors.primary, size: 24.r),
-              SizedBox(width: 8.w),
+              Container(
+                padding: EdgeInsets.all(8.r),
+                decoration: BoxDecoration(
+                  color: AppColors.primary.withValues(alpha: 0.15),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(LucideIcons.bellRing, color: AppColors.primary, size: 22.r),
+              ),
+              SizedBox(width: 10.w),
               Expanded(
                 child: Text(
-                  'حل مشكلة تأخير وقفل الشاشة 🔔',
+                  'ضمان عمل الإشعارات عند قفل الشاشة 🔔',
                   style: TextStyle(
                     fontSize: 16.sp,
                     fontWeight: FontWeight.bold,
-                    color: isDark
-                        ? AppColors.darkTextPrimary
-                        : AppColors.textPrimary,
+                    color: isDark ? AppColors.darkTextPrimary : AppColors.textPrimary,
                   ),
                 ),
               ),
             ],
           ),
-          content: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'لضمان وصول الإشعارات والأصوات في وقتها أثناء سكون الفون وقفل الشاشة:',
-                  style: TextStyle(
-                    fontSize: 13.sp,
-                    height: 1.4,
-                    fontWeight: FontWeight.w600,
-                    color: isDark
-                        ? AppColors.darkTextPrimary
-                        : AppColors.textPrimary,
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'لضمان وصول صوت الأذكار في موعدها وقبل قفل الشاشة بدون أي تأخير:',
+                style: TextStyle(
+                  fontSize: 13.5.sp,
+                  height: 1.4,
+                  fontWeight: FontWeight.w600,
+                  color: isDark ? AppColors.darkTextPrimary : AppColors.textPrimary,
+                ),
+              ),
+              SizedBox(height: 14.h),
+              Container(
+                padding: EdgeInsets.all(12.r),
+                decoration: BoxDecoration(
+                  color: AppColors.primary.withValues(alpha: 0.08),
+                  borderRadius: BorderRadius.circular(14.r),
+                  border: Border.all(
+                    color: AppColors.primary.withValues(alpha: 0.25),
                   ),
                 ),
-                SizedBox(height: 12.h),
-                _buildDialogStepRow(
-                  '1️⃣',
-                  'استثناء التطبيق من موفر البطارية (اختيار "بدون قيود Unrestricted").',
-                  isDark,
+                child: Row(
+                  children: [
+                    Icon(LucideIcons.sparkles, color: AppColors.primary, size: 22.r),
+                    SizedBox(width: 10.w),
+                    Expanded(
+                      child: Text(
+                        'اضغط على زر التفعيل أدناه لمنح كافّة الأذونات المطلوبة تلقائياً بضغطة واحدة.',
+                        style: TextStyle(
+                          fontSize: 13.sp,
+                          color: AppColors.primary,
+                          fontWeight: FontWeight.bold,
+                          height: 1.3,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
-                SizedBox(height: 8.h),
-                _buildDialogStepRow(
-                  '2️⃣',
-                  'منح إذن "المنبهات والتذكيرات الدقيقة" (Exact Alarms).',
-                  isDark,
-                ),
-                SizedBox(height: 8.h),
-                _buildDialogStepRow(
-                  '3️⃣',
-                  'تفعيل "عرض الإشعارات على شاشة القفل" و"التشغيل التلقائي Auto-start" (لهواتف شاومي وحمايات الموبايل).',
-                  isDark,
-                ),
-              ],
-            ),
+              ),
+            ],
           ),
           actions: [
             Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                ElevatedButton.icon(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.primary,
-                    foregroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12.r),
+                SizedBox(
+                  height: 48.h,
+                  child: ElevatedButton.icon(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.primary,
+                      foregroundColor: Colors.white,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(14.r),
+                      ),
+                      elevation: 3,
                     ),
-                    padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h),
-                  ),
-                  icon: Icon(LucideIcons.batteryCharging, size: 16.r),
-                  label: Text(
-                    '1. طلب استثناء موفر البطارية 🔋',
-                    style: TextStyle(
-                      fontSize: 13.sp,
-                      fontWeight: FontWeight.bold,
+                    icon: Icon(LucideIcons.zap, size: 18.r),
+                    label: Text(
+                      'تفعيل كافّة الأذونات بضغطة واحدة ⚡',
+                      style: TextStyle(
+                        fontSize: 14.sp,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
+                    onPressed: () async {
+                      Navigator.pop(dialogContext);
+                      final notificationService = sl<NotificationService>();
+                      final ok = await notificationService.setupEverything();
+                      if (context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(
+                              ok
+                                  ? 'تم تفعيل جميع أذونات الإشعارات بنجاح ⚡'
+                                  : 'تم طلب الأذونات، يرجى تفعيل الأذونات عند ظهور رسائل النظام',
+                            ),
+                            backgroundColor: AppColors.primary,
+                            behavior: SnackBarBehavior.floating,
+                          ),
+                        );
+                      }
+                    },
                   ),
-                  onPressed: () async {
-                    Navigator.pop(dialogContext);
-                    final notificationService = sl<NotificationService>();
-                    final res = await notificationService.requestIgnoreBatteryOptimizations();
-                    if (context.mounted) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text(res
-                              ? 'تم استثناء التطبيق من موفر البطارية بنجاح ⚡'
-                              : 'يرجى اختيار "بدون قيود" من إعدادات البطارية'),
-                          backgroundColor: res ? AppColors.primary : AppColors.accentGold,
-                          behavior: SnackBarBehavior.floating,
-                        ),
-                      );
-                    }
-                  },
                 ),
-                SizedBox(height: 6.h),
-                OutlinedButton.icon(
-                  style: OutlinedButton.styleFrom(
-                    foregroundColor: AppColors.primary,
-                    side: const BorderSide(color: AppColors.primary),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12.r),
-                    ),
-                    padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h),
-                  ),
-                  icon: Icon(LucideIcons.alarmClock, size: 16.r),
-                  label: Text(
-                    '2. إذن المنبهات الدقيقة ⏰',
-                    style: TextStyle(
-                      fontSize: 13.sp,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  onPressed: () async {
-                    Navigator.pop(dialogContext);
-                    final notificationService = sl<NotificationService>();
-                    await notificationService.requestExactAlarmPermission();
-                  },
-                ),
-                SizedBox(height: 6.h),
+                SizedBox(height: 8.h),
                 OutlinedButton.icon(
                   style: OutlinedButton.styleFrom(
                     foregroundColor: isDark ? AppColors.darkTextSecondary : AppColors.textSecondary,
                     side: BorderSide(
-                      color: isDark ? AppColors.darkTextSecondary : AppColors.textSecondary,
+                      color: (isDark ? AppColors.darkTextSecondary : AppColors.textSecondary)
+                          .withValues(alpha: 0.4),
                     ),
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12.r),
+                      borderRadius: BorderRadius.circular(14.r),
                     ),
-                    padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h),
+                    padding: EdgeInsets.symmetric(vertical: 10.h),
                   ),
                   icon: Icon(LucideIcons.settings, size: 16.r),
                   label: Text(
-                    '3. فتح إعدادات الموبايل العامة ⚙️',
+                    'إعدادات الموبايل (لهواتف شاومي / سامسونج) ⚙️',
                     style: TextStyle(
-                      fontSize: 13.sp,
-                      fontWeight: FontWeight.bold,
+                      fontSize: 12.5.sp,
+                      fontWeight: FontWeight.w600,
                     ),
                   ),
                   onPressed: () async {
@@ -998,20 +988,20 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                 SizedBox(height: 10.h),
                                 SizedBox(
                                   width: double.infinity,
-                                  height: 44.h,
-                                  child: OutlinedButton.icon(
-                                    style: OutlinedButton.styleFrom(
-                                      foregroundColor: AppColors.accentGold,
-                                      side: const BorderSide(
-                                          color: AppColors.accentGold),
+                                  height: 48.h,
+                                  child: ElevatedButton.icon(
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: AppColors.primary,
+                                      foregroundColor: Colors.white,
                                       shape: RoundedRectangleBorder(
                                         borderRadius:
                                             BorderRadius.circular(14.r),
                                       ),
+                                      elevation: 2,
                                     ),
-                                    icon: Icon(LucideIcons.settings, size: 18.r),
+                                    icon: Icon(LucideIcons.zap, size: 18.r),
                                     label: const Text(
-                                        'ضبط إعدادات الموبايل لقفل الشاشة ⚙️'),
+                                        'تفعيل كافّة صلاحيات وقفل الشاشة ⚡'),
                                     onPressed: () =>
                                         _showLockScreenPermissionDialog(context),
                                   ),

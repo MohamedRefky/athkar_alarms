@@ -20,7 +20,7 @@ class NotificationService {
   static const String _textChannelName = 'إشعارات الأدعية المكتوبة';
   static const String _textChannelDesc = 'تذكيرات دورية بالأدعية المكتوبة للأم المتوفاة';
 
-  static const String _audioChannelPrefix = 'azkar_audio_v2_';
+  static const String _audioChannelPrefix = 'azkar_audio_v3_';
 
   Future<void> init() async {
     tz.initializeTimeZones();
@@ -122,7 +122,7 @@ class NotificationService {
       debugPrint('🔔 [CHANNELS] ❌ FAILED to create text channel: $e');
     }
 
-    // 2. Pre-create All Audio Sound Channels with Alarm Attributes & Max Importance for LockScreen Playback
+    // 2. Pre-create All Audio Sound Channels with Custom MP3 Sound & Max Importance
     final sounds = [
       'azkar_sound',
       for (int i = 1; i <= 16; i++) 'audio$i',
@@ -133,6 +133,14 @@ class NotificationService {
 
     for (final sound in sounds) {
       try {
+        // Delete old cached channels so Android OS doesn't keep old sound preferences
+        try {
+          await androidImplementation.deleteNotificationChannel('azkar_audio_channel_v1');
+          await androidImplementation.deleteNotificationChannel('azkar_audio_channel_$sound');
+          await androidImplementation.deleteNotificationChannel('azkar_audio_v2_$sound');
+          await androidImplementation.deleteNotificationChannel('azkar_instant_audio_channel_$sound');
+        } catch (_) {}
+
         final audioChannel = AndroidNotificationChannel(
           '$_audioChannelPrefix$sound',
           'إشعار صوتي - $sound',
@@ -140,12 +148,12 @@ class NotificationService {
           importance: Importance.max,
           playSound: true,
           sound: RawResourceAndroidNotificationSound(sound),
-          audioAttributesUsage: AudioAttributesUsage.alarm,
+          audioAttributesUsage: AudioAttributesUsage.notification,
           enableVibration: true,
         );
         await androidImplementation.createNotificationChannel(audioChannel);
         successCount++;
-        debugPrint('🔔 [CHANNELS] ✅ Created channel for: $sound');
+        debugPrint('🔔 [CHANNELS] ✅ Created custom sound channel for: $sound');
       } catch (e) {
         failCount++;
         debugPrint('🔔 [CHANNELS] ❌ FAILED to create channel for "$sound": $e');
@@ -470,9 +478,9 @@ class NotificationService {
         priority: Priority.max,
         playSound: true,
         sound: RawResourceAndroidNotificationSound(soundResource),
-        audioAttributesUsage: AudioAttributesUsage.alarm,
+        audioAttributesUsage: AudioAttributesUsage.notification,
         visibility: NotificationVisibility.public,
-        category: AndroidNotificationCategory.alarm,
+        category: AndroidNotificationCategory.reminder,
         enableVibration: true,
       );
 
@@ -546,9 +554,9 @@ class NotificationService {
       priority: Priority.max,
       playSound: true,
       sound: RawResourceAndroidNotificationSound(soundResource),
-      audioAttributesUsage: AudioAttributesUsage.alarm,
+      audioAttributesUsage: AudioAttributesUsage.notification,
       visibility: NotificationVisibility.public,
-      category: AndroidNotificationCategory.alarm,
+      category: AndroidNotificationCategory.reminder,
       enableVibration: true,
     );
 
