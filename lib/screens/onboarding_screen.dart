@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../app/app_colors.dart';
+import '../cubits/settings_cubit.dart';
+import '../cubits/settings_state.dart';
 import '../widgets/surah_fatiha_card.dart';
 import 'shell_screen.dart';
 
@@ -29,71 +32,77 @@ class OnboardingScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: isDark ? AppColors.darkBackground : AppColors.background,
       body: SafeArea(
-        child: Padding(
-          padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 16.h),
-          child: Column(
-            children: [
-              SizedBox(height: 12.h),
+        child: BlocBuilder<SettingsCubit, SettingsState>(
+          builder: (context, settingsState) {
+            final motherName = settingsState.settings.motherName.trim().isNotEmpty
+                ? settingsState.settings.motherName
+                : 'صباح عجمي أحمد محمد ريان';
 
-              // Decorative Top Badge
-              Container(
-                padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
-                decoration: BoxDecoration(
-                  color: AppColors.accentGold.withValues(alpha: 0.15),
-                  borderRadius: BorderRadius.circular(30.r),
-                  border: Border.all(
-                    color: AppColors.accentGold.withValues(alpha: 0.4),
-                    width: 1,
-                  ),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(
-                      LucideIcons.heart,
-                      size: 16.r,
-                      color: AppColors.accentGold,
-                    ),
-                    SizedBox(width: 8.w),
-                    Text(
-                      'صدقة جارية',
-                      style: TextStyle(
-                        fontSize: 14.sp,
-                        fontWeight: FontWeight.bold,
-                        color: AppColors.accentGold,
+            return Padding(
+              padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 16.h),
+              child: Column(
+                children: [
+                  SizedBox(height: 12.h),
+
+                  // Decorative Top Badge
+                  Container(
+                    padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
+                    decoration: BoxDecoration(
+                      color: AppColors.accentGold.withValues(alpha: 0.15),
+                      borderRadius: BorderRadius.circular(30.r),
+                      border: Border.all(
+                        color: AppColors.accentGold.withValues(alpha: 0.4),
+                        width: 1,
                       ),
                     ),
-                  ],
-                ),
-              ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          LucideIcons.heart,
+                          size: 16.r,
+                          color: AppColors.accentGold,
+                        ),
+                        SizedBox(width: 8.w),
+                        Text(
+                          'صدقة جارية',
+                          style: TextStyle(
+                            fontSize: 14.sp,
+                            fontWeight: FontWeight.bold,
+                            color: AppColors.accentGold,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
 
-              SizedBox(height: 24.h),
+                  SizedBox(height: 24.h),
 
-              // Dedication Title & Name Section
-              Text(
-                'صدقة جارية عن المرحومة',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 18.sp,
-                  color: isDark
-                      ? AppColors.darkTextSecondary
-                      : AppColors.textSecondary,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-              SizedBox(height: 8.h),
-              Text(
-                'صباح عجمي أحمد محمد ريان',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 24.sp,
-                  fontWeight: FontWeight.bold,
-                  color: isDark
-                      ? AppColors.darkTextPrimary
-                      : AppColors.primaryDark,
-                  height: 1.3,
-                ),
-              ),
+                  // Dedication Title & Name Section
+                  Text(
+                    'صدقة جارية عن المرحومة',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 18.sp,
+                      color: isDark
+                          ? AppColors.darkTextSecondary
+                          : AppColors.textSecondary,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                  SizedBox(height: 8.h),
+                  Text(
+                    motherName,
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 24.sp,
+                      fontWeight: FontWeight.bold,
+                      color: isDark
+                          ? AppColors.darkTextPrimary
+                          : AppColors.primaryDark,
+                      height: 1.3,
+                    ),
+                  ),
               SizedBox(height: 12.h),
               Text(
                 'نرجو الفاتحة والدعاء لها بالرحمة والمغفرة',
@@ -152,9 +161,10 @@ class OnboardingScreen extends StatelessWidget {
 
               SizedBox(height: 8.h),
             ],
-          ),
-        ),
+          );
+        },
       ),
-    );
-  }
+    ),
+  );
+}
 }

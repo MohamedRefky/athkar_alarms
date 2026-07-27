@@ -312,42 +312,97 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   // 1. Mother Name Section
                   _buildSectionHeader(
                     context,
-                    title: 'اسم الوالدة المتوفاة',
-                    subtitle: 'تخصيص نص ونية الدعاء باسمها',
+                    title: 'اسم الوالدة المتوفاة 🤍',
+                    subtitle: 'تخصيص نص ونية الدعاء باسمها في كافة الشاشات والإشعارات',
                     icon: LucideIcons.heart,
                   ),
                   SizedBox(height: 12.h),
                   _buildCardContainer(
                     isDark: isDark,
-                    child: TextFormField(
-                      controller: _nameController,
-                      keyboardType: TextInputType.name,
-                      style: TextStyle(
-                        fontSize: 16.sp,
-                        fontWeight: FontWeight.w600,
-                        color: isDark
-                            ? AppColors.darkTextPrimary
-                            : AppColors.textPrimary,
-                      ),
-                      decoration: InputDecoration(
-                        hintText: 'أدخل اسم الوالدة هنا...',
-                        prefixIcon: Icon(
-                          LucideIcons.user,
-                          color: AppColors.primary,
-                          size: 20.r,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        TextFormField(
+                          controller: _nameController,
+                          keyboardType: TextInputType.name,
+                          style: TextStyle(
+                            fontSize: 16.sp,
+                            fontWeight: FontWeight.w600,
+                            color: isDark
+                                ? AppColors.darkTextPrimary
+                                : AppColors.textPrimary,
+                          ),
+                          decoration: InputDecoration(
+                            hintText: 'أدخل اسم الوالدة هنا...',
+                            prefixIcon: Icon(
+                              LucideIcons.user,
+                              color: AppColors.primary,
+                              size: 20.r,
+                            ),
+                            filled: true,
+                            fillColor: isDark
+                                ? AppColors.darkBackground
+                                : AppColors.surfaceVariant,
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(14.r),
+                              borderSide: BorderSide.none,
+                            ),
+                          ),
                         ),
-                        filled: true,
-                        fillColor: isDark
-                            ? AppColors.darkBackground
-                            : AppColors.surfaceVariant,
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(14.r),
-                          borderSide: BorderSide.none,
+                        SizedBox(height: 12.h),
+                        SizedBox(
+                          height: 44.h,
+                          child: ElevatedButton.icon(
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: AppColors.primary,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12.r),
+                              ),
+                            ),
+                            icon: Icon(LucideIcons.save, color: Colors.white, size: 18.r),
+                            label: Text(
+                              'حفظ وتحديث الاسم 💾',
+                              style: TextStyle(
+                                fontSize: 15.sp,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                              ),
+                            ),
+                            onPressed: () {
+                              final name = _nameController.text.trim();
+                              context.read<SettingsCubit>().updateMotherName(name);
+                              FocusScope.of(context).unfocus();
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Row(
+                                    children: [
+                                      Icon(LucideIcons.checkCircle2,
+                                          color: Colors.white, size: 20.r),
+                                      SizedBox(width: 10.w),
+                                      Expanded(
+                                        child: Text(
+                                          name.isNotEmpty
+                                              ? 'تم حفظ وتحديث اسم الوالدة بنجاح: "$name" 🤍'
+                                              : 'تم تحديث الاسم بنجاح 🤍',
+                                          style: TextStyle(
+                                            fontSize: 14.sp,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  backgroundColor: AppColors.primary,
+                                  behavior: SnackBarBehavior.floating,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(12.r),
+                                  ),
+                                ),
+                              );
+                            },
+                          ),
                         ),
-                      ),
-                      onChanged: (val) {
-                        context.read<SettingsCubit>().updateMotherName(val);
-                      },
+                      ],
                     ),
                   ),
 
