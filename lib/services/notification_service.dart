@@ -110,7 +110,7 @@ class NotificationService {
       _textChannelId,
       _textChannelName,
       description: _textChannelDesc,
-      importance: Importance.high,
+      importance: Importance.max,
       playSound: true,
     );
     await androidImplementation.createNotificationChannel(textChannel);
@@ -119,7 +119,7 @@ class NotificationService {
       _audioChannelId,
       _audioChannelName,
       description: _audioChannelDesc,
-      importance: Importance.high,
+      importance: Importance.max,
       playSound: true,
       sound: RawResourceAndroidNotificationSound('azkar_sound'),
     );
@@ -208,7 +208,7 @@ class NotificationService {
   }
 
   // --- Text Notifications Scheduling ---
-  // Uses periodicallyShowWithDuration for reliable repeating delivery
+  // Uses zonedSchedule with exactAllowWhileIdle for exact delivery timing
   Future<void> _scheduleTextNotifications({
     required SettingsModel settings,
     required List<DuaModel> duas,
@@ -219,15 +219,12 @@ class NotificationService {
 
     if (duas.isEmpty) return;
 
-    final dua = (List<DuaModel>.from(duas)..shuffle()).first;
-    final bodyText = dua.getFormattedText(motherName);
-
     const androidDetails = AndroidNotificationDetails(
       _textChannelId,
       _textChannelName,
       channelDescription: _textChannelDesc,
-      importance: Importance.high,
-      priority: Priority.high,
+      importance: Importance.max,
+      priority: Priority.max,
       playSound: true,
       styleInformation: BigTextStyleInformation(''),
     );
@@ -240,25 +237,40 @@ class NotificationService {
 
     const details = NotificationDetails(android: androidDetails, iOS: iosDetails);
 
-    debugPrint('📝 [TEXT] Using periodicallyShowWithDuration: every $intervalMins minutes');
+    final now = tz.TZDateTime.now(tz.local);
+    final shuffledDuas = List<DuaModel>.from(duas)..shuffle();
+    const int count = 25;
 
-    // Use periodicallyShowWithDuration - Android AlarmManager repeating
-    // This fires the FIRST notification after intervalMins, then repeats
-    await _notificationsPlugin.periodicallyShowWithDuration(
-      110, // notification id
-      'اللهم ارحم أمي 🤍',
-      bodyText,
-      Duration(minutes: intervalMins),
-      details,
-      androidScheduleMode: scheduleMode,
-      payload: 'dua_${dua.id}',
-    );
+    debugPrint('📝 [TEXT] Scheduling $count exact text notifications every $intervalMins min');
 
-    debugPrint('📝 [TEXT] ✅ Periodic text notification scheduled (id=110, every ${intervalMins}min)');
+    for (int i = 1; i <= count; i++) {
+      final dua = shuffledDuas[(i - 1) % shuffledDuas.length];
+      final bodyText = dua.getFormattedText(motherName);
+      final scheduledDate = now.add(Duration(minutes: intervalMins * i));
+      final notificationId = 100 + i;
+
+      try {
+        await _notificationsPlugin.zonedSchedule(
+          notificationId,
+          'اللهم ارحم أمي 🤍',
+          bodyText,
+          scheduledDate,
+          details,
+          androidScheduleMode: scheduleMode,
+          uiLocalNotificationDateInterpretation:
+              UILocalNotificationDateInterpretation.absoluteTime,
+          payload: 'dua_${dua.id}',
+        );
+      } catch (e) {
+        debugPrint('📝 [TEXT] Error scheduling notification $notificationId: $e');
+      }
+    }
+
+    debugPrint('📝 [TEXT] ✅ Successfully scheduled $count exact text notifications');
   }
 
   // --- Audio Notifications Scheduling ---
-  // Uses periodicallyShowWithDuration for reliable repeating delivery
+  // Uses zonedSchedule with exactAllowWhileIdle for exact delivery timing
   Future<void> _scheduleAudioNotifications({
     required SettingsModel settings,
     required List<AudioAzkarModel> audioAzkar,
@@ -269,7 +281,6 @@ class NotificationService {
     final String motherName = settings.motherName;
     final scheduleMode = await _getScheduleMode();
 
-    // Pick the audio to use
     final AudioAzkarModel audioItem;
     if (settings.selectedAudioIndex > 0 &&
         settings.selectedAudioIndex <= audioAzkar.length) {
@@ -285,8 +296,8 @@ class NotificationService {
       'azkar_audio_channel_$soundResource',
       'إشعار صوتي - ${audioItem.title}',
       channelDescription: 'قناة الإشعار الصوتي الخاص ${audioItem.title}',
-      importance: Importance.high,
-      priority: Priority.high,
+      importance: Importance.max,
+      priority: Priority.max,
       playSound: true,
       sound: RawResourceAndroidNotificationSound(soundResource),
     );
@@ -305,20 +316,33 @@ class NotificationService {
     final titleText = 'دعاء صبي لأمي $motherName 🎧';
     final bodyText = 'المقطع الصوتي #${audioItem.id}: ${audioItem.title}';
 
-    debugPrint('🔊 [AUDIO] Using periodicallyShowWithDuration: every $intervalMins minutes');
+    final now = tz.TZDateTime.now(tz.local);
+    const int count = 25;
 
-    // Use periodicallyShowWithDuration - Android AlarmManager repeating
-    await _notificationsPlugin.periodicallyShowWithDuration(
-      200, // notification id
-      titleText,
-      bodyText,
-      Duration(minutes: intervalMins),
-      details,
-      androidScheduleMode: scheduleMode,
-      payload: 'audio_${audioItem.id}',
-    );
+    debugPrint('🔊 [AUDIO] Scheduling $count exact audio notifications every $intervalMins min');
 
-    debugPrint('🔊 [AUDIO] ✅ Periodic audio notification scheduled (id=200, every ${intervalMins}min)');
+    for (int i = 1; i <= count; i++) {
+      final scheduledDate = now.add(Duration(minutes: intervalMins * i));
+      final notificationId = 200 + i;
+
+      try {
+        await _notificationsPlugin.zonedSchedule(
+          notificationId,
+          titleText,
+          bodyText,
+          scheduledDate,
+          details,
+          androidScheduleMode: scheduleMode,
+          uiLocalNotificationDateInterpretation:
+              UILocalNotificationDateInterpretation.absoluteTime,
+          payload: 'audio_${audioItem.id}',
+        );
+      } catch (e) {
+        debugPrint('🔊 [AUDIO] Error scheduling audio notification $notificationId: $e');
+      }
+    }
+
+    debugPrint('🔊 [AUDIO] ✅ Successfully scheduled $count exact audio notifications');
   }
 
   // --- Trigger Instant Audio Test Notification ---

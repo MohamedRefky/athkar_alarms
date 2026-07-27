@@ -1,0 +1,3 @@
+-keep class com.dexterous.** { *; }
+-keep class com.google.gson.** { *; }
+-keep class java.lang.reflect.Type
