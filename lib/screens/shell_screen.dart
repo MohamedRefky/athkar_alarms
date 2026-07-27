@@ -1,4 +1,6 @@
 import 'dart:async';
+
+import 'package:azkar/cubits/dua_state.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -9,8 +11,8 @@ import '../cubits/dua_cubit.dart';
 import '../cubits/settings_cubit.dart';
 import '../services/notification_service.dart';
 import '../services/service_locator.dart';
-import 'home_screen.dart';
 import 'audio_azkar_screen.dart';
+import 'home_screen.dart';
 import 'settings_screen.dart';
 
 class ShellScreen extends StatefulWidget {
@@ -34,6 +36,21 @@ class _ShellScreenState extends State<ShellScreen> {
   void initState() {
     super.initState();
     _listenToNotificationPayloads();
+    _initPermissionsAndSchedule();
+  }
+
+  Future<void> _initPermissionsAndSchedule() async {
+    final notificationService = sl<NotificationService>();
+    await notificationService.requestPermissions();
+
+    if (!mounted) return;
+    final duaCubit = context.read<DuaCubit>();
+    if (!duaCubit.state.isLoading && duaCubit.state.duas.isNotEmpty) {
+      context.read<SettingsCubit>().rescheduleNotifications(
+            duas: duaCubit.state.duas,
+            audioAzkar: duaCubit.state.audioAzkar,
+          );
+    }
   }
 
   void _listenToNotificationPayloads() {
@@ -84,13 +101,23 @@ class _ShellScreenState extends State<ShellScreen> {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    return Scaffold(
-      extendBody: true,
-      body: IndexedStack(
-        index: _currentIndex,
-        children: _pages,
+    return BlocListener<DuaCubit, DuaState>(
+      listenWhen: (prev, curr) =>
+          prev.isLoading && !curr.isLoading && curr.duas.isNotEmpty,
+      listener: (context, state) {
+        context.read<SettingsCubit>().rescheduleNotifications(
+              duas: state.duas,
+              audioAzkar: state.audioAzkar,
+            );
+      },
+      child: Scaffold(
+        extendBody: true,
+        body: IndexedStack(
+          index: _currentIndex,
+          children: _pages,
+        ),
+        bottomNavigationBar: _buildFloatingNavBar(context, isDark),
       ),
-      bottomNavigationBar: _buildFloatingNavBar(context, isDark),
     );
   }
 

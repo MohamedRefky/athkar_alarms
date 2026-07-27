@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:timezone/data/latest_all.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
+import 'package:permission_handler/permission_handler.dart';
 import '../models/settings_model.dart';
 import '../models/dua_model.dart';
 import '../models/audio_azkar_model.dart';
@@ -127,6 +128,19 @@ class NotificationService {
   }
 
   Future<bool> requestPermissions() async {
+    // 1. Request via permission_handler (triggers system dialogs on Android 13+)
+    try {
+      final notifStatus = await Permission.notification.request();
+      debugPrint('🔔 [PERM] Notification permission status: $notifStatus');
+      if (await Permission.scheduleExactAlarm.isDenied) {
+        final alarmStatus = await Permission.scheduleExactAlarm.request();
+        debugPrint('🔔 [PERM] Exact Alarm permission status: $alarmStatus');
+      }
+    } catch (e) {
+      debugPrint('🔔 [PERM] Error with permission_handler: $e');
+    }
+
+    // 2. Fallback via flutter_local_notifications plugin
     final androidImplementation =
         _notificationsPlugin.resolvePlatformSpecificImplementation<
             AndroidFlutterLocalNotificationsPlugin>();
