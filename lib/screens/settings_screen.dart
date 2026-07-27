@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 import '../app/app_colors.dart';
 import '../cubits/dua_cubit.dart';
@@ -54,7 +55,133 @@ class _SettingsScreenState extends State<SettingsScreen> {
           behavior: SnackBarBehavior.floating,
         ),
       );
+
+      _showLockScreenPermissionDialog(context);
     }
+  }
+
+  void _showLockScreenPermissionDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (dialogContext) {
+        final isDark = Theme.of(dialogContext).brightness == Brightness.dark;
+        return AlertDialog(
+          backgroundColor:
+              isDark ? AppColors.darkSurface : Colors.white,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20.r),
+          ),
+          title: Row(
+            children: [
+              Icon(LucideIcons.bellRing, color: AppColors.primary, size: 24.r),
+              SizedBox(width: 8.w),
+              Expanded(
+                child: Text(
+                  'ضمان العمل عند قفل الشاشة 🔔',
+                  style: TextStyle(
+                    fontSize: 16.sp,
+                    fontWeight: FontWeight.bold,
+                    color: isDark
+                        ? AppColors.darkTextPrimary
+                        : AppColors.textPrimary,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'لضمان نطق الأذكار وسماع الأصوات أثناء قفل الشاشة أو سكون الموبايل:',
+                style: TextStyle(
+                  fontSize: 13.sp,
+                  height: 1.4,
+                  fontWeight: FontWeight.w600,
+                  color: isDark
+                      ? AppColors.darkTextPrimary
+                      : AppColors.textPrimary,
+                ),
+              ),
+              SizedBox(height: 12.h),
+              _buildDialogStepRow(
+                '1️⃣',
+                'فعّل "عرض الإشعارات على شاشة القفل".',
+                isDark,
+              ),
+              SizedBox(height: 8.h),
+              _buildDialogStepRow(
+                '2️⃣',
+                'فعّل "السماح بالصوت والنغمات".',
+                isDark,
+              ),
+              SizedBox(height: 8.h),
+              _buildDialogStepRow(
+                '3️⃣',
+                'اختر "بدون قيود" (Unrestricted) في البطارية.',
+                isDark,
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(dialogContext),
+              child: Text(
+                'حسناً، فهمت',
+                style: TextStyle(
+                  color: isDark
+                      ? AppColors.darkTextSecondary
+                      : AppColors.textSecondary,
+                ),
+              ),
+            ),
+            ElevatedButton.icon(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.primary,
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12.r),
+                ),
+                padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h),
+              ),
+              icon: Icon(LucideIcons.settings, size: 16.r),
+              label: Text(
+                'فتح إعدادات الموبايل ⚙️',
+                style: TextStyle(
+                  fontSize: 13.sp,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              onPressed: () async {
+                Navigator.pop(dialogContext);
+                await openAppSettings();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Widget _buildDialogStepRow(String iconStr, String text, bool isDark) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(iconStr, style: TextStyle(fontSize: 14.sp)),
+        SizedBox(width: 8.w),
+        Expanded(
+          child: Text(
+            text,
+            style: TextStyle(
+              fontSize: 12.5.sp,
+              color: isDark ? AppColors.darkTextSecondary : AppColors.textSecondary,
+              height: 1.3,
+            ),
+          ),
+        ),
+      ],
+    );
   }
 
   Future<void> _showCustomIntervalSheet(
@@ -809,6 +936,27 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                         }
                                       },
                                     ),
+                                  ),
+                                ),
+                                SizedBox(height: 10.h),
+                                SizedBox(
+                                  width: double.infinity,
+                                  height: 44.h,
+                                  child: OutlinedButton.icon(
+                                    style: OutlinedButton.styleFrom(
+                                      foregroundColor: AppColors.accentGold,
+                                      side: const BorderSide(
+                                          color: AppColors.accentGold),
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius:
+                                            BorderRadius.circular(14.r),
+                                      ),
+                                    ),
+                                    icon: Icon(LucideIcons.settings, size: 18.r),
+                                    label: const Text(
+                                        'ضبط إعدادات الموبايل لقفل الشاشة ⚙️'),
+                                    onPressed: () =>
+                                        _showLockScreenPermissionDialog(context),
                                   ),
                                 ),
                                 SizedBox(height: 12.h),
