@@ -625,12 +625,75 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                               height: double.infinity,
                                               filterQuality: FilterQuality.high,
                                             )
-                                          : Image.asset(
-                                              'assets/image/image.jpeg',
-                                              fit: BoxFit.cover,
+                                          : Container(
                                               width: double.infinity,
                                               height: double.infinity,
-                                              filterQuality: FilterQuality.high,
+                                              decoration: BoxDecoration(
+                                                gradient: LinearGradient(
+                                                  colors: isDark
+                                                      ? [
+                                                          const Color(0xFF1B382B),
+                                                          AppColors.darkSurface
+                                                        ]
+                                                      : [
+                                                          AppColors.surfaceVariant,
+                                                          Colors.white
+                                                        ],
+                                                  begin: Alignment.topRight,
+                                                  end: Alignment.bottomLeft,
+                                                ),
+                                              ),
+                                              child: Column(
+                                                mainAxisAlignment:
+                                                    MainAxisAlignment.center,
+                                                children: [
+                                                  Container(
+                                                    padding:
+                                                        EdgeInsets.all(16.r),
+                                                    decoration: BoxDecoration(
+                                                      shape: BoxShape.circle,
+                                                      color: AppColors.primary
+                                                          .withValues(
+                                                              alpha: 0.12),
+                                                      border: Border.all(
+                                                        color: AppColors.accentGold
+                                                            .withValues(
+                                                                alpha: 0.4),
+                                                        width: 1.5,
+                                                      ),
+                                                    ),
+                                                    child: Icon(
+                                                      Icons.volunteer_activism,
+                                                      size: 48.r,
+                                                      color: AppColors.primary,
+                                                    ),
+                                                  ),
+                                                  SizedBox(height: 8.h),
+                                                  Row(
+                                                    mainAxisSize:
+                                                        MainAxisSize.min,
+                                                    children: [
+                                                      Icon(
+                                                        LucideIcons.sparkles,
+                                                        size: 14.r,
+                                                        color: AppColors
+                                                            .accentGold,
+                                                      ),
+                                                      SizedBox(width: 4.w),
+                                                      Text(
+                                                        'أيقونة الصدقة الجارية الافتراضية',
+                                                        style: TextStyle(
+                                                          fontSize: 13.sp,
+                                                          fontWeight:
+                                                              FontWeight.bold,
+                                                          color:
+                                                              AppColors.primary,
+                                                        ),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                ],
+                                              ),
                                             ),
                                     ),
                                     // Status Badge Overlay
@@ -670,7 +733,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                             Text(
                                               hasCustomFile
                                                   ? 'صورة مخصصة ✨'
-                                                  : 'الصورة الافتراضية 📱',
+                                                  : 'الأيقونة الافتراضية 🕊️',
                                               style: TextStyle(
                                                 fontSize: 12.sp,
                                                 fontWeight: FontWeight.bold,

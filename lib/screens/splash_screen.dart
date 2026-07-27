@@ -114,35 +114,55 @@ class _SplashScreenState extends State<SplashScreen>
 
                           return Column(
                             children: [
-                              Container(
-                                height: 340.h,
-                                width: double.infinity,
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(24.r),
-                                  border: Border.all(
-                                    color: AppColors.primary.withValues(alpha: 0.35),
-                                    width: 1.5,
-                                  ),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: AppColors.primary
-                                          .withValues(alpha: isDark ? 0.35 : 0.12),
-                                      blurRadius: 20.r,
-                                      spreadRadius: 1.r,
-                                    ),
-                                  ],
-                                ),
-                                child: ClipRRect(
-                                  borderRadius: BorderRadius.circular(22.5.r),
-                                  child: hasCustomFile
-                                      ? Image.file(
+                              hasCustomFile
+                                  ? Container(
+                                      constraints: BoxConstraints(maxHeight: 340.h),
+                                      decoration: BoxDecoration(
+                                        borderRadius: BorderRadius.circular(24.r),
+                                        border: Border.all(
+                                          color: AppColors.primary.withValues(alpha: 0.35),
+                                          width: 1.5,
+                                        ),
+                                        boxShadow: [
+                                          BoxShadow(
+                                            color: AppColors.primary
+                                                .withValues(alpha: isDark ? 0.35 : 0.12),
+                                            blurRadius: 20.r,
+                                            spreadRadius: 1.r,
+                                          ),
+                                        ],
+                                      ),
+                                      child: ClipRRect(
+                                        borderRadius: BorderRadius.circular(22.5.r),
+                                        child: Image.file(
                                           File(customPath),
-                                          fit: BoxFit.cover,
-                                          width: double.infinity,
-                                          height: double.infinity,
+                                          fit: BoxFit.contain,
                                           filterQuality: FilterQuality.high,
-                                        )
-                                      : Container(
+                                          isAntiAlias: true,
+                                        ),
+                                      ),
+                                    )
+                                  : Container(
+                                      height: 340.h,
+                                      width: double.infinity,
+                                      decoration: BoxDecoration(
+                                        borderRadius: BorderRadius.circular(24.r),
+                                        border: Border.all(
+                                          color: AppColors.primary.withValues(alpha: 0.35),
+                                          width: 1.5,
+                                        ),
+                                        boxShadow: [
+                                          BoxShadow(
+                                            color: AppColors.primary
+                                                .withValues(alpha: isDark ? 0.35 : 0.12),
+                                            blurRadius: 20.r,
+                                            spreadRadius: 1.r,
+                                          ),
+                                        ],
+                                      ),
+                                      child: ClipRRect(
+                                        borderRadius: BorderRadius.circular(22.5.r),
+                                        child: Container(
                                           width: double.infinity,
                                           height: double.infinity,
                                           decoration: BoxDecoration(
@@ -206,8 +226,8 @@ class _SplashScreenState extends State<SplashScreen>
                                             ],
                                           ),
                                         ),
-                                ),
-                              ),
+                                      ),
+                                    ),
                               SizedBox(height: 28.h),
                               Text(
                                 splashTitle,
