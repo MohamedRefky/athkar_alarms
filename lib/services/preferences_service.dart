@@ -22,6 +22,7 @@ class PreferencesService {
   static const String keyAudioDailyMinute = 'audio_daily_minute';
   static const String keySelectedAudioIndex = 'selected_audio_index';
 
+  static const String keyCustomSplashImagePath = 'custom_splash_image_path';
   static const String keyCustomAudioMap = 'custom_audio_map';
   static const String keyLastDuaId = 'last_dua_id';
 
@@ -47,6 +48,9 @@ class PreferencesService {
     final audioDailyHour = _prefs.getInt(keyAudioDailyHour) ?? 17;
     final audioDailyMinute = _prefs.getInt(keyAudioDailyMinute) ?? 0;
     final selectedAudioIndex = _prefs.getInt(keySelectedAudioIndex) ?? 0;
+
+    // Splash Image
+    final customSplashImagePath = _prefs.getString(keyCustomSplashImagePath);
 
     final customAudioJson = _prefs.getString(keyCustomAudioMap);
     Map<int, String> customAudioMap = {};
@@ -81,6 +85,7 @@ class PreferencesService {
       audioDailyHour: audioDailyHour,
       audioDailyMinute: audioDailyMinute,
       selectedAudioIndex: selectedAudioIndex,
+      customSplashImagePath: customSplashImagePath,
       customAudioMap: customAudioMap,
     );
   }
@@ -106,6 +111,13 @@ class PreferencesService {
     await _prefs.setInt(keyAudioDailyHour, settings.audioDailyHour);
     await _prefs.setInt(keyAudioDailyMinute, settings.audioDailyMinute);
     await _prefs.setInt(keySelectedAudioIndex, settings.selectedAudioIndex);
+
+    // Splash Image
+    if (settings.customSplashImagePath != null) {
+      await _prefs.setString(keyCustomSplashImagePath, settings.customSplashImagePath!);
+    } else {
+      await _prefs.remove(keyCustomSplashImagePath);
+    }
 
     final jsonMap =
         settings.customAudioMap.map((key, value) => MapEntry(key.toString(), value));

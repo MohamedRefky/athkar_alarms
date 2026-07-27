@@ -78,6 +78,9 @@ class SettingsModel extends Equatable {
   final int audioDailyMinute;
   final int selectedAudioIndex; // 0 = Sequential Loop (1..16), >0 = Specific sound
 
+  // Custom Splash Screen Image
+  final String? customSplashImagePath;
+
   // Legacy fallback fields for backward compatibility
   final Map<int, String> customAudioMap;
 
@@ -94,6 +97,7 @@ class SettingsModel extends Equatable {
     this.audioDailyHour = 17,
     this.audioDailyMinute = 0,
     this.selectedAudioIndex = 0,
+    this.customSplashImagePath,
     this.customAudioMap = const {},
   });
 
@@ -117,6 +121,8 @@ class SettingsModel extends Equatable {
     int? audioDailyHour,
     int? audioDailyMinute,
     int? selectedAudioIndex,
+    String? customSplashImagePath,
+    bool clearSplashImagePath = false,
     Map<int, String>? customAudioMap,
   }) {
     return SettingsModel(
@@ -136,6 +142,9 @@ class SettingsModel extends Equatable {
       audioDailyHour: audioDailyHour ?? this.audioDailyHour,
       audioDailyMinute: audioDailyMinute ?? this.audioDailyMinute,
       selectedAudioIndex: selectedAudioIndex ?? this.selectedAudioIndex,
+      customSplashImagePath: clearSplashImagePath
+          ? null
+          : (customSplashImagePath ?? this.customSplashImagePath),
       customAudioMap: customAudioMap ?? this.customAudioMap,
     );
   }
@@ -168,6 +177,7 @@ class SettingsModel extends Equatable {
         audioDailyHour,
         audioDailyMinute,
         selectedAudioIndex,
+        customSplashImagePath,
         customAudioMap,
       ];
 }

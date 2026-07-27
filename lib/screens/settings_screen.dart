@@ -1,7 +1,9 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
+import 'package:file_picker/file_picker.dart';
 
 import '../app/app_colors.dart';
 import '../cubits/dua_cubit.dart';
@@ -22,6 +24,7 @@ class SettingsScreen extends StatefulWidget {
 
 class _SettingsScreenState extends State<SettingsScreen> {
   late TextEditingController _nameController;
+  bool _isPickingImage = false;
 
   @override
   void initState() {
@@ -58,12 +61,17 @@ class _SettingsScreenState extends State<SettingsScreen> {
   Future<void> _showCustomIntervalSheet(
     BuildContext context,
     bool isAudio,
-    int initialValue,
+    int currentIntervalMins,
   ) async {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final controller = TextEditingController(
-      text: initialValue > 0 ? initialValue.toString() : '60',
+      text: currentIntervalMins > 0 ? '$currentIntervalMins' : '60',
     );
+
+    void addMinutes(int mins) {
+      final current = int.tryParse(controller.text) ?? 0;
+      controller.text = '${(current + mins).clamp(1, 1440)}';
+    }
 
     final result = await showModalBottomSheet<int>(
       context: context,
@@ -75,13 +83,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
       builder: (context) {
         return StatefulBuilder(
           builder: (context, setSheetState) {
-            void addMinutes(int mins) {
-              final current = int.tryParse(controller.text) ?? 0;
-              final updatedVal = (current + mins).clamp(1, 1440);
-              controller.text = updatedVal.toString();
-              setSheetState(() {});
-            }
-
             return Padding(
               padding: EdgeInsets.only(
                 left: 24.w,
@@ -136,8 +137,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     ],
                   ),
                   SizedBox(height: 20.h),
-
-                  // Preset Addition Buttons
                   Text(
                     'إضافة سريعة للوقت:',
                     style: TextStyle(
@@ -150,16 +149,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      _buildPresetChip('+15د', () => addMinutes(15)),
-                      _buildPresetChip('+30د', () => addMinutes(30)),
-                      _buildPresetChip('+1س', () => addMinutes(60)),
-                      _buildPresetChip('+2س', () => addMinutes(120)),
+                      _buildPresetChip('+15د', () => setSheetState(() => addMinutes(15))),
+                      _buildPresetChip('+30د', () => setSheetState(() => addMinutes(30))),
+                      _buildPresetChip('+1س', () => setSheetState(() => addMinutes(60))),
+                      _buildPresetChip('+2س', () => setSheetState(() => addMinutes(120))),
                     ],
                   ),
-
                   SizedBox(height: 20.h),
-
-                  // Custom Input Field Box
                   Container(
                     padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 6.h),
                     decoration: BoxDecoration(
@@ -192,10 +188,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       ),
                     ),
                   ),
-
                   SizedBox(height: 24.h),
-
-                  // Save Action Button
                   SizedBox(
                     width: double.infinity,
                     height: 54.h,
@@ -286,7 +279,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
       body: SafeArea(
         child: BlocConsumer<SettingsCubit, SettingsState>(
           listener: (context, state) {
-            // Only reschedule when save is complete, not during intermediate saving state
             if (!state.isSaving) {
               final duaCubit = context.read<DuaCubit>();
               context.read<SettingsCubit>().rescheduleNotifications(
@@ -304,12 +296,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Header Card
                   _buildHeaderCard(context, isDark),
-
                   SizedBox(height: 24.h),
-
-                  // 1. Mother Name Section
                   _buildSectionHeader(
                     context,
                     title: 'اسم الوالدة المتوفاة 🤍',
@@ -405,10 +393,211 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       ],
                     ),
                   ),
-
                   SizedBox(height: 24.h),
+                  _buildSectionHeader(
+                    context,
+                    title: 'صورة شاشة البداية (Splash Screen) 🖼️',
+                    subtitle: 'تغيير وتخصيص الصورة المعروضة عند فتح التطبيق من المعرض',
+                    icon: LucideIcons.image,
+                  ),
+                  SizedBox(height: 12.h),
+                  _buildCardContainer(
+                    isDark: isDark,
+                    child: Column(
+                      children: [
+                        Container(
+                          height: 140.h,
+                          width: double.infinity,
+                          padding: EdgeInsets.all(6.r),
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(16.r),
+                            border: Border.all(
+                              color: AppColors.primary.withValues(alpha: 0.3),
+                              width: 1.5,
+                            ),
+                          ),
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(15.r),
+                            child: settings.customSplashImagePath != null &&
+                                    settings.customSplashImagePath!.isNotEmpty &&
+                                    File(settings.customSplashImagePath!).existsSync()
+                                ? Image.file(
+                                    File(settings.customSplashImagePath!),
+                                    fit: BoxFit.contain,
+                                    width: double.infinity,
+                                  )
+                                : Image.asset(
+                                    'assets/image/image.jpeg',
+                                    fit: BoxFit.contain,
+                                    width: double.infinity,
+                                  ),
+                          ),
+                        ),
+                        SizedBox(height: 14.h),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: OutlinedButton.icon(
+                                style: OutlinedButton.styleFrom(
+                                  foregroundColor: AppColors.primary,
+                                  side: const BorderSide(color: AppColors.primary),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(12.r),
+                                  ),
+                                  padding: EdgeInsets.symmetric(vertical: 12.h),
+                                ),
+                                icon: Icon(LucideIcons.upload, size: 18.r),
+                                label: Text(
+                                  'اختيار صورة من المعرض 🖼️',
+                                  style: TextStyle(
+                                    fontSize: 14.sp,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                onPressed: _isPickingImage
+                                    ? null
+                                    : () async {
+                                        setState(() => _isPickingImage = true);
+                                        try {
+                                          final result = await FilePicker.platform
+                                              .pickFiles(
+                                            type: FileType.image,
+                                            allowMultiple: false,
+                                          );
+                                          if (result != null &&
+                                              result.files.single.path !=
+                                                  null &&
+                                              mounted) {
+                                            final imagePath =
+                                                result.files.single.path!;
 
-                  // 2. Audio Notifications Section (Recorded Audio Clips)
+                                            // Copy picked image to persistent directory
+                                            String savedPath = imagePath;
+                                            try {
+                                              final pickedFile = File(imagePath);
+                                              final persistentDir = Directory(
+                                                  '${pickedFile.parent.parent.path}/persistent_splash');
+                                              if (!persistentDir.existsSync()) {
+                                                await persistentDir.create(
+                                                    recursive: true);
+                                              }
+                                              final extension = pickedFile.path
+                                                  .split('.')
+                                                  .last;
+                                              final targetFile = File(
+                                                  '${persistentDir.path}/splash_image.$extension');
+                                              await pickedFile.copy(targetFile.path);
+                                              savedPath = targetFile.path;
+                                            } catch (_) {}
+
+                                            if (mounted) {
+                                              context
+                                                  .read<SettingsCubit>()
+                                                  .updateCustomSplashImagePath(
+                                                      savedPath);
+                                              ScaffoldMessenger.of(context)
+                                                  .showSnackBar(
+                                                SnackBar(
+                                                  content: Row(
+                                                    children: [
+                                                      Icon(
+                                                          LucideIcons
+                                                              .checkCircle2,
+                                                          color: Colors.white,
+                                                          size: 20.r),
+                                                      SizedBox(width: 10.w),
+                                                      const Expanded(
+                                                        child: Text(
+                                                          'تم تحديث صورة شاشة البداية بنجاح 🖼️',
+                                                          style: TextStyle(
+                                                              fontWeight:
+                                                                  FontWeight
+                                                                      .bold),
+                                                        ),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                  backgroundColor:
+                                                      AppColors.primary,
+                                                  behavior:
+                                                      SnackBarBehavior.floating,
+                                                  shape: RoundedRectangleBorder(
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            12.r),
+                                                  ),
+                                                ),
+                                              );
+                                            }
+                                          }
+                                        } catch (e) {
+                                          debugPrint('File picker error: $e');
+                                        } finally {
+                                          if (mounted) {
+                                            setState(
+                                                () => _isPickingImage = false);
+                                          }
+                                        }
+                                      },
+                              ),
+                            ),
+                            if (settings.customSplashImagePath != null) ...[
+                              SizedBox(width: 10.w),
+                              OutlinedButton.icon(
+                                style: OutlinedButton.styleFrom(
+                                  foregroundColor: AppColors.error,
+                                  side: const BorderSide(color: AppColors.error),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(12.r),
+                                  ),
+                                  padding: EdgeInsets.symmetric(
+                                      vertical: 12.h, horizontal: 12.w),
+                                ),
+                                icon: Icon(LucideIcons.rotateCcw, size: 18.r),
+                                label: Text(
+                                  'الافتراضية',
+                                  style: TextStyle(
+                                    fontSize: 14.sp,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                onPressed: () {
+                                  context
+                                      .read<SettingsCubit>()
+                                      .updateCustomSplashImagePath(null);
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Row(
+                                        children: [
+                                          Icon(LucideIcons.checkCircle2,
+                                              color: Colors.white, size: 20.r),
+                                          SizedBox(width: 10.w),
+                                          const Expanded(
+                                            child: Text(
+                                              'تمت استعادة الصورة الافتراضية 🔄',
+                                              style: TextStyle(
+                                                  fontWeight: FontWeight.bold),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                      backgroundColor: AppColors.primary,
+                                      behavior: SnackBarBehavior.floating,
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius:
+                                            BorderRadius.circular(12.r),
+                                      ),
+                                    ),
+                                  );
+                                },
+                              ),
+                            ],
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                  SizedBox(height: 24.h),
                   _buildSectionHeader(
                     context,
                     title: '1. الإشعارات وتكرار أصوات الأدعية 🎧',

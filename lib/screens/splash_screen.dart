@@ -1,8 +1,12 @@
 import 'dart:async';
+import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../app/app_colors.dart';
+import '../cubits/settings_cubit.dart';
+import '../cubits/settings_state.dart';
 import 'onboarding_screen.dart';
 
 class SplashScreen extends StatefulWidget {
@@ -88,45 +92,69 @@ class _SplashScreenState extends State<SplashScreen>
               child: ScaleTransition(
                 scale: _scaleAnimation,
                 child: Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 16.w),
+                  padding: EdgeInsets.symmetric(horizontal: 28.w, vertical: 12.h),
                   child: Column(
                     children: [
-                      SizedBox(height: 16.h),
+                      SizedBox(height: 12.h),
                       // Large Prominent Image Frame
                       Expanded(
                         child: Container(
                           width: double.infinity,
+                          padding: EdgeInsets.all(16.r),
                           decoration: BoxDecoration(
+                            color: isDark
+                                ? AppColors.darkSurface.withValues(alpha: 0.5)
+                                : AppColors.surface.withValues(alpha: 0.5),
                             borderRadius: BorderRadius.circular(28.r),
+                            border: Border.all(
+                              color: AppColors.primary.withValues(alpha: 0.2),
+                              width: 1.5,
+                            ),
                             boxShadow: [
                               BoxShadow(
-                                color: AppColors.primary.withValues(alpha: 0.25),
+                                color: AppColors.primary.withValues(alpha: 0.2),
                                 blurRadius: 24.r,
                                 spreadRadius: 2.r,
                                 offset: const Offset(0, 10),
                               ),
                             ],
                           ),
-                          child: ClipRRect(
-                            borderRadius: BorderRadius.circular(28.r),
-                            child: Image.asset(
-                              'assets/image/image.jpeg',
-                              fit: BoxFit.cover,
-                              filterQuality: FilterQuality.high,
-                              isAntiAlias: true,
-                              errorBuilder: (context, error, stackTrace) {
-                                return Container(
-                                  color: isDark
-                                      ? AppColors.darkSurface
-                                      : AppColors.surfaceVariant,
-                                  child: Icon(
-                                    Icons.image_not_supported_outlined,
-                                    size: 64.r,
-                                    color: AppColors.primary,
-                                  ),
-                                );
-                              },
-                            ),
+                          child: BlocBuilder<SettingsCubit, SettingsState>(
+                            builder: (context, settingsState) {
+                              final customPath =
+                                  settingsState.settings.customSplashImagePath;
+                              final bool hasCustomFile = customPath != null &&
+                                  customPath.isNotEmpty &&
+                                  File(customPath).existsSync();
+
+                              return ClipRRect(
+                                borderRadius: BorderRadius.circular(20.r),
+                                child: Padding(
+                                  padding: EdgeInsets.all(12.r),
+                                  child: hasCustomFile
+                                      ? Image.file(
+                                          File(customPath),
+                                          fit: BoxFit.contain,
+                                          filterQuality: FilterQuality.high,
+                                          isAntiAlias: true,
+                                          errorBuilder:
+                                              (context, error, stackTrace) {
+                                            return Image.asset(
+                                              'assets/image/image.jpeg',
+                                              fit: BoxFit.contain,
+                                              filterQuality: FilterQuality.high,
+                                            );
+                                          },
+                                        )
+                                      : Image.asset(
+                                          'assets/image/image.jpeg',
+                                          fit: BoxFit.contain,
+                                          filterQuality: FilterQuality.high,
+                                          isAntiAlias: true,
+                                        ),
+                                ),
+                              );
+                            },
                           ),
                         ),
                       ),

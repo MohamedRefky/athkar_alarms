@@ -18,6 +18,13 @@ class SettingsCubit extends Cubit<SettingsState> {
     await _saveAndReschedule(updated);
   }
 
+  void updateCustomSplashImagePath(String? path) async {
+    final updated = path == null
+        ? state.settings.copyWith(clearSplashImagePath: true)
+        : state.settings.copyWith(customSplashImagePath: path);
+    await _saveAndReschedule(updated);
+  }
+
   // --- Text Notification Settings ---
   void toggleTextNotifications(bool enabled) async {
     final updated = state.settings.copyWith(isTextNotificationsEnabled: enabled);
