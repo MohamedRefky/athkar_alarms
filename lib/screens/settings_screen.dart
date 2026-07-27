@@ -439,36 +439,23 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                             .existsSync();
 
                                 return Stack(
-                                  alignment: Alignment.center,
                                   children: [
-                                    // Ambient background matching image colors seamlessly
+                                    // Main Image filling 100% of the card with zero black spaces
                                     Positioned.fill(
-                                      child: Opacity(
-                                        opacity: 0.2,
-                                        child: hasCustomFile
-                                            ? Image.file(
-                                                File(settings
-                                                    .customSplashImagePath!),
-                                                fit: BoxFit.cover,
-                                              )
-                                            : Image.asset(
-                                                'assets/image/image.jpeg',
-                                                fit: BoxFit.cover,
-                                              ),
-                                      ),
-                                    ),
-                                    // Full uncropped crisp foreground image
-                                    Center(
                                       child: hasCustomFile
                                           ? Image.file(
                                               File(settings
                                                   .customSplashImagePath!),
                                               fit: BoxFit.cover,
+                                              width: double.infinity,
+                                              height: double.infinity,
                                               filterQuality: FilterQuality.high,
                                             )
                                           : Image.asset(
                                               'assets/image/image.jpeg',
                                               fit: BoxFit.cover,
+                                              width: double.infinity,
+                                              height: double.infinity,
                                               filterQuality: FilterQuality.high,
                                             ),
                                     ),
