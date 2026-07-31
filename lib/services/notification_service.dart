@@ -1,4 +1,6 @@
 import 'dart:async';
+import 'package:azkar/services/audio_service.dart';
+import 'package:azkar/services/service_locator.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:timezone/data/latest_all.dart' as tz;
@@ -487,17 +489,17 @@ class NotificationService {
         audioItem = shuffledAudio[(i - 1) % shuffledAudio.length];
       }
 
-      final soundResource = audioItem.soundName;
+      const soundResource = 'azkar_sound';
       final soundFileWithExt = '${audioItem.soundName}.mp3';
 
       final androidDetails = AndroidNotificationDetails(
-        '$_audioChannelPrefix$soundResource',
+        '${_audioChannelPrefix}azkar_sound',
         'إشعار صوتي - ${audioItem.title}',
         channelDescription: 'قناة الإشعار الصوتي الخاص ${audioItem.title}',
         importance: Importance.max,
         priority: Priority.max,
         playSound: true,
-        sound: RawResourceAndroidNotificationSound(soundResource),
+        sound: const RawResourceAndroidNotificationSound(soundResource),
         audioAttributesUsage: AudioAttributesUsage.notification,
         visibility: NotificationVisibility.public,
         category: AndroidNotificationCategory.reminder,
@@ -565,17 +567,23 @@ class NotificationService {
   }) async {
     await _createNotificationChannels();
 
-    final soundResource = audioItem.soundName;
+    // Play the full audio recitation voice via AudioService
+    try {
+      final audioService = sl<AudioService>();
+      await audioService.playAsset(audioItem.audio);
+    } catch (_) {}
+
+    const soundResource = 'azkar_sound';
     final soundFileWithExt = '${audioItem.soundName}.mp3';
 
     final androidDetails = AndroidNotificationDetails(
-      '$_audioChannelPrefix$soundResource',
+      '${_audioChannelPrefix}azkar_sound',
       'إشعار تجربة الصوت',
       channelDescription: 'قناة تجربة أصوات الإشعارات الصوتية',
       importance: Importance.max,
       priority: Priority.max,
       playSound: true,
-      sound: RawResourceAndroidNotificationSound(soundResource),
+      sound: const RawResourceAndroidNotificationSound(soundResource),
       audioAttributesUsage: AudioAttributesUsage.notification,
       visibility: NotificationVisibility.public,
       category: AndroidNotificationCategory.reminder,
