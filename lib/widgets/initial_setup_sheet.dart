@@ -306,19 +306,22 @@ class _InitialSetupSheetState extends State<InitialSetupSheet> {
             children: [
               _buildSetupTargetChip(
                 target: AudioGenderTarget.femaleOnly,
-                label: 'المرحومة 👩',
+                label: 'أدعية المرحومة',
+                icon: LucideIcons.heart,
                 isDark: isDark,
               ),
               SizedBox(width: 8.w),
               _buildSetupTargetChip(
                 target: AudioGenderTarget.maleOnly,
-                label: 'المرحوم 👨',
+                label: 'أدعية المرحوم',
+                icon: LucideIcons.userCheck,
                 isDark: isDark,
               ),
               SizedBox(width: 8.w),
               _buildSetupTargetChip(
                 target: AudioGenderTarget.both,
-                label: 'كلاهما 👫',
+                label: 'كافة الأصوات',
+                icon: LucideIcons.layers,
                 isDark: isDark,
               ),
             ],
@@ -473,6 +476,7 @@ class _InitialSetupSheetState extends State<InitialSetupSheet> {
   Widget _buildSetupTargetChip({
     required AudioGenderTarget target,
     required String label,
+    required IconData icon,
     required bool isDark,
   }) {
     final isSelected = _selectedGenderTarget == target;
@@ -500,18 +504,33 @@ class _InitialSetupSheetState extends State<InitialSetupSheet> {
                   : AppColors.primary.withValues(alpha: 0.2),
             ),
           ),
-          child: Text(
-            label,
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              fontSize: 13.sp,
-              fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-              color: isSelected
-                  ? Colors.white
-                  : (isDark
-                      ? AppColors.darkTextPrimary
-                      : AppColors.textPrimary),
-            ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                icon,
+                size: 14.r,
+                color: isSelected
+                    ? Colors.white
+                    : (isDark
+                        ? AppColors.darkTextSecondary
+                        : AppColors.textSecondary),
+              ),
+              SizedBox(width: 5.w),
+              Text(
+                label,
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 12.5.sp,
+                  fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                  color: isSelected
+                      ? Colors.white
+                      : (isDark
+                          ? AppColors.darkTextPrimary
+                          : AppColors.textPrimary),
+                ),
+              ),
+            ],
           ),
         ),
       ),

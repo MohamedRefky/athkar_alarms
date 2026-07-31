@@ -70,11 +70,11 @@ extension AudioGenderTargetX on AudioGenderTarget {
   String get label {
     switch (this) {
       case AudioGenderTarget.femaleOnly:
-        return 'تسجيلات المرحومة (أنثى) فقط 👩';
+        return 'أدعية المرحومة (لأمي / للفقيدة)';
       case AudioGenderTarget.maleOnly:
-        return 'تسجيلات المرحوم (ذكر) فقط 👨';
+        return 'أدعية المرحوم (لأبي / للفقيد)';
       case AudioGenderTarget.both:
-        return 'جميع التسجيلات (أنثى وذكر) 👫';
+        return 'كافة التسجيلات المباركة (15 صوتاً)';
     }
   }
 }

@@ -177,26 +177,24 @@ class _AudioAzkarScreenState extends State<AudioAzkarScreen> {
                           children: [
                             _buildFilterTab(
                               id: 'all',
-                              title: 'الكل ($femaleCount+$maleCount)',
+                              title: 'كافة الأصوات',
                               icon: LucideIcons.layers,
                               isSelected: _filter == 'all',
                               isDark: isDark,
                             ),
                             _buildFilterTab(
                               id: 'female',
-                              title: 'المرحومة ($femaleCount)',
+                              title: 'أدعية المرحومة',
                               icon: LucideIcons.heart,
                               isSelected: _filter == 'female',
                               isDark: isDark,
-                              activeColor: const Color(0xFFE91E63),
                             ),
                             _buildFilterTab(
                               id: 'male',
-                              title: 'المرحوم ($maleCount)',
-                              icon: LucideIcons.user,
+                              title: 'أدعية المرحوم',
+                              icon: LucideIcons.userCheck,
                               isSelected: _filter == 'male',
                               isDark: isDark,
-                              activeColor: const Color(0xFF0288D1),
                             ),
                           ],
                         ),
@@ -341,35 +339,39 @@ class _AudioAzkarScreenState extends State<AudioAzkarScreen> {
                                       ),
                                     ),
                                     SizedBox(width: 6.w),
-                                    // Gender Badge
                                     Container(
                                       padding: EdgeInsets.symmetric(
-                                          horizontal: 8.w, vertical: 2.h),
+                                          horizontal: 8.w, vertical: 3.h),
                                       decoration: BoxDecoration(
-                                        color: item.isFemale
-                                            ? const Color(0xFFE91E63)
-                                                .withValues(alpha: 0.12)
-                                            : const Color(0xFF0288D1)
-                                                .withValues(alpha: 0.12),
+                                        color: AppColors.primary
+                                            .withValues(alpha: 0.1),
                                         borderRadius:
                                             BorderRadius.circular(10.r),
                                         border: Border.all(
-                                          color: item.isFemale
-                                              ? const Color(0xFFE91E63)
-                                                  .withValues(alpha: 0.3)
-                                              : const Color(0xFF0288D1)
-                                                  .withValues(alpha: 0.3),
+                                          color: AppColors.primary
+                                              .withValues(alpha: 0.25),
                                         ),
                                       ),
-                                      child: Text(
-                                        item.isFemale ? '👩 أنثى' : '👨 ذكر',
-                                        style: TextStyle(
-                                          fontSize: 11.sp,
-                                          fontWeight: FontWeight.bold,
-                                          color: item.isFemale
-                                              ? const Color(0xFFE91E63)
-                                              : const Color(0xFF0288D1),
-                                        ),
+                                      child: Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          Icon(
+                                            item.isFemale
+                                                ? LucideIcons.heart
+                                                : LucideIcons.userCheck,
+                                            size: 11.r,
+                                            color: AppColors.primary,
+                                          ),
+                                          SizedBox(width: 4.w),
+                                          Text(
+                                            item.isFemale ? 'للمرحومة' : 'للمرحوم',
+                                            style: TextStyle(
+                                              fontSize: 11.sp,
+                                              fontWeight: FontWeight.bold,
+                                              color: AppColors.primary,
+                                            ),
+                                          ),
+                                        ],
                                       ),
                                     ),
                                   ],

@@ -1006,39 +1006,50 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                       : Colors.black.withValues(alpha: 0.05),
                                 ),
                                 SizedBox(height: 12.h),
+                                SizedBox(height: 16.h),
+                                Divider(
+                                  height: 1,
+                                  color: isDark
+                                      ? Colors.white.withValues(alpha: 0.08)
+                                      : Colors.black.withValues(alpha: 0.05),
+                                ),
+                                SizedBox(height: 12.h),
                                 Text(
-                                  'فئة الأصوات ونوع الإشعارات الصوتية:',
+                                  'تخصيص فئة وصيغة الإشعارات الصوتية:',
                                   style: TextStyle(
-                                    fontSize: 14.sp,
+                                    fontSize: 14.5.sp,
                                     fontWeight: FontWeight.bold,
                                     color: isDark
-                                        ? AppColors.darkTextSecondary
-                                        : AppColors.textSecondary,
+                                        ? AppColors.darkTextPrimary
+                                        : AppColors.primaryDark,
                                   ),
                                 ),
-                                SizedBox(height: 8.h),
-                                _buildGenderTargetOption(
+                                SizedBox(height: 10.h),
+                                _buildAudioCategoryCard(
                                   context: context,
-                                  title: 'تسجيلات المرحومة (أنثى) فقط 👩',
-                                  subtitle: '7 مقاطع صوتية مخصصة للأم/الأنثى المتوفاة',
+                                  title: 'أدعية المرحومة / للفقيدة',
+                                  subtitle: '7 مقاطع صوتية خاشعة بصيغة المؤنث (للأم، الأخت، الجدة...)',
+                                  icon: LucideIcons.heart,
                                   target: AudioGenderTarget.femaleOnly,
                                   current: settings.audioGenderTarget,
                                   isDark: isDark,
                                 ),
-                                SizedBox(height: 6.h),
-                                _buildGenderTargetOption(
+                                SizedBox(height: 8.h),
+                                _buildAudioCategoryCard(
                                   context: context,
-                                  title: 'تسجيلات المرحوم (ذكر) فقط 👨',
-                                  subtitle: '8 مقاطع صوتية مخصصة للأب/الذكر المتوفى',
+                                  title: 'أدعية المرحوم / للفقيد',
+                                  subtitle: '8 مقاطع صوتية خاشعة بصيغة المذكر (للأب، الأخ، الجد...)',
+                                  icon: LucideIcons.user,
                                   target: AudioGenderTarget.maleOnly,
                                   current: settings.audioGenderTarget,
                                   isDark: isDark,
                                 ),
-                                SizedBox(height: 6.h),
-                                _buildGenderTargetOption(
+                                SizedBox(height: 8.h),
+                                _buildAudioCategoryCard(
                                   context: context,
-                                  title: 'كلا التسجيلات (أنثى وذكر بالتناوب) 👫',
-                                  subtitle: '15 مقطع صوتي متاح بالتناوب',
+                                  title: 'كافة الأدعية والتسجيلات المباركة',
+                                  subtitle: '15 مقطعاً صوتياً للتنويع والتناوب بين الأدعية',
+                                  icon: LucideIcons.volume2,
                                   target: AudioGenderTarget.both,
                                   current: settings.audioGenderTarget,
                                   isDark: isDark,
@@ -1487,10 +1498,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
-  Widget _buildGenderTargetOption({
+  Widget _buildAudioCategoryCard({
     required BuildContext context,
     required String title,
     required String subtitle,
+    required IconData icon,
     required AudioGenderTarget target,
     required AudioGenderTarget current,
     required bool isDark,
@@ -1500,37 +1512,55 @@ class _SettingsScreenState extends State<SettingsScreen> {
       onTap: () {
         context.read<SettingsCubit>().updateAudioGenderTarget(target);
       },
-      borderRadius: BorderRadius.circular(14.r),
+      borderRadius: BorderRadius.circular(16.r),
       child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 10.h),
+        duration: const Duration(milliseconds: 220),
+        curve: Curves.easeOut,
+        padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 12.h),
         decoration: BoxDecoration(
           color: isSelected
-              ? AppColors.primary.withValues(alpha: 0.12)
+              ? (isDark
+                  ? AppColors.primary.withValues(alpha: 0.18)
+                  : AppColors.primary.withValues(alpha: 0.08))
               : (isDark
                   ? AppColors.darkBackground
-                  : AppColors.surfaceVariant),
-          borderRadius: BorderRadius.circular(14.r),
+                  : AppColors.surfaceVariant.withValues(alpha: 0.5)),
+          borderRadius: BorderRadius.circular(16.r),
           border: Border.all(
             color: isSelected
                 ? AppColors.primary
-                : AppColors.primary.withValues(alpha: 0.15),
+                : (isDark
+                    ? Colors.white.withValues(alpha: 0.08)
+                    : Colors.black.withValues(alpha: 0.06)),
             width: isSelected ? 1.8 : 1,
           ),
+          boxShadow: isSelected
+              ? [
+                  BoxShadow(
+                    color: AppColors.primary.withValues(alpha: 0.15),
+                    blurRadius: 10.r,
+                    offset: const Offset(0, 3),
+                  ),
+                ]
+              : null,
         ),
         child: Row(
           children: [
-            Radio<AudioGenderTarget>(
-              value: target,
-              groupValue: current,
-              activeColor: AppColors.primary,
-              onChanged: (val) {
-                if (val != null) {
-                  context.read<SettingsCubit>().updateAudioGenderTarget(val);
-                }
-              },
+            Container(
+              padding: EdgeInsets.all(10.r),
+              decoration: BoxDecoration(
+                color: isSelected
+                    ? AppColors.primary
+                    : AppColors.primary.withValues(alpha: 0.12),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                icon,
+                color: isSelected ? Colors.white : AppColors.primary,
+                size: 20.r,
+              ),
             ),
-            SizedBox(width: 4.w),
+            SizedBox(width: 12.w),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -1538,23 +1568,51 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   Text(
                     title,
                     style: TextStyle(
-                      fontSize: 14.sp,
+                      fontSize: 14.5.sp,
                       fontWeight: FontWeight.bold,
-                      color: isDark
-                          ? AppColors.darkTextPrimary
-                          : AppColors.textPrimary,
+                      color: isSelected
+                          ? AppColors.primary
+                          : (isDark
+                              ? AppColors.darkTextPrimary
+                              : AppColors.textPrimary),
                     ),
                   ),
-                  SizedBox(height: 2.h),
+                  SizedBox(height: 3.h),
                   Text(
                     subtitle,
                     style: TextStyle(
                       fontSize: 11.5.sp,
-                      color: AppColors.textHint,
+                      color: isDark
+                          ? AppColors.darkTextSecondary
+                          : AppColors.textSecondary,
+                      height: 1.25,
                     ),
                   ),
                 ],
               ),
+            ),
+            SizedBox(width: 8.w),
+            AnimatedContainer(
+              duration: const Duration(milliseconds: 200),
+              width: 22.r,
+              height: 22.r,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: isSelected ? AppColors.primary : Colors.transparent,
+                border: Border.all(
+                  color: isSelected
+                      ? AppColors.primary
+                      : AppColors.textHint.withValues(alpha: 0.4),
+                  width: 1.5,
+                ),
+              ),
+              child: isSelected
+                  ? Icon(
+                      LucideIcons.check,
+                      color: Colors.white,
+                      size: 14.r,
+                    )
+                  : null,
             ),
           ],
         ),
