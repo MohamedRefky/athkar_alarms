@@ -45,5 +45,7 @@ flutter:
     - assets/duas.json
     - assets/audio_azkar.json
     - assets/audio/
+    - assets/audio/man/
+    - assets/audio/woman/
     - assets/image/
 

@@ -84,6 +84,11 @@ class SettingsCubit extends Cubit<SettingsState> {
     await _saveAndReschedule(updated);
   }
 
+  void updateAudioGenderTarget(AudioGenderTarget target) async {
+    final updated = state.settings.copyWith(audioGenderTarget: target);
+    await _saveAndReschedule(updated);
+  }
+
   void setCustomAudioForDua(int duaId, String filePath) async {
     final updatedMap = Map<int, String>.from(state.settings.customAudioMap);
     updatedMap[duaId] = filePath;
@@ -117,4 +122,3 @@ class SettingsCubit extends Cubit<SettingsState> {
     );
   }
 }
-

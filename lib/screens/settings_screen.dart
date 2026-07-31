@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:azkar/models/settings_model.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -1006,7 +1007,52 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                 ),
                                 SizedBox(height: 12.h),
                                 Text(
-                                  'نمط اختيار الصوت:',
+                                  'فئة الأصوات ونوع الإشعارات الصوتية:',
+                                  style: TextStyle(
+                                    fontSize: 14.sp,
+                                    fontWeight: FontWeight.bold,
+                                    color: isDark
+                                        ? AppColors.darkTextSecondary
+                                        : AppColors.textSecondary,
+                                  ),
+                                ),
+                                SizedBox(height: 8.h),
+                                _buildGenderTargetOption(
+                                  context: context,
+                                  title: 'تسجيلات المرحومة (أنثى) فقط 👩',
+                                  subtitle: '7 مقاطع صوتية مخصصة للأم/الأنثى المتوفاة',
+                                  target: AudioGenderTarget.femaleOnly,
+                                  current: settings.audioGenderTarget,
+                                  isDark: isDark,
+                                ),
+                                SizedBox(height: 6.h),
+                                _buildGenderTargetOption(
+                                  context: context,
+                                  title: 'تسجيلات المرحوم (ذكر) فقط 👨',
+                                  subtitle: '8 مقاطع صوتية مخصصة للأب/الذكر المتوفى',
+                                  target: AudioGenderTarget.maleOnly,
+                                  current: settings.audioGenderTarget,
+                                  isDark: isDark,
+                                ),
+                                SizedBox(height: 6.h),
+                                _buildGenderTargetOption(
+                                  context: context,
+                                  title: 'كلا التسجيلات (أنثى وذكر بالتناوب) 👫',
+                                  subtitle: '15 مقطع صوتي متاح بالتناوب',
+                                  target: AudioGenderTarget.both,
+                                  current: settings.audioGenderTarget,
+                                  isDark: isDark,
+                                ),
+                                SizedBox(height: 16.h),
+                                Divider(
+                                  height: 1,
+                                  color: isDark
+                                      ? Colors.white.withValues(alpha: 0.08)
+                                      : Colors.black.withValues(alpha: 0.05),
+                                ),
+                                SizedBox(height: 12.h),
+                                Text(
+                                  'نمط تشغيل الصوت:',
                                   style: TextStyle(
                                     fontSize: 14.sp,
                                     fontWeight: FontWeight.bold,
@@ -1035,9 +1081,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                       activeColor: AppColors.primary,
                                       groupValue: settings.selectedAudioIndex,
                                       title: const Text(
-                                          'تتابع متسلسل بين الـ 16 صوت (صوت جديد كل فترة) 🔁'),
+                                          'تتابع متسلسل في الفئة المحددة (صوت جديد كل فترة) 🔁'),
                                       subtitle: const Text(
-                                          'الفترة الأولى صوت 1، الفترة التالية صوت 2... وهكذا'),
+                                          'الفترة الأولى صوت 1، الفترة التالية صوت 2... وهكذا في الفئة المختارة'),
                                       onChanged: (val) {
                                         if (val != null) {
                                           context
@@ -1437,6 +1483,81 @@ class _SettingsScreenState extends State<SettingsScreen> {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildGenderTargetOption({
+    required BuildContext context,
+    required String title,
+    required String subtitle,
+    required AudioGenderTarget target,
+    required AudioGenderTarget current,
+    required bool isDark,
+  }) {
+    final isSelected = target == current;
+    return InkWell(
+      onTap: () {
+        context.read<SettingsCubit>().updateAudioGenderTarget(target);
+      },
+      borderRadius: BorderRadius.circular(14.r),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 10.h),
+        decoration: BoxDecoration(
+          color: isSelected
+              ? AppColors.primary.withValues(alpha: 0.12)
+              : (isDark
+                  ? AppColors.darkBackground
+                  : AppColors.surfaceVariant),
+          borderRadius: BorderRadius.circular(14.r),
+          border: Border.all(
+            color: isSelected
+                ? AppColors.primary
+                : AppColors.primary.withValues(alpha: 0.15),
+            width: isSelected ? 1.8 : 1,
+          ),
+        ),
+        child: Row(
+          children: [
+            Radio<AudioGenderTarget>(
+              value: target,
+              groupValue: current,
+              activeColor: AppColors.primary,
+              onChanged: (val) {
+                if (val != null) {
+                  context.read<SettingsCubit>().updateAudioGenderTarget(val);
+                }
+              },
+            ),
+            SizedBox(width: 4.w),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: TextStyle(
+                      fontSize: 14.sp,
+                      fontWeight: FontWeight.bold,
+                      color: isDark
+                          ? AppColors.darkTextPrimary
+                          : AppColors.textPrimary,
+                    ),
+                  ),
+                  SizedBox(height: 2.h),
+                  Text(
+                    subtitle,
+                    style: TextStyle(
+                      fontSize: 11.5.sp,
+                      color: AppColors.textHint,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

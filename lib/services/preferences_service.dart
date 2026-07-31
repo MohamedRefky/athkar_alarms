@@ -21,6 +21,7 @@ class PreferencesService {
   static const String keyAudioDailyHour = 'audio_daily_hour';
   static const String keyAudioDailyMinute = 'audio_daily_minute';
   static const String keySelectedAudioIndex = 'selected_audio_index';
+  static const String keyAudioGenderTargetIndex = 'audio_gender_target_index';
 
   static const String keyCustomSplashImagePath = 'custom_splash_image_path';
   static const String keyCustomAudioMap = 'custom_audio_map';
@@ -38,8 +39,7 @@ class PreferencesService {
   }
 
   SettingsModel getSettings() {
-    final motherName =
-        _prefs.getString(keyMotherName) ?? '';
+    final motherName = _prefs.getString(keyMotherName) ?? '';
 
     // Text settings
     final isTextEnabled = _prefs.getBool(keyIsTextEnabled) ?? true;
@@ -57,6 +57,8 @@ class PreferencesService {
     final audioDailyHour = _prefs.getInt(keyAudioDailyHour) ?? 17;
     final audioDailyMinute = _prefs.getInt(keyAudioDailyMinute) ?? 0;
     final selectedAudioIndex = _prefs.getInt(keySelectedAudioIndex) ?? 0;
+    final audioGenderTargetIdx =
+        _prefs.getInt(keyAudioGenderTargetIndex) ?? AudioGenderTarget.both.index;
 
     // Splash Image
     final customSplashImagePath = _prefs.getString(keyCustomSplashImagePath);
@@ -81,6 +83,11 @@ class PreferencesService {
             ? audioFreqIdx
             : NotificationFrequency.custom.index;
 
+    final safeAudioGenderTargetIdx = (audioGenderTargetIdx >= 0 &&
+            audioGenderTargetIdx < AudioGenderTarget.values.length)
+        ? audioGenderTargetIdx
+        : AudioGenderTarget.both.index;
+
     return SettingsModel(
       motherName: motherName,
       isTextNotificationsEnabled: isTextEnabled,
@@ -94,6 +101,7 @@ class PreferencesService {
       audioDailyHour: audioDailyHour,
       audioDailyMinute: audioDailyMinute,
       selectedAudioIndex: selectedAudioIndex,
+      audioGenderTarget: AudioGenderTarget.values[safeAudioGenderTargetIdx],
       customSplashImagePath: customSplashImagePath,
       customAudioMap: customAudioMap,
     );
@@ -120,6 +128,8 @@ class PreferencesService {
     await _prefs.setInt(keyAudioDailyHour, settings.audioDailyHour);
     await _prefs.setInt(keyAudioDailyMinute, settings.audioDailyMinute);
     await _prefs.setInt(keySelectedAudioIndex, settings.selectedAudioIndex);
+    await _prefs.setInt(
+        keyAudioGenderTargetIndex, settings.audioGenderTarget.index);
 
     // Splash Image
     if (settings.customSplashImagePath != null) {

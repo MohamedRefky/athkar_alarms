@@ -11,6 +11,7 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../app/app_colors.dart';
 import '../cubits/dua_cubit.dart';
 import '../cubits/settings_cubit.dart';
+import '../models/settings_model.dart';
 
 class InitialSetupSheet extends StatefulWidget {
   const InitialSetupSheet({super.key});
@@ -36,6 +37,7 @@ class InitialSetupSheet extends StatefulWidget {
 class _InitialSetupSheetState extends State<InitialSetupSheet> {
   late TextEditingController _nameController;
   String? _pickedImagePath;
+  late AudioGenderTarget _selectedGenderTarget;
   bool _isPickingImage = false;
 
   @override
@@ -44,6 +46,7 @@ class _InitialSetupSheetState extends State<InitialSetupSheet> {
     final settings = context.read<SettingsCubit>().state.settings;
     _nameController = TextEditingController(text: settings.motherName);
     _pickedImagePath = settings.customSplashImagePath;
+    _selectedGenderTarget = settings.audioGenderTarget;
   }
 
   @override
@@ -96,6 +99,9 @@ class _InitialSetupSheetState extends State<InitialSetupSheet> {
 
     // Update name
     settingsCubit.updateMotherName(name);
+
+    // Update audio gender target
+    settingsCubit.updateAudioGenderTarget(_selectedGenderTarget);
 
     // Update image
     settingsCubit.updateCustomSplashImagePath(_pickedImagePath);
@@ -221,7 +227,7 @@ class _InitialSetupSheetState extends State<InitialSetupSheet> {
 
           // Subtitle
           Text(
-            'أدخل اسم وصورة الفقيد ليتخصص التطبيق والإشعارات بنية الدعاء له والصدقة الجارية باسمه.',
+            'أدخل اسم وصورة الفقيد واختر أصوات الإشعارات المناسبة بنية الدعاء له والصدقة الجارية باسمه.',
             textAlign: TextAlign.center,
             style: TextStyle(
               fontSize: 13.sp,
@@ -231,7 +237,7 @@ class _InitialSetupSheetState extends State<InitialSetupSheet> {
               height: 1.4,
             ),
           ),
-          SizedBox(height: 20.h),
+          SizedBox(height: 18.h),
 
           // Name Input Field
           TextFormField(
@@ -277,7 +283,48 @@ class _InitialSetupSheetState extends State<InitialSetupSheet> {
               ),
             ),
           ),
-          SizedBox(height: 16.h),
+          SizedBox(height: 14.h),
+
+          // Audio Gender Target Selection Header
+          Align(
+            alignment: Alignment.centerRight,
+            child: Text(
+              'أصوات الإشعارات الصوتية المرغوبة:',
+              style: TextStyle(
+                fontSize: 13.sp,
+                fontWeight: FontWeight.bold,
+                color: isDark
+                    ? AppColors.darkTextSecondary
+                    : AppColors.textSecondary,
+              ),
+            ),
+          ),
+          SizedBox(height: 8.h),
+
+          // Gender Selection Segmented Options
+          Row(
+            children: [
+              _buildSetupTargetChip(
+                target: AudioGenderTarget.femaleOnly,
+                label: 'المرحومة 👩',
+                isDark: isDark,
+              ),
+              SizedBox(width: 8.w),
+              _buildSetupTargetChip(
+                target: AudioGenderTarget.maleOnly,
+                label: 'المرحوم 👨',
+                isDark: isDark,
+              ),
+              SizedBox(width: 8.w),
+              _buildSetupTargetChip(
+                target: AudioGenderTarget.both,
+                label: 'كلاهما 👫',
+                isDark: isDark,
+              ),
+            ],
+          ),
+
+          SizedBox(height: 14.h),
 
           // Custom Picture Picker Container
           InkWell(
@@ -301,8 +348,8 @@ class _InitialSetupSheetState extends State<InitialSetupSheet> {
                 children: [
                   // Image Thumbnail or Icon
                   Container(
-                    width: 58.r,
-                    height: 58.r,
+                    width: 54.r,
+                    height: 54.r,
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
                       color: AppColors.primary.withValues(alpha: 0.1),
@@ -315,13 +362,13 @@ class _InitialSetupSheetState extends State<InitialSetupSheet> {
                           ? Image.file(
                               File(_pickedImagePath!),
                               fit: BoxFit.cover,
-                              width: 58.r,
-                              height: 58.r,
+                              width: 54.r,
+                              height: 54.r,
                             )
                           : Icon(
                               LucideIcons.camera,
                               color: AppColors.primary,
-                              size: 26.r,
+                              size: 24.r,
                             ),
                     ),
                   ),
@@ -375,7 +422,7 @@ class _InitialSetupSheetState extends State<InitialSetupSheet> {
               ),
             ),
           ),
-          SizedBox(height: 22.h),
+          SizedBox(height: 20.h),
 
           // Primary Save Button
           SizedBox(
@@ -403,7 +450,7 @@ class _InitialSetupSheetState extends State<InitialSetupSheet> {
             ),
           ),
 
-          SizedBox(height: 10.h),
+          SizedBox(height: 8.h),
 
           // Secondary Skip Button
           TextButton(
@@ -419,6 +466,54 @@ class _InitialSetupSheetState extends State<InitialSetupSheet> {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildSetupTargetChip({
+    required AudioGenderTarget target,
+    required String label,
+    required bool isDark,
+  }) {
+    final isSelected = _selectedGenderTarget == target;
+    return Expanded(
+      child: InkWell(
+        onTap: () {
+          setState(() {
+            _selectedGenderTarget = target;
+          });
+        },
+        borderRadius: BorderRadius.circular(12.r),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
+          padding: EdgeInsets.symmetric(vertical: 10.h),
+          decoration: BoxDecoration(
+            color: isSelected
+                ? AppColors.primary
+                : (isDark
+                    ? AppColors.darkBackground
+                    : AppColors.surfaceVariant),
+            borderRadius: BorderRadius.circular(12.r),
+            border: Border.all(
+              color: isSelected
+                  ? AppColors.primary
+                  : AppColors.primary.withValues(alpha: 0.2),
+            ),
+          ),
+          child: Text(
+            label,
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              fontSize: 13.sp,
+              fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+              color: isSelected
+                  ? Colors.white
+                  : (isDark
+                      ? AppColors.darkTextPrimary
+                      : AppColors.textPrimary),
+            ),
+          ),
+        ),
       ),
     );
   }

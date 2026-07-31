@@ -60,6 +60,25 @@ extension NotificationFrequencyX on NotificationFrequency {
   }
 }
 
+enum AudioGenderTarget {
+  femaleOnly,
+  maleOnly,
+  both,
+}
+
+extension AudioGenderTargetX on AudioGenderTarget {
+  String get label {
+    switch (this) {
+      case AudioGenderTarget.femaleOnly:
+        return 'تسجيلات المرحومة (أنثى) فقط 👩';
+      case AudioGenderTarget.maleOnly:
+        return 'تسجيلات المرحوم (ذكر) فقط 👨';
+      case AudioGenderTarget.both:
+        return 'جميع التسجيلات (أنثى وذكر) 👫';
+    }
+  }
+}
+
 class SettingsModel extends Equatable {
   final String motherName;
 
@@ -76,7 +95,8 @@ class SettingsModel extends Equatable {
   final int audioCustomIntervalMinutes;
   final int audioDailyHour;
   final int audioDailyMinute;
-  final int selectedAudioIndex; // 0 = Sequential Loop (1..16), >0 = Specific sound
+  final int selectedAudioIndex; // 0 = Sequential Loop, >0 = Specific sound
+  final AudioGenderTarget audioGenderTarget; // femaleOnly, maleOnly, both
 
   // Custom Splash Screen Image
   final String? customSplashImagePath;
@@ -97,6 +117,7 @@ class SettingsModel extends Equatable {
     this.audioDailyHour = 17,
     this.audioDailyMinute = 0,
     this.selectedAudioIndex = 0,
+    this.audioGenderTarget = AudioGenderTarget.both,
     this.customSplashImagePath,
     this.customAudioMap = const {},
   });
@@ -121,6 +142,7 @@ class SettingsModel extends Equatable {
     int? audioDailyHour,
     int? audioDailyMinute,
     int? selectedAudioIndex,
+    AudioGenderTarget? audioGenderTarget,
     String? customSplashImagePath,
     bool clearSplashImagePath = false,
     Map<int, String>? customAudioMap,
@@ -142,6 +164,7 @@ class SettingsModel extends Equatable {
       audioDailyHour: audioDailyHour ?? this.audioDailyHour,
       audioDailyMinute: audioDailyMinute ?? this.audioDailyMinute,
       selectedAudioIndex: selectedAudioIndex ?? this.selectedAudioIndex,
+      audioGenderTarget: audioGenderTarget ?? this.audioGenderTarget,
       customSplashImagePath: clearSplashImagePath
           ? null
           : (customSplashImagePath ?? this.customSplashImagePath),
@@ -177,6 +200,7 @@ class SettingsModel extends Equatable {
         audioDailyHour,
         audioDailyMinute,
         selectedAudioIndex,
+        audioGenderTarget,
         customSplashImagePath,
         customAudioMap,
       ];

@@ -125,7 +125,9 @@ class NotificationService {
     // 2. Pre-create All Audio Sound Channels with Custom MP3 Sound & Max Importance
     final sounds = [
       'azkar_sound',
-      for (int i = 1; i <= 16; i++) 'audio$i',
+      for (int i = 1; i <= 7; i++) 'woman_mother_$i',
+      for (int i = 1; i <= 3; i++) 'man_father_$i',
+      for (int i = 1; i <= 5; i++) 'man_all_$i',
     ];
 
     int successCount = 0;
@@ -449,21 +451,34 @@ class NotificationService {
     final now = tz.TZDateTime.now(tz.local);
     const int count = 25;
 
-    // Shuffle audio list for random order if auto-rotation is selected
-    final shuffledAudio = List<AudioAzkarModel>.from(audioAzkar)..shuffle();
+    // Filter audio pool according to user's gender preference (femaleOnly / maleOnly / both)
+    List<AudioAzkarModel> pool = audioAzkar;
+    if (settings.audioGenderTarget == AudioGenderTarget.femaleOnly) {
+      pool = audioAzkar.where((a) => a.isFemale).toList();
+    } else if (settings.audioGenderTarget == AudioGenderTarget.maleOnly) {
+      pool = audioAzkar.where((a) => a.isMale).toList();
+    }
+    if (pool.isEmpty) {
+      pool = audioAzkar;
+    }
 
-    debugPrint('🔊 [AUDIO] Scheduling $count exact audio notifications every $intervalMins min');
+    // Shuffle audio list for random order if auto-rotation is selected
+    final shuffledAudio = List<AudioAzkarModel>.from(pool)..shuffle();
+
+    debugPrint('🔊 [AUDIO] Scheduling $count exact audio notifications every $intervalMins min (target: ${settings.audioGenderTarget.name}, pool size: ${pool.length})');
 
     int scheduled = 0;
 
     for (int i = 1; i <= count; i++) {
       final AudioAzkarModel audioItem;
-      if (settings.selectedAudioIndex > 0 &&
-          settings.selectedAudioIndex <= audioAzkar.length) {
-        // Specific audio file chosen by user
-        audioItem = audioAzkar[settings.selectedAudioIndex - 1];
+      if (settings.selectedAudioIndex > 0) {
+        final specific = audioAzkar.firstWhere(
+          (a) => a.id == settings.selectedAudioIndex,
+          orElse: () => shuffledAudio[(i - 1) % shuffledAudio.length],
+        );
+        audioItem = specific;
       } else {
-        // Rotate through all audio files automatically
+        // Rotate through filtered audio files automatically
         audioItem = shuffledAudio[(i - 1) % shuffledAudio.length];
       }
 

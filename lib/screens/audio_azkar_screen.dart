@@ -2,17 +2,27 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
+
 import '../app/app_colors.dart';
 import '../cubits/dua_cubit.dart';
 import '../cubits/dua_state.dart';
 import '../cubits/settings_cubit.dart';
 import '../cubits/settings_state.dart';
+import '../models/audio_azkar_model.dart';
+import '../models/settings_model.dart';
 import '../services/notification_service.dart';
 import '../services/service_locator.dart';
 import '../widgets/audio_player_bar.dart';
 
-class AudioAzkarScreen extends StatelessWidget {
+class AudioAzkarScreen extends StatefulWidget {
   const AudioAzkarScreen({super.key});
+
+  @override
+  State<AudioAzkarScreen> createState() => _AudioAzkarScreenState();
+}
+
+class _AudioAzkarScreenState extends State<AudioAzkarScreen> {
+  String _filter = 'all'; // 'all', 'female', 'male'
 
   @override
   Widget build(BuildContext context) {
@@ -43,6 +53,7 @@ class AudioAzkarScreen extends StatelessWidget {
           builder: (context, settingsState) {
             final motherName = settingsState.settings.motherName;
             final selectedAudioIdx = settingsState.settings.selectedAudioIndex;
+            final currentTarget = settingsState.settings.audioGenderTarget;
 
             return BlocBuilder<DuaCubit, DuaState>(
               builder: (context, duaState) {
@@ -52,9 +63,9 @@ class AudioAzkarScreen extends StatelessWidget {
                   );
                 }
 
-                final audioList = duaState.audioAzkar;
+                final allAudioList = duaState.audioAzkar;
 
-                if (audioList.isEmpty) {
+                if (allAudioList.isEmpty) {
                   return Center(
                     child: Text(
                       'لا توجد تسجيلات صوتية متاحة حالياً',
@@ -66,6 +77,18 @@ class AudioAzkarScreen extends StatelessWidget {
                       ),
                     ),
                   );
+                }
+
+                final femaleCount =
+                    allAudioList.where((a) => a.isFemale).length;
+                final maleCount = allAudioList.where((a) => a.isMale).length;
+
+                // Filter list
+                List<AudioAzkarModel> displayList = allAudioList;
+                if (_filter == 'female') {
+                  displayList = allAudioList.where((a) => a.isFemale).toList();
+                } else if (_filter == 'male') {
+                  displayList = allAudioList.where((a) => a.isMale).toList();
                 }
 
                 return Column(
@@ -82,7 +105,7 @@ class AudioAzkarScreen extends StatelessWidget {
                           begin: Alignment.topRight,
                           end: Alignment.bottomLeft,
                         ),
-                        borderRadius: BorderRadius.circular(16.r),
+                        borderRadius: BorderRadius.circular(20.r),
                         boxShadow: [
                           BoxShadow(
                             color: AppColors.primary.withValues(alpha: 0.2),
@@ -94,7 +117,7 @@ class AudioAzkarScreen extends StatelessWidget {
                       child: Row(
                         children: [
                           Container(
-                            padding: EdgeInsets.all(10.r),
+                            padding: EdgeInsets.all(12.r),
                             decoration: BoxDecoration(
                               color: Colors.white.withValues(alpha: 0.15),
                               shape: BoxShape.circle,
@@ -111,7 +134,7 @@ class AudioAzkarScreen extends StatelessWidget {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  'المقاطع والتسجيلات الصوتية (16 صوت)',
+                                  'مكتبة التسجيلات الصوتية (15 صوت)',
                                   style: TextStyle(
                                     fontSize: 16.sp,
                                     fontWeight: FontWeight.bold,
@@ -120,10 +143,11 @@ class AudioAzkarScreen extends StatelessWidget {
                                 ),
                                 SizedBox(height: 4.h),
                                 Text(
-                                  'يمكنك الاستماع لكل تسجيل أو تعيينه بنغمة الإشعارات',
+                                  'تم فصل تسجيلات الإناث (7 مقاطع) عن الذكور (8 مقاطع) لتخصيص الإشعارات بنية الدعاء.',
                                   style: TextStyle(
                                     fontSize: 12.sp,
-                                    color: Colors.white.withValues(alpha: 0.85),
+                                    color: Colors.white.withValues(alpha: 0.9),
+                                    height: 1.3,
                                   ),
                                 ),
                               ],
@@ -132,6 +156,80 @@ class AudioAzkarScreen extends StatelessWidget {
                         ],
                       ),
                     ),
+
+                    // Filter Tabs Header
+                    Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 16.w),
+                      child: Container(
+                        padding: EdgeInsets.all(4.r),
+                        decoration: BoxDecoration(
+                          color: isDark
+                              ? AppColors.darkSurface
+                              : AppColors.surfaceVariant,
+                          borderRadius: BorderRadius.circular(16.r),
+                          border: Border.all(
+                            color: isDark
+                                ? Colors.white.withValues(alpha: 0.08)
+                                : Colors.black.withValues(alpha: 0.05),
+                          ),
+                        ),
+                        child: Row(
+                          children: [
+                            _buildFilterTab(
+                              id: 'all',
+                              title: 'الكل ($femaleCount+$maleCount)',
+                              icon: LucideIcons.layers,
+                              isSelected: _filter == 'all',
+                              isDark: isDark,
+                            ),
+                            _buildFilterTab(
+                              id: 'female',
+                              title: 'المرحومة ($femaleCount)',
+                              icon: LucideIcons.heart,
+                              isSelected: _filter == 'female',
+                              isDark: isDark,
+                              activeColor: const Color(0xFFE91E63),
+                            ),
+                            _buildFilterTab(
+                              id: 'male',
+                              title: 'المرحوم ($maleCount)',
+                              icon: LucideIcons.user,
+                              isSelected: _filter == 'male',
+                              isDark: isDark,
+                              activeColor: const Color(0xFF0288D1),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+
+                    SizedBox(height: 10.h),
+
+                    // Active Target Indicator
+                    Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 20.w),
+                      child: Row(
+                        children: [
+                          Icon(LucideIcons.bell,
+                              size: 14.r, color: AppColors.accentGold),
+                          SizedBox(width: 6.w),
+                          Expanded(
+                            child: Text(
+                              'مصدر إشعارات الصوت المعتمد حالياً: ${currentTarget.label}',
+                              style: TextStyle(
+                                fontSize: 12.sp,
+                                color: isDark
+                                    ? AppColors.darkTextSecondary
+                                    : AppColors.textSecondary,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+
+                    SizedBox(height: 10.h),
 
                     // Audio Player Bar if active
                     if (duaState.isPlayingAudio ||
@@ -155,16 +253,16 @@ class AudioAzkarScreen extends StatelessWidget {
                         ),
                       ),
 
-                    SizedBox(height: 8.h),
+                    SizedBox(height: 4.h),
 
                     // Audio Items List
                     Expanded(
                       child: ListView.builder(
                         padding: EdgeInsets.symmetric(
                             horizontal: 16.w, vertical: 8.h),
-                        itemCount: audioList.length,
+                        itemCount: displayList.length,
                         itemBuilder: (context, index) {
-                          final item = audioList[index];
+                          final item = displayList[index];
                           final isCurrentPlaying =
                               duaState.currentAudioAzkar?.id == item.id &&
                                   duaState.isPlayingAudio;
@@ -199,128 +297,169 @@ class AudioAzkarScreen extends StatelessWidget {
                               color: Colors.transparent,
                               borderRadius: BorderRadius.circular(16.r),
                               child: ListTile(
-                              contentPadding: EdgeInsets.symmetric(
-                                horizontal: 16.w,
-                                vertical: 6.h,
-                              ),
-                              leading: GestureDetector(
-                                onTap: () => context
-                                    .read<DuaCubit>()
-                                    .playAudioAzkarItem(item),
-                                child: Container(
-                                  width: 44.r,
-                                  height: 44.r,
-                                  decoration: BoxDecoration(
-                                    color: isCurrentPlaying
-                                        ? AppColors.primary
-                                        : AppColors.primary
-                                            .withValues(alpha: 0.12),
-                                    shape: BoxShape.circle,
-                                  ),
-                                  child: Icon(
-                                    isCurrentPlaying
-                                        ? LucideIcons.pause
-                                        : LucideIcons.play,
-                                    color: isCurrentPlaying
-                                        ? Colors.white
-                                        : AppColors.primary,
-                                    size: 22.r,
-                                  ),
+                                contentPadding: EdgeInsets.symmetric(
+                                  horizontal: 14.w,
+                                  vertical: 6.h,
                                 ),
-                              ),
-                              title: Text(
-                                item.title,
-                                style: TextStyle(
-                                  fontSize: 15.sp,
-                                  fontWeight: FontWeight.bold,
-                                  color: isDark
-                                      ? AppColors.darkTextPrimary
-                                      : AppColors.textPrimary,
-                                ),
-                              ),
-                              subtitle: Text(
-                                isSelectedForNotification
-                                    ? 'محدد كنغمة إشعارات صوتية أساسية ✓'
-                                    : 'اضغط للاستماع أو التجربة',
-                                style: TextStyle(
-                                  fontSize: 12.sp,
-                                  color: isSelectedForNotification
-                                      ? AppColors.primary
-                                      : AppColors.textHint,
-                                  fontWeight: isSelectedForNotification
-                                      ? FontWeight.bold
-                                      : FontWeight.normal,
-                                ),
-                              ),
-                              trailing: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  IconButton(
-                                    tooltip: 'تجربة إشعار فورية بصوت المقطع',
-                                    icon: Icon(
-                                      LucideIcons.bellRing,
-                                      color: AppColors.primary,
-                                      size: 20.r,
+                                leading: GestureDetector(
+                                  onTap: () => context
+                                      .read<DuaCubit>()
+                                      .playAudioAzkarItem(item),
+                                  child: Container(
+                                    width: 44.r,
+                                    height: 44.r,
+                                    decoration: BoxDecoration(
+                                      color: isCurrentPlaying
+                                          ? AppColors.primary
+                                          : AppColors.primary
+                                              .withValues(alpha: 0.12),
+                                      shape: BoxShape.circle,
                                     ),
-                                    onPressed: () {
-                                      sl<NotificationService>()
-                                          .showInstantAudioNotification(
-                                        audioItem: item,
-                                        motherName: motherName,
-                                      );
-                                      ScaffoldMessenger.of(context)
-                                          .showSnackBar(
-                                        SnackBar(
-                                          content: Text(
-                                              'تم إرسال إشعار تجريبي بصوت: ${item.title}'),
-                                          backgroundColor: AppColors.primary,
-                                          behavior: SnackBarBehavior.floating,
-                                          duration: const Duration(seconds: 2),
-                                        ),
-                                      );
-                                    },
-                                  ),
-                                  PopupMenuButton<String>(
-                                    icon: Icon(
-                                      LucideIcons.moreVertical,
-                                      color: AppColors.textHint,
-                                      size: 18.r,
+                                    child: Icon(
+                                      isCurrentPlaying
+                                          ? LucideIcons.pause
+                                          : LucideIcons.play,
+                                      color: isCurrentPlaying
+                                          ? Colors.white
+                                          : AppColors.primary,
+                                      size: 22.r,
                                     ),
-                                    onSelected: (val) {
-                                      if (val == 'select') {
-                                        context
-                                            .read<SettingsCubit>()
-                                            .updateSelectedAudioIndex(item.id);
-                                        final duaCubit =
-                                            context.read<DuaCubit>();
-                                        context
-                                            .read<SettingsCubit>()
-                                            .rescheduleNotifications(
-                                              duas: duaCubit.state.duas,
-                                              audioAzkar:
-                                                  duaCubit.state.audioAzkar,
-                                            );
-                                      }
-                                    },
-                                    itemBuilder: (context) => [
-                                      const PopupMenuItem(
-                                        value: 'select',
-                                        child: Row(
-                                          children: [
-                                            Icon(LucideIcons.checkCircle,
-                                                color: AppColors.primary),
-                                            SizedBox(width: 8),
-                                            Text(
-                                                'تعيين كصوت الإشعارات المفضل'),
-                                          ],
+                                  ),
+                                ),
+                                title: Row(
+                                  children: [
+                                    Expanded(
+                                      child: Text(
+                                        item.title,
+                                        style: TextStyle(
+                                          fontSize: 14.5.sp,
+                                          fontWeight: FontWeight.bold,
+                                          color: isDark
+                                              ? AppColors.darkTextPrimary
+                                              : AppColors.textPrimary,
                                         ),
                                       ),
-                                    ],
+                                    ),
+                                    SizedBox(width: 6.w),
+                                    // Gender Badge
+                                    Container(
+                                      padding: EdgeInsets.symmetric(
+                                          horizontal: 8.w, vertical: 2.h),
+                                      decoration: BoxDecoration(
+                                        color: item.isFemale
+                                            ? const Color(0xFFE91E63)
+                                                .withValues(alpha: 0.12)
+                                            : const Color(0xFF0288D1)
+                                                .withValues(alpha: 0.12),
+                                        borderRadius:
+                                            BorderRadius.circular(10.r),
+                                        border: Border.all(
+                                          color: item.isFemale
+                                              ? const Color(0xFFE91E63)
+                                                  .withValues(alpha: 0.3)
+                                              : const Color(0xFF0288D1)
+                                                  .withValues(alpha: 0.3),
+                                        ),
+                                      ),
+                                      child: Text(
+                                        item.isFemale ? '👩 أنثى' : '👨 ذكر',
+                                        style: TextStyle(
+                                          fontSize: 11.sp,
+                                          fontWeight: FontWeight.bold,
+                                          color: item.isFemale
+                                              ? const Color(0xFFE91E63)
+                                              : const Color(0xFF0288D1),
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                subtitle: Padding(
+                                  padding: EdgeInsets.only(top: 4.h),
+                                  child: Text(
+                                    isSelectedForNotification
+                                        ? 'محدد كنغمة إشعارات صوتية أساسية ✓'
+                                        : 'اضغط للاستماع أو التجربة',
+                                    style: TextStyle(
+                                      fontSize: 12.sp,
+                                      color: isSelectedForNotification
+                                          ? AppColors.primary
+                                          : AppColors.textHint,
+                                      fontWeight: isSelectedForNotification
+                                          ? FontWeight.bold
+                                          : FontWeight.normal,
+                                    ),
                                   ),
-                                ],
+                                ),
+                                trailing: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    IconButton(
+                                      tooltip: 'تجربة إشعار فورية بصوت المقطع',
+                                      icon: Icon(
+                                        LucideIcons.bellRing,
+                                        color: AppColors.primary,
+                                        size: 20.r,
+                                      ),
+                                      onPressed: () {
+                                        sl<NotificationService>()
+                                            .showInstantAudioNotification(
+                                          audioItem: item,
+                                          motherName: motherName,
+                                        );
+                                        ScaffoldMessenger.of(context)
+                                            .showSnackBar(
+                                          SnackBar(
+                                            content: Text(
+                                                'تم إرسال إشعار تجريبي بصوت: ${item.title}'),
+                                            backgroundColor: AppColors.primary,
+                                            behavior: SnackBarBehavior.floating,
+                                            duration: const Duration(seconds: 2),
+                                          ),
+                                        );
+                                      },
+                                    ),
+                                    PopupMenuButton<String>(
+                                      icon: Icon(
+                                        LucideIcons.moreVertical,
+                                        color: AppColors.textHint,
+                                        size: 18.r,
+                                      ),
+                                      onSelected: (val) {
+                                        if (val == 'select') {
+                                          context
+                                              .read<SettingsCubit>()
+                                              .updateSelectedAudioIndex(item.id);
+                                          final duaCubit =
+                                              context.read<DuaCubit>();
+                                          context
+                                              .read<SettingsCubit>()
+                                              .rescheduleNotifications(
+                                                duas: duaCubit.state.duas,
+                                                audioAzkar:
+                                                    duaCubit.state.audioAzkar,
+                                              );
+                                        }
+                                      },
+                                      itemBuilder: (context) => [
+                                        const PopupMenuItem(
+                                          value: 'select',
+                                          child: Row(
+                                            children: [
+                                              Icon(LucideIcons.checkCircle,
+                                                  color: AppColors.primary),
+                                              SizedBox(width: 8),
+                                              Text(
+                                                  'تعيين كصوت الإشعارات المفضل'),
+                                            ],
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ],
+                                ),
                               ),
                             ),
-                          ),
                           );
                         },
                       ),
@@ -330,6 +469,56 @@ class AudioAzkarScreen extends StatelessWidget {
               },
             );
           },
+        ),
+      ),
+    );
+  }
+
+  Widget _buildFilterTab({
+    required String id,
+    required String title,
+    required IconData icon,
+    required bool isSelected,
+    required bool isDark,
+    Color activeColor = AppColors.primary,
+  }) {
+    return Expanded(
+      child: GestureDetector(
+        onTap: () => setState(() => _filter = id),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
+          padding: EdgeInsets.symmetric(vertical: 10.h),
+          decoration: BoxDecoration(
+            color: isSelected ? activeColor : Colors.transparent,
+            borderRadius: BorderRadius.circular(12.r),
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                icon,
+                size: 15.r,
+                color: isSelected
+                    ? Colors.white
+                    : (isDark
+                        ? AppColors.darkTextSecondary
+                        : AppColors.textSecondary),
+              ),
+              SizedBox(width: 6.w),
+              Text(
+                title,
+                style: TextStyle(
+                  fontSize: 12.5.sp,
+                  fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                  color: isSelected
+                      ? Colors.white
+                      : (isDark
+                          ? AppColors.darkTextSecondary
+                          : AppColors.textSecondary),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

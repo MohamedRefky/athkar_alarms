@@ -1,98 +1,107 @@
 [
   {
     "id": 1,
-    "title": "مقطع صوتي 1 - دعاء عطِر للأم 🎧",
-    "audio": "assets/audio/audio1.mp3",
-    "soundName": "audio1"
+    "title": "دعاء عطِر للمرحومة (أنثى) - المقطع 1 🎧",
+    "gender": "female",
+    "audio": "assets/audio/woman/woman_mother_1.mp3",
+    "soundName": "woman_mother_1"
   },
   {
     "id": 2,
-    "title": "مقطع صوتي 2 - دعاء عطِر للأم 🎧",
-    "audio": "assets/audio/audio2.mp3",
-    "soundName": "audio2"
+    "title": "دعاء عطِر للمرحومة (أنثى) - المقطع 2 🎧",
+    "gender": "female",
+    "audio": "assets/audio/woman/woman_mother_2.mp3",
+    "soundName": "woman_mother_2"
   },
   {
     "id": 3,
-    "title": "مقطع صوتي 3 - دعاء عطِر للأم 🎧",
-    "audio": "assets/audio/audio3.mp3",
-    "soundName": "audio3"
+    "title": "دعاء عطِر للمرحومة (أنثى) - المقطع 3 🎧",
+    "gender": "female",
+    "audio": "assets/audio/woman/woman_mother_3.mp3",
+    "soundName": "woman_mother_3"
   },
   {
     "id": 4,
-    "title": "مقطع صوتي 4 - دعاء عطِر للأم 🎧",
-    "audio": "assets/audio/audio4.mp3",
-    "soundName": "audio4"
+    "title": "دعاء عطِر للمرحومة (أنثى) - المقطع 4 🎧",
+    "gender": "female",
+    "audio": "assets/audio/woman/woman_mother_4.mp3",
+    "soundName": "woman_mother_4"
   },
   {
     "id": 5,
-    "title": "مقطع صوتي 5 - دعاء عطِر للأم 🎧",
-    "audio": "assets/audio/audio5.mp3",
-    "soundName": "audio5"
+    "title": "دعاء عطِر للمرحومة (أنثى) - المقطع 5 🎧",
+    "gender": "female",
+    "audio": "assets/audio/woman/woman_mother_5.mp3",
+    "soundName": "woman_mother_5"
   },
   {
     "id": 6,
-    "title": "مقطع صوتي 6 - دعاء عطِر للأم 🎧",
-    "audio": "assets/audio/audio6.mp3",
-    "soundName": "audio6"
+    "title": "دعاء عطِر للمرحومة (أنثى) - المقطع 6 🎧",
+    "gender": "female",
+    "audio": "assets/audio/woman/woman_mother_6.mp3",
+    "soundName": "woman_mother_6"
   },
   {
     "id": 7,
-    "title": "مقطع صوتي 7 - دعاء عطِر للأم 🎧",
-    "audio": "assets/audio/audio7.mp3",
-    "soundName": "audio7"
+    "title": "دعاء عطِر للمرحومة (أنثى) - المقطع 7 🎧",
+    "gender": "female",
+    "audio": "assets/audio/woman/woman_mother_7.mp3",
+    "soundName": "woman_mother_7"
   },
   {
     "id": 8,
-    "title": "مقطع صوتي 8 - دعاء عطِر للأم 🎧",
-    "audio": "assets/audio/audio8.mp3",
-    "soundName": "audio8"
+    "title": "دعاء عطِر للمرحوم (ذكر) - المقطع 1 🎧",
+    "gender": "male",
+    "audio": "assets/audio/man/man_father_1.mp3",
+    "soundName": "man_father_1"
   },
   {
     "id": 9,
-    "title": "مقطع صوتي 9 - دعاء عطِر للأم 🎧",
-    "audio": "assets/audio/audio9.mp3",
-    "soundName": "audio9"
+    "title": "دعاء عطِر للمرحوم (ذكر) - المقطع 2 🎧",
+    "gender": "male",
+    "audio": "assets/audio/man/man_father_2.mp3",
+    "soundName": "man_father_2"
   },
   {
     "id": 10,
-    "title": "مقطع صوتي 10 - دعاء عطِر للأم 🎧",
-    "audio": "assets/audio/audio10.mp3",
-    "soundName": "audio10"
+    "title": "دعاء عطِر للمرحوم (ذكر) - المقطع 3 🎧",
+    "gender": "male",
+    "audio": "assets/audio/man/man_father_3.mp3",
+    "soundName": "man_father_3"
   },
   {
     "id": 11,
-    "title": "مقطع صوتي 11 - دعاء عطِر للأم 🎧",
-    "audio": "assets/audio/audio11.mp3",
-    "soundName": "audio11"
+    "title": "دعاء عطِر للمرحوم (ذكر) - المقطع 4 🎧",
+    "gender": "male",
+    "audio": "assets/audio/man/man_all_1.mp3",
+    "soundName": "man_all_1"
   },
   {
     "id": 12,
-    "title": "مقطع صوتي 12 - دعاء عطِر للأم 🎧",
-    "audio": "assets/audio/audio12.mp3",
-    "soundName": "audio12"
+    "title": "دعاء عطِر للمرحوم (ذكر) - المقطع 5 🎧",
+    "gender": "male",
+    "audio": "assets/audio/man/man_all_2.mp3",
+    "soundName": "man_all_2"
   },
   {
     "id": 13,
-    "title": "مقطع صوتي 13 - دعاء عطِر للأم 🎧",
-    "audio": "assets/audio/audio13.mp3",
-    "soundName": "audio13"
+    "title": "دعاء عطِر للمرحوم (ذكر) - المقطع 6 🎧",
+    "gender": "male",
+    "audio": "assets/audio/man/man_all_3.mp3",
+    "soundName": "man_all_3"
   },
   {
     "id": 14,
-    "title": "مقطع صوتي 14 - دعاء عطِر للأم 🎧",
-    "audio": "assets/audio/audio14.mp3",
-    "soundName": "audio14"
+    "title": "دعاء عطِر للمرحوم (ذكر) - المقطع 7 🎧",
+    "gender": "male",
+    "audio": "assets/audio/man/man_all_4.mp3",
+    "soundName": "man_all_4"
   },
   {
     "id": 15,
-    "title": "مقطع صوتي 15 - دعاء عطِر للأم 🎧",
-    "audio": "assets/audio/audio15.mp3",
-    "soundName": "audio15"
-  },
-  {
-    "id": 16,
-    "title": "مقطع صوتي 16 - دعاء عطِر للأم 🎧",
-    "audio": "assets/audio/audio16.mp3",
-    "soundName": "audio16"
+    "title": "دعاء عطِر للمرحوم (ذكر) - المقطع 8 🎧",
+    "gender": "male",
+    "audio": "assets/audio/man/man_all_5.mp3",
+    "soundName": "man_all_5"
   }
 ]
