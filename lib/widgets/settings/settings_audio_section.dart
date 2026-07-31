@@ -165,19 +165,26 @@ class SettingsAudioSection extends StatelessWidget {
                       SizedBox(height: 8.h),
 
                       // Lock Screen Permissions
-                      Center(
-                        child: TextButton.icon(
-                          style: TextButton.styleFrom(
-                            foregroundColor:
-                                isDark ? AppColors.darkTextSecondary : AppColors.textHint,
-                            padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
+                      SizedBox(height: 12.h),
+                      SizedBox(
+                        width: double.infinity,
+                        height: 42.h,
+                        child: OutlinedButton.icon(
+                          style: OutlinedButton.styleFrom(
+                            foregroundColor: AppColors.primary,
+                            side: BorderSide(
+                              color: AppColors.primary.withValues(alpha: 0.4),
+                            ),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12.r),
+                            ),
                           ),
-                          icon: Icon(LucideIcons.shieldCheck, size: 15.r, color: AppColors.accentGold),
+                          icon: Icon(LucideIcons.shieldCheck, size: 17.r, color: AppColors.accentGold),
                           label: Text(
-                            'صلاحيات قفل الشاشة',
+                            'صلاحيات وتفعيل أذونات قفل الشاشة 🛡️',
                             style: TextStyle(
-                              fontSize: 12.sp,
-                              fontWeight: FontWeight.w500,
+                              fontSize: 13.sp,
+                              fontWeight: FontWeight.bold,
                             ),
                           ),
                           onPressed: () => LockScreenPermissionDialog.show(context),
