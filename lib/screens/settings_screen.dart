@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:azkar/models/settings_model.dart';
+import 'package:azkar/screens/audio_azkar_screen.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -923,8 +924,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   SizedBox(height: 24.h),
                   _buildSectionHeader(
                     context,
-                    title: '1. الإشعارات وتكرار أصوات الأدعية 🎧',
-                    subtitle: 'تكرار أصوات المقاطع الـ 16 بتتابع زمني مخصص',
+                    title: '1. الإشعارات والأدعية الصوتية',
+                    subtitle: 'تذكير صوتي دوري ينطق بالأدعية بصوت خاشع ومبارك',
                     icon: LucideIcons.volume2,
                   ),
                   SizedBox(height: 12.h),
@@ -933,63 +934,62 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     padding: EdgeInsets.zero,
                     child: Column(
                       children: [
-                        SwitchListTile(
-                          value: settings.isAudioNotificationsEnabled,
-                          activeTrackColor: AppColors.primary,
-                          activeThumbColor: Colors.white,
-                          thumbColor: WidgetStateProperty.resolveWith(
-                            (states) => states.contains(WidgetState.selected)
-                                ? Colors.white
-                                : null,
-                          ),
-                          trackColor: WidgetStateProperty.resolveWith(
-                            (states) => states.contains(WidgetState.selected)
-                                ? AppColors.primary
-                                : null,
-                          ),
-                          trackOutlineColor:
-                              WidgetStateProperty.all(Colors.transparent),
-                          title: Text(
-                            'تفعيل نظام الإشعارات الصوتية',
-                            style: TextStyle(
-                              fontSize: 15.sp,
-                              fontWeight: FontWeight.bold,
-                              color: isDark
-                                  ? AppColors.darkTextPrimary
-                                  : AppColors.textPrimary,
+                        // ─── Toggle Row ───
+                        Material(
+                          color: Colors.transparent,
+                          child: SwitchListTile(
+                            contentPadding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 4.h),
+                            value: settings.isAudioNotificationsEnabled,
+                            activeTrackColor: AppColors.primary,
+                            activeThumbColor: Colors.white,
+                            title: Text(
+                              'تفعيل الإشعارات الصوتية',
+                              style: TextStyle(
+                                fontSize: 15.5.sp,
+                                fontWeight: FontWeight.bold,
+                                color: isDark
+                                    ? AppColors.darkTextPrimary
+                                    : AppColors.textPrimary,
+                              ),
                             ),
-                          ),
-                          subtitle: Text(
-                            'إرسال إشعار ينطق بصوت المقطع التالي في كل مرة',
-                            style: TextStyle(
-                              fontSize: 12.sp,
-                              color: AppColors.textHint,
+                            subtitle: Text(
+                              'تذكير دوري ينطق بالدعاء',
+                              style: TextStyle(
+                                fontSize: 12.sp,
+                                color: AppColors.textHint,
+                              ),
                             ),
+                            onChanged: (val) async {
+                              if (val) {
+                                await _requestNotificationPermissions(context);
+                              }
+                              if (context.mounted) {
+                                context
+                                    .read<SettingsCubit>()
+                                    .toggleAudioNotifications(val);
+                              }
+                            },
                           ),
-                          onChanged: (val) async {
-                            if (val) {
-                              await _requestNotificationPermissions(context);
-                            }
-                            if (context.mounted) {
-                              context
-                                  .read<SettingsCubit>()
-                                  .toggleAudioNotifications(val);
-                            }
-                          },
                         ),
+
+                        // ─── Expandable Settings ───
                         if (settings.isAudioNotificationsEnabled) ...[
                           Divider(
                             height: 1,
+                            indent: 16.w,
+                            endIndent: 16.w,
                             color: isDark
-                                ? Colors.white.withValues(alpha: 0.08)
-                                : Colors.black.withValues(alpha: 0.05),
+                                ? Colors.white.withValues(alpha: 0.06)
+                                : Colors.black.withValues(alpha: 0.04),
                           ),
+
                           Padding(
-                            padding: EdgeInsets.all(16.r),
+                            padding: EdgeInsets.fromLTRB(16.w, 16.h, 16.w, 8.h),
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                // Single Custom Time Selector Card
+
+                                // ── 1. Custom Time Selector Card (Same design as Written Duas) ──
                                 _buildSingleCustomTimeCard(
                                   context: context,
                                   isAudio: true,
@@ -999,165 +999,89 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                 ),
 
                                 SizedBox(height: 16.h),
-                                Divider(
-                                  height: 1,
-                                  color: isDark
-                                      ? Colors.white.withValues(alpha: 0.08)
-                                      : Colors.black.withValues(alpha: 0.05),
-                                ),
-                                SizedBox(height: 12.h),
-                                SizedBox(height: 16.h),
-                                Divider(
-                                  height: 1,
-                                  color: isDark
-                                      ? Colors.white.withValues(alpha: 0.08)
-                                      : Colors.black.withValues(alpha: 0.05),
-                                ),
-                                SizedBox(height: 12.h),
+
+                                // ── 2. Target Selector ──
                                 Text(
-                                  'تخصيص فئة وصيغة الإشعارات الصوتية:',
+                                  'فئة الأصوات',
                                   style: TextStyle(
-                                    fontSize: 14.5.sp,
-                                    fontWeight: FontWeight.bold,
-                                    color: isDark
-                                        ? AppColors.darkTextPrimary
-                                        : AppColors.primaryDark,
-                                  ),
-                                ),
-                                SizedBox(height: 10.h),
-                                _buildAudioCategoryCard(
-                                  context: context,
-                                  title: 'أدعية المرحومة / للفقيدة',
-                                  subtitle: '7 مقاطع صوتية خاشعة بصيغة المؤنث (للأم، الأخت، الجدة...)',
-                                  icon: LucideIcons.heart,
-                                  target: AudioGenderTarget.femaleOnly,
-                                  current: settings.audioGenderTarget,
-                                  isDark: isDark,
-                                ),
-                                SizedBox(height: 8.h),
-                                _buildAudioCategoryCard(
-                                  context: context,
-                                  title: 'أدعية المرحوم / للفقيد',
-                                  subtitle: '8 مقاطع صوتية خاشعة بصيغة المذكر (للأب، الأخ، الجد...)',
-                                  icon: LucideIcons.user,
-                                  target: AudioGenderTarget.maleOnly,
-                                  current: settings.audioGenderTarget,
-                                  isDark: isDark,
-                                ),
-                                SizedBox(height: 8.h),
-                                _buildAudioCategoryCard(
-                                  context: context,
-                                  title: 'كافة الأدعية والتسجيلات المباركة',
-                                  subtitle: '15 مقطعاً صوتياً للتنويع والتناوب بين الأدعية',
-                                  icon: LucideIcons.volume2,
-                                  target: AudioGenderTarget.both,
-                                  current: settings.audioGenderTarget,
-                                  isDark: isDark,
-                                ),
-                                SizedBox(height: 16.h),
-                                Divider(
-                                  height: 1,
-                                  color: isDark
-                                      ? Colors.white.withValues(alpha: 0.08)
-                                      : Colors.black.withValues(alpha: 0.05),
-                                ),
-                                SizedBox(height: 12.h),
-                                Text(
-                                  'نمط تشغيل الصوت:',
-                                  style: TextStyle(
-                                    fontSize: 14.sp,
-                                    fontWeight: FontWeight.bold,
+                                    fontSize: 13.sp,
+                                    fontWeight: FontWeight.w600,
                                     color: isDark
                                         ? AppColors.darkTextSecondary
                                         : AppColors.textSecondary,
                                   ),
                                 ),
-                                SizedBox(height: 6.h),
-                                Container(
-                                  decoration: BoxDecoration(
-                                    color: isDark
-                                        ? AppColors.darkBackground
-                                        : AppColors.surfaceVariant,
-                                    borderRadius: BorderRadius.circular(14.r),
-                                    border: Border.all(
-                                      color: AppColors.primary
-                                          .withValues(alpha: 0.2),
-                                    ),
-                                  ),
-                                  child: Material(
-                                    color: Colors.transparent,
-                                    borderRadius: BorderRadius.circular(14.r),
-                                    child: RadioListTile<int>(
-                                      value: 0,
-                                      activeColor: AppColors.primary,
-                                      groupValue: settings.selectedAudioIndex,
-                                      title: const Text(
-                                          'تتابع متسلسل في الفئة المحددة (صوت جديد كل فترة) 🔁'),
-                                      subtitle: const Text(
-                                          'الفترة الأولى صوت 1، الفترة التالية صوت 2... وهكذا في الفئة المختارة'),
-                                      onChanged: (val) {
-                                        if (val != null) {
-                                          context
-                                              .read<SettingsCubit>()
-                                              .updateSelectedAudioIndex(val);
-                                        }
-                                      },
-                                    ),
-                                  ),
+                                SizedBox(height: 8.h),
+                                _buildSegmentedAudioTargetSelector(
+                                  context: context,
+                                  current: settings.audioGenderTarget,
+                                  isDark: isDark,
                                 ),
-                                SizedBox(height: 10.h),
-                                SizedBox(
-                                  width: double.infinity,
-                                  height: 48.h,
-                                  child: ElevatedButton.icon(
-                                    style: ElevatedButton.styleFrom(
-                                      backgroundColor: AppColors.primary,
-                                      foregroundColor: Colors.white,
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius:
-                                            BorderRadius.circular(14.r),
-                                      ),
-                                      elevation: 2,
-                                    ),
-                                    icon: Icon(LucideIcons.zap, size: 18.r),
-                                    label: const Text(
-                                        'تفعيل كافّة صلاحيات وقفل الشاشة ⚡'),
-                                    onPressed: () =>
-                                        _showLockScreenPermissionDialog(context),
-                                  ),
-                                ),
-                                SizedBox(height: 12.h),
-                                SizedBox(
-                                  width: double.infinity,
-                                  height: 44.h,
-                                  child: OutlinedButton.icon(
-                                    style: OutlinedButton.styleFrom(
-                                      foregroundColor: AppColors.primary,
-                                      side: const BorderSide(
-                                          color: AppColors.primary),
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius:
-                                            BorderRadius.circular(14.r),
+
+                                SizedBox(height: 16.h),
+
+                                // ── 3. Actions ──
+                                Row(
+                                  children: [
+                                    Expanded(
+                                      child: _buildCompactActionButton(
+                                        icon: LucideIcons.listMusic,
+                                        label: 'المكتبة',
+                                        isPrimary: true,
+                                        isDark: isDark,
+                                        onTap: () {
+                                          Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                              builder: (_) => const AudioAzkarScreen(),
+                                            ),
+                                          );
+                                        },
                                       ),
                                     ),
-                                    icon:
-                                        Icon(LucideIcons.bellRing, size: 18.r),
-                                    label: const Text(
-                                        'تجربة إشعار وتسميع صوتي فوري الآن 🔊'),
-                                    onPressed: () async {
-                                      final duaCubit = context.read<DuaCubit>();
-                                      final audioList =
-                                          duaCubit.state.audioAzkar;
-                                      if (audioList.isNotEmpty) {
-                                        final notificationService =
-                                            sl<NotificationService>();
-                                        await notificationService
-                                            .showInstantAudioNotification(
-                                          audioItem: audioList.first,
-                                          motherName: settings.motherName,
-                                        );
-                                      }
-                                    },
+                                    SizedBox(width: 10.w),
+                                    Expanded(
+                                      child: _buildCompactActionButton(
+                                        icon: LucideIcons.bellRing,
+                                        label: 'تجربة صوتية',
+                                        isPrimary: false,
+                                        isDark: isDark,
+                                        onTap: () async {
+                                          final duaCubit = context.read<DuaCubit>();
+                                          final audioList = duaCubit.state.audioAzkar;
+                                          if (audioList.isNotEmpty) {
+                                            final notificationService = sl<NotificationService>();
+                                            await notificationService.showInstantAudioNotification(
+                                              audioItem: audioList.first,
+                                              motherName: settings.motherName,
+                                            );
+                                          }
+                                        },
+                                      ),
+                                    ),
+                                  ],
+                                ),
+
+                                SizedBox(height: 8.h),
+
+                                // Lock Screen Permissions
+                                Center(
+                                  child: TextButton.icon(
+                                    style: TextButton.styleFrom(
+                                      foregroundColor: isDark
+                                          ? AppColors.darkTextSecondary
+                                          : AppColors.textHint,
+                                      padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
+                                    ),
+                                    icon: Icon(LucideIcons.shieldCheck, size: 15.r, color: AppColors.accentGold),
+                                    label: Text(
+                                      'صلاحيات قفل الشاشة',
+                                      style: TextStyle(
+                                        fontSize: 12.sp,
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                    ),
+                                    onPressed: () => _showLockScreenPermissionDialog(context),
                                   ),
                                 ),
                               ],
@@ -1183,49 +1107,52 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     padding: EdgeInsets.zero,
                     child: Column(
                       children: [
-                        SwitchListTile(
-                          value: settings.isTextNotificationsEnabled,
-                          activeTrackColor: AppColors.primary,
-                          activeThumbColor: Colors.white,
-                          thumbColor: WidgetStateProperty.resolveWith(
-                            (states) => states.contains(WidgetState.selected)
-                                ? Colors.white
-                                : null,
-                          ),
-                          trackColor: WidgetStateProperty.resolveWith(
-                            (states) => states.contains(WidgetState.selected)
-                                ? AppColors.primary
-                                : null,
-                          ),
-                          trackOutlineColor:
-                              WidgetStateProperty.all(Colors.transparent),
-                          title: Text(
-                            'تفعيل إشعارات الأدعية المكتوبة',
-                            style: TextStyle(
-                              fontSize: 15.sp,
-                              fontWeight: FontWeight.bold,
-                              color: isDark
-                                  ? AppColors.darkTextPrimary
-                                  : AppColors.textPrimary,
+                        Material(
+                          color: Colors.transparent,
+                          child: SwitchListTile(
+                            value: settings.isTextNotificationsEnabled,
+                            activeTrackColor: AppColors.primary,
+                            activeThumbColor: Colors.white,
+                            thumbColor: WidgetStateProperty.resolveWith(
+                              (states) => states.contains(WidgetState.selected)
+                                  ? Colors.white
+                                  : null,
                             ),
-                          ),
-                          subtitle: Text(
-                            'إرسال تنبيهات نصية دورية للأدعية المكتوبة',
-                            style: TextStyle(
-                              fontSize: 12.sp,
-                              color: AppColors.textHint,
+                            trackColor: WidgetStateProperty.resolveWith(
+                              (states) => states.contains(WidgetState.selected)
+                                  ? AppColors.primary
+                                  : null,
                             ),
+                            trackOutlineColor:
+                                WidgetStateProperty.all(Colors.transparent),
+                            title: Text(
+                              'تفعيل إشعارات الأدعية المكتوبة',
+                              style: TextStyle(
+                                fontSize: 15.sp,
+                                fontWeight: FontWeight.bold,
+                                color: isDark
+                                    ? AppColors.darkTextPrimary
+                                    : AppColors.textPrimary,
+                              ),
+                            ),
+                            subtitle: Text(
+                              'إرسال تنبيهات نصية دورية للأدعية المكتوبة',
+                              style: TextStyle(
+                                fontSize: 12.sp,
+                                color: AppColors.textHint,
+                              ),
+                            ),
+                            onChanged: (val) async {
+                              if (val) {
+                                await _requestNotificationPermissions(context);
+                              }
+                              if (context.mounted) {
+                                context
+                                    .read<SettingsCubit>()
+                                    .toggleTextNotifications(val);
+                              }
+                            },
                           ),
-                          onChanged: (val) async {
-                            if (val) {
-                              await _requestNotificationPermissions(context);
-                            }
-                            if (context.mounted) {
-                              context
-                                  .read<SettingsCubit>()
-                                  .toggleTextNotifications(val);
-                            }
-                          },
                         ),
                         if (settings.isTextNotificationsEnabled) ...[
                           Divider(
@@ -1498,125 +1425,240 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
-  Widget _buildAudioCategoryCard({
+  Widget _buildSegmentedAudioTargetSelector({
     required BuildContext context,
-    required String title,
-    required String subtitle,
-    required IconData icon,
-    required AudioGenderTarget target,
     required AudioGenderTarget current,
     required bool isDark,
   }) {
-    final isSelected = target == current;
-    return InkWell(
-      onTap: () {
-        context.read<SettingsCubit>().updateAudioGenderTarget(target);
-      },
-      borderRadius: BorderRadius.circular(16.r),
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 220),
-        curve: Curves.easeOut,
-        padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 12.h),
-        decoration: BoxDecoration(
-          color: isSelected
-              ? (isDark
-                  ? AppColors.primary.withValues(alpha: 0.18)
-                  : AppColors.primary.withValues(alpha: 0.08))
-              : (isDark
-                  ? AppColors.darkBackground
-                  : AppColors.surfaceVariant.withValues(alpha: 0.5)),
-          borderRadius: BorderRadius.circular(16.r),
-          border: Border.all(
-            color: isSelected
-                ? AppColors.primary
-                : (isDark
-                    ? Colors.white.withValues(alpha: 0.08)
-                    : Colors.black.withValues(alpha: 0.06)),
-            width: isSelected ? 1.8 : 1,
+    String getActiveDescription() {
+      switch (current) {
+        case AudioGenderTarget.femaleOnly:
+          return 'تخصيص الإشعارات بنية الدعاء للمرحومة (7 مقاطع صوتية خاشعة بصيغة المؤنث للأم، الأخت، الجدة...)';
+        case AudioGenderTarget.maleOnly:
+          return 'تخصيص الإشعارات بنية الدعاء للمرحوم (8 مقاطع صوتية خاشعة بصيغة المذكر للأب، الأخ، الجد...)';
+        case AudioGenderTarget.both:
+          return 'التنويع والتناوب التلقائي بين كافة الأدعية والتسجيلات المباركة (15 مقطعاً صوتياً)';
+      }
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Segmented Control Pill Container
+        Container(
+          padding: EdgeInsets.all(4.r),
+          decoration: BoxDecoration(
+            color: isDark
+                ? AppColors.darkBackground
+                : AppColors.surfaceVariant.withValues(alpha: 0.7),
+            borderRadius: BorderRadius.circular(16.r),
+            border: Border.all(
+              color: isDark
+                  ? Colors.white.withValues(alpha: 0.08)
+                  : Colors.black.withValues(alpha: 0.06),
+            ),
           ),
-          boxShadow: isSelected
-              ? [
-                  BoxShadow(
-                    color: AppColors.primary.withValues(alpha: 0.15),
-                    blurRadius: 10.r,
-                    offset: const Offset(0, 3),
-                  ),
-                ]
-              : null,
+          child: Row(
+            children: [
+              _buildSegmentPill(
+                context: context,
+                target: AudioGenderTarget.femaleOnly,
+                current: current,
+                label: 'المرحومة',
+                icon: LucideIcons.heart,
+                isDark: isDark,
+              ),
+              SizedBox(width: 4.w),
+              _buildSegmentPill(
+                context: context,
+                target: AudioGenderTarget.maleOnly,
+                current: current,
+                label: 'المرحوم',
+                icon: LucideIcons.user,
+                isDark: isDark,
+              ),
+              SizedBox(width: 4.w),
+              _buildSegmentPill(
+                context: context,
+                target: AudioGenderTarget.both,
+                current: current,
+                label: 'كافة الأصوات',
+                icon: LucideIcons.volume2,
+                isDark: isDark,
+              ),
+            ],
+          ),
         ),
-        child: Row(
-          children: [
-            Container(
-              padding: EdgeInsets.all(10.r),
-              decoration: BoxDecoration(
-                color: isSelected
-                    ? AppColors.primary
-                    : AppColors.primary.withValues(alpha: 0.12),
-                shape: BoxShape.circle,
-              ),
-              child: Icon(
-                icon,
-                color: isSelected ? Colors.white : AppColors.primary,
-                size: 20.r,
-              ),
+
+        SizedBox(height: 10.h),
+
+        // Active Mode Description Card
+        AnimatedContainer(
+          duration: const Duration(milliseconds: 250),
+          width: double.infinity,
+          padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 10.h),
+          decoration: BoxDecoration(
+            color: isDark
+                ? AppColors.primary.withValues(alpha: 0.14)
+                : AppColors.primary.withValues(alpha: 0.06),
+            borderRadius: BorderRadius.circular(12.r),
+            border: Border.all(
+              color: AppColors.primary.withValues(alpha: 0.2),
             ),
-            SizedBox(width: 12.w),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    title,
-                    style: TextStyle(
-                      fontSize: 14.5.sp,
-                      fontWeight: FontWeight.bold,
-                      color: isSelected
-                          ? AppColors.primary
-                          : (isDark
-                              ? AppColors.darkTextPrimary
-                              : AppColors.textPrimary),
-                    ),
-                  ),
-                  SizedBox(height: 3.h),
-                  Text(
-                    subtitle,
-                    style: TextStyle(
-                      fontSize: 11.5.sp,
-                      color: isDark
-                          ? AppColors.darkTextSecondary
-                          : AppColors.textSecondary,
-                      height: 1.25,
-                    ),
-                  ),
-                ],
+          ),
+          child: Row(
+            children: [
+              Icon(
+                LucideIcons.info,
+                size: 16.r,
+                color: AppColors.primary,
               ),
-            ),
-            SizedBox(width: 8.w),
-            AnimatedContainer(
-              duration: const Duration(milliseconds: 200),
-              width: 22.r,
-              height: 22.r,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: isSelected ? AppColors.primary : Colors.transparent,
-                border: Border.all(
-                  color: isSelected
-                      ? AppColors.primary
-                      : AppColors.textHint.withValues(alpha: 0.4),
-                  width: 1.5,
+              SizedBox(width: 10.w),
+              Expanded(
+                child: Text(
+                  getActiveDescription(),
+                  style: TextStyle(
+                    fontSize: 12.5.sp,
+                    color: isDark
+                        ? AppColors.darkTextPrimary
+                        : AppColors.textPrimary,
+                    height: 1.3,
+                    fontWeight: FontWeight.w500,
+                  ),
                 ),
               ),
-              child: isSelected
-                  ? Icon(
-                      LucideIcons.check,
-                      color: Colors.white,
-                      size: 14.r,
-                    )
-                  : null,
-            ),
-          ],
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildSegmentPill({
+    required BuildContext context,
+    required AudioGenderTarget target,
+    required AudioGenderTarget current,
+    required String label,
+    required IconData icon,
+    required bool isDark,
+  }) {
+    final isSelected = target == current;
+    return Expanded(
+      child: InkWell(
+        onTap: () {
+          context.read<SettingsCubit>().updateAudioGenderTarget(target);
+        },
+        borderRadius: BorderRadius.circular(12.r),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
+          padding: EdgeInsets.symmetric(vertical: 10.h),
+          decoration: BoxDecoration(
+            color: isSelected ? AppColors.primary : Colors.transparent,
+            borderRadius: BorderRadius.circular(12.r),
+            boxShadow: isSelected
+                ? [
+                    BoxShadow(
+                      color: AppColors.primary.withValues(alpha: 0.25),
+                      blurRadius: 8.r,
+                      offset: const Offset(0, 2),
+                    ),
+                  ]
+                : null,
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                icon,
+                size: 15.r,
+                color: isSelected
+                    ? Colors.white
+                    : (isDark
+                        ? AppColors.darkTextSecondary
+                        : AppColors.textSecondary),
+              ),
+              SizedBox(width: 5.w),
+              Text(
+                label,
+                style: TextStyle(
+                  fontSize: 13.sp,
+                  fontWeight: isSelected ? FontWeight.bold : FontWeight.w600,
+                  color: isSelected
+                      ? Colors.white
+                      : (isDark
+                          ? AppColors.darkTextPrimary
+                          : AppColors.textPrimary),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
+    );
+  }
+
+  String _formatInterval(int minutes) {
+    if (minutes >= 60) {
+      final hours = minutes ~/ 60;
+      final remMins = minutes % 60;
+      if (remMins == 0) {
+        return '$hours ساعة';
+      }
+      return '$hours ساعة و $remMins دقيقة';
+    }
+    return '$minutes دقيقة';
+  }
+
+  Widget _buildCompactActionButton({
+    required IconData icon,
+    required String label,
+    required bool isPrimary,
+    required bool isDark,
+    required VoidCallback onTap,
+  }) {
+    return SizedBox(
+      height: 44.h,
+      child: isPrimary
+          ? ElevatedButton.icon(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.primary,
+                foregroundColor: Colors.white,
+                elevation: 0,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12.r),
+                ),
+              ),
+              icon: Icon(icon, size: 17.r),
+              label: Text(
+                label,
+                style: TextStyle(
+                  fontSize: 13.sp,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              onPressed: onTap,
+            )
+          : OutlinedButton.icon(
+              style: OutlinedButton.styleFrom(
+                foregroundColor: isDark ? AppColors.darkTextPrimary : AppColors.primary,
+                side: BorderSide(
+                  color: AppColors.primary.withValues(alpha: 0.3),
+                  width: 1.2,
+                ),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12.r),
+                ),
+              ),
+              icon: Icon(icon, size: 17.r),
+              label: Text(
+                label,
+                style: TextStyle(
+                  fontSize: 13.sp,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              onPressed: onTap,
+            ),
     );
   }
 

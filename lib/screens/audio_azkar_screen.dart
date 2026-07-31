@@ -134,7 +134,7 @@ class _AudioAzkarScreenState extends State<AudioAzkarScreen> {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  'مكتبة التسجيلات الصوتية (15 صوت)',
+                                  'مكتبة الأدعية والتسجيلات الصوتية (15 صوتاً)',
                                   style: TextStyle(
                                     fontSize: 16.sp,
                                     fontWeight: FontWeight.bold,
@@ -143,7 +143,7 @@ class _AudioAzkarScreenState extends State<AudioAzkarScreen> {
                                 ),
                                 SizedBox(height: 4.h),
                                 Text(
-                                  'تم فصل تسجيلات الإناث (7 مقاطع) عن الذكور (8 مقاطع) لتخصيص الإشعارات بنية الدعاء.',
+                                  'تم توزيع الأدعية بين خيارات المرحومة وخيارات المرحوم لتخصيص التذكير بنية الدعاء.',
                                   style: TextStyle(
                                     fontSize: 12.sp,
                                     color: Colors.white.withValues(alpha: 0.9),
