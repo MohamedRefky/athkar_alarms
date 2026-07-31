@@ -20,7 +20,7 @@ class NotificationService {
   static const String _textChannelName = 'إشعارات الأدعية المكتوبة';
   static const String _textChannelDesc = 'تذكيرات دورية بالأدعية المكتوبة للأم المتوفاة';
 
-  static const String _audioChannelPrefix = 'azkar_audio_v3_';
+  static const String _audioChannelPrefix = 'azkar_audio_v5_';
 
   Future<void> init() async {
     tz.initializeTimeZones();
@@ -140,6 +140,9 @@ class NotificationService {
           await androidImplementation.deleteNotificationChannel('azkar_audio_channel_v1');
           await androidImplementation.deleteNotificationChannel('azkar_audio_channel_$sound');
           await androidImplementation.deleteNotificationChannel('azkar_audio_v2_$sound');
+          await androidImplementation.deleteNotificationChannel('azkar_audio_v3_$sound');
+          await androidImplementation.deleteNotificationChannel('azkar_audio_v4_$sound');
+          await androidImplementation.deleteNotificationChannel('$_audioChannelPrefix$sound');
           await androidImplementation.deleteNotificationChannel('azkar_instant_audio_channel_$sound');
         } catch (_) {}
 
@@ -317,6 +320,8 @@ class NotificationService {
     bool onlyIfEmpty = false,
   }) async {
     debugPrint('📋 [SCHEDULE] ===== scheduleNotifications called (onlyIfEmpty=$onlyIfEmpty) =====');
+
+    await _createNotificationChannels();
 
     if (onlyIfEmpty) {
       final pendingCount = (await _notificationsPlugin.pendingNotificationRequests()).length;
@@ -558,6 +563,8 @@ class NotificationService {
     required AudioAzkarModel audioItem,
     required String motherName,
   }) async {
+    await _createNotificationChannels();
+
     final soundResource = audioItem.soundName;
     final soundFileWithExt = '${audioItem.soundName}.mp3';
 
