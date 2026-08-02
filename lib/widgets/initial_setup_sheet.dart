@@ -96,6 +96,9 @@ class _InitialSetupSheetState extends State<InitialSetupSheet> {
   void _saveAndClose() async {
     final name = _nameController.text.trim();
     final settingsCubit = context.read<SettingsCubit>();
+    final duaCubit = context.read<DuaCubit>();
+    final navigator = Navigator.of(context);
+    final messenger = ScaffoldMessenger.of(context);
 
     // Update name
     settingsCubit.updateMotherName(name);
@@ -110,41 +113,40 @@ class _InitialSetupSheetState extends State<InitialSetupSheet> {
     final prefs = sl<PreferencesService>();
     await prefs.setHasCompletedInitialSetup(true);
 
+    if (!mounted) return;
+
     // Reschedule notifications with new name/image
-    final duaCubit = context.read<DuaCubit>();
     settingsCubit.rescheduleNotifications(
       duas: duaCubit.state.duas,
       audioAzkar: duaCubit.state.audioAzkar,
       onlyIfEmpty: false,
     );
 
-    if (mounted) {
-      Navigator.pop(context);
+    navigator.pop();
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Row(
-            children: [
-              Icon(LucideIcons.checkCircle2, color: Colors.white, size: 20.r),
-              SizedBox(width: 10.w),
-              Expanded(
-                child: Text(
-                  name.isNotEmpty
-                      ? 'تم حفظ بيانات "$name" وتخصيص التطبيق والإشعارات 🤍'
-                      : 'تم تخصيص التطبيق بنجاح 🤍',
-                  style: const TextStyle(fontWeight: FontWeight.bold),
-                ),
+    messenger.showSnackBar(
+      SnackBar(
+        content: Row(
+          children: [
+            Icon(LucideIcons.checkCircle2, color: Colors.white, size: 20.r),
+            SizedBox(width: 10.w),
+            Expanded(
+              child: Text(
+                name.isNotEmpty
+                    ? 'تم حفظ بيانات "$name" وتخصيص التطبيق والإشعارات 🤍'
+                    : 'تم تخصيص التطبيق بنجاح 🤍',
+                style: const TextStyle(fontWeight: FontWeight.bold),
               ),
-            ],
-          ),
-          backgroundColor: AppColors.primary,
-          behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12.r),
-          ),
+            ),
+          ],
         ),
-      );
-    }
+        backgroundColor: AppColors.primary,
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12.r),
+        ),
+      ),
+    );
   }
 
   void _skipAndClose() async {
