@@ -169,10 +169,11 @@ class _InitialSetupSheetState extends State<InitialSetupSheet> {
         top: 16.h,
         bottom: MediaQuery.of(context).viewInsets.bottom + 24.h,
       ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
+      child: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
           // Drag Handle
           Container(
             width: 48.w,
@@ -249,7 +250,7 @@ class _InitialSetupSheetState extends State<InitialSetupSheet> {
               color: isDark ? AppColors.darkTextPrimary : AppColors.textPrimary,
             ),
             decoration: InputDecoration(
-              hintText: 'اسم المتوفى (مثال: أمي فاطمة / أبي أحمد)...',
+              hintText: 'أدخل اسم المتوفى هنا...',
               hintStyle:
                   TextStyle(fontSize: 13.5.sp, color: AppColors.textHint),
               prefixIcon: Icon(
@@ -470,7 +471,8 @@ class _InitialSetupSheetState extends State<InitialSetupSheet> {
           ),
         ],
       ),
-    );
+    ),
+  );
   }
 
   Widget _buildSetupTargetChip({
