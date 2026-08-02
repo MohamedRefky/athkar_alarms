@@ -34,9 +34,8 @@ class OnboardingScreen extends StatelessWidget {
       body: SafeArea(
         child: BlocBuilder<SettingsCubit, SettingsState>(
           builder: (context, settingsState) {
-            final motherName = settingsState.settings.motherName.trim().isNotEmpty
-                ? settingsState.settings.motherName
-                : 'صباح عجمي أحمد محمد ريان';
+            final motherName = settingsState.settings.motherName.trim();
+            final hasCustomName = motherName.isNotEmpty;
 
             return Padding(
               padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 16.h),
@@ -80,7 +79,7 @@ class OnboardingScreen extends StatelessWidget {
 
                   // Dedication Title & Name Section
                   Text(
-                    'صدقة جارية عن المرحومة',
+                    hasCustomName ? 'صدقة جارية عن روح' : 'صدقة جارية عن جميع أمواتنا',
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       fontSize: 18.sp,
@@ -90,22 +89,26 @@ class OnboardingScreen extends StatelessWidget {
                       fontWeight: FontWeight.w500,
                     ),
                   ),
-                  SizedBox(height: 8.h),
-                  Text(
-                    motherName,
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontSize: 24.sp,
-                      fontWeight: FontWeight.bold,
-                      color: isDark
-                          ? AppColors.darkTextPrimary
-                          : AppColors.primaryDark,
-                      height: 1.3,
+                  if (hasCustomName) ...[
+                    SizedBox(height: 8.h),
+                    Text(
+                      motherName,
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 24.sp,
+                        fontWeight: FontWeight.bold,
+                        color: isDark
+                            ? AppColors.darkTextPrimary
+                            : AppColors.primaryDark,
+                        height: 1.3,
+                      ),
                     ),
-                  ),
+                  ],
                   SizedBox(height: 12.h),
                   Text(
-                    'نرجو الفاتحة والدعاء لها بالرحمة والمغفرة',
+                    hasCustomName
+                        ? 'نرجو الفاتحة والدعاء بالرحمة والمغفرة'
+                        : 'نرجو الفاتحة والدعاء لجميع أموات المسلمين بالرحمة والمغفرة',
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       fontSize: 15.sp,

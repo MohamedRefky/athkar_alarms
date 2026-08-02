@@ -12,8 +12,8 @@ void main() {
         audio: 'assets/audio/audio1.mp3',
       );
 
-      final formatted = dua.getFormattedText('صباح عجمي');
-      expect(formatted, equals('اللهم اغفر لـ صباح عجمي وارحمها'));
+      final formatted = dua.getFormattedText('أمي الغالية');
+      expect(formatted, equals('اللهم اغفر لـ أمي الغالية وارحمها'));
     });
 
     test('Should fallback to "المتوفى" when mother name is empty', () {
