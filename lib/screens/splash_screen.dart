@@ -136,7 +136,7 @@ class _SplashScreenState extends State<SplashScreen>
                                         borderRadius: BorderRadius.circular(22.5.r),
                                         child: Image.file(
                                           File(customPath),
-                                          fit: BoxFit.contain,
+                                          fit: BoxFit.cover,
                                           filterQuality: FilterQuality.high,
                                           isAntiAlias: true,
                                         ),
