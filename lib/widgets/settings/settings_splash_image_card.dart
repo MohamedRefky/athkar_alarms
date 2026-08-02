@@ -190,6 +190,9 @@ class _SettingsSplashImageCardState extends State<SettingsSplashImageCard> {
                       onPressed: _isPickingImage
                           ? null
                           : () async {
+                              final settingsCubit = context.read<SettingsCubit>();
+                              final messenger = ScaffoldMessenger.of(context);
+
                               setState(() => _isPickingImage = true);
                               try {
                                 final result = await FilePicker.platform.pickFiles(
@@ -215,33 +218,31 @@ class _SettingsSplashImageCardState extends State<SettingsSplashImageCard> {
                                     savedPath = targetFile.path;
                                   } catch (_) {}
 
-                                  if (mounted) {
-                                    context
-                                        .read<SettingsCubit>()
-                                        .updateCustomSplashImagePath(savedPath);
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(
-                                        content: Row(
-                                          children: [
-                                            Icon(LucideIcons.checkCircle2,
-                                                color: Colors.white, size: 20.r),
-                                            SizedBox(width: 10.w),
-                                            const Expanded(
-                                              child: Text(
-                                                'تم تحديث صورة شاشة البداية بنجاح 🖼️',
-                                                style: TextStyle(fontWeight: FontWeight.bold),
-                                              ),
+                                  if (!mounted) return;
+
+                                  settingsCubit.updateCustomSplashImagePath(savedPath);
+                                  messenger.showSnackBar(
+                                    SnackBar(
+                                      content: Row(
+                                        children: [
+                                          Icon(LucideIcons.checkCircle2,
+                                              color: Colors.white, size: 20.r),
+                                          SizedBox(width: 10.w),
+                                          const Expanded(
+                                            child: Text(
+                                              'تم تحديث صورة شاشة البداية بنجاح 🖼️',
+                                              style: TextStyle(fontWeight: FontWeight.bold),
                                             ),
-                                          ],
-                                        ),
-                                        backgroundColor: AppColors.primary,
-                                        behavior: SnackBarBehavior.floating,
-                                        shape: RoundedRectangleBorder(
-                                          borderRadius: BorderRadius.circular(12.r),
-                                        ),
+                                          ),
+                                        ],
                                       ),
-                                    );
-                                  }
+                                      backgroundColor: AppColors.primary,
+                                      behavior: SnackBarBehavior.floating,
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(12.r),
+                                      ),
+                                    ),
+                                  );
                                 }
                               } catch (e) {
                                 debugPrint('File picker error: $e');
