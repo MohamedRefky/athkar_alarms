@@ -25,7 +25,16 @@ class DuaCubit extends Cubit<DuaState> {
 
   void _initAudioListeners() {
     _playerStateSub = _audioService.onPlayerStateChanged.listen((playerState) {
-      emit(state.copyWith(isPlayingAudio: playerState == PlayerState.playing));
+      final isPlaying = playerState == PlayerState.playing;
+      if (playerState == PlayerState.completed || playerState == PlayerState.stopped) {
+        emit(state.copyWith(
+          isPlayingAudio: false,
+          audioPosition: Duration.zero,
+          audioDuration: Duration.zero,
+        ));
+      } else {
+        emit(state.copyWith(isPlayingAudio: isPlaying));
+      }
     });
 
     _positionSub = _audioService.onPositionChanged.listen((pos) {
@@ -154,6 +163,12 @@ class DuaCubit extends Cubit<DuaState> {
 
   Future<void> stopAudio() async {
     await _audioService.stop();
+    emit(state.copyWith(
+      isPlayingAudio: false,
+      audioPosition: Duration.zero,
+      audioDuration: Duration.zero,
+      currentAudioAzkar: null,
+    ));
   }
 
   @override
